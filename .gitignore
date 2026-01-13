@@ -1,0 +1,17 @@
+# Vendor (Composer)
+vendor/
+
+# Google OAuth secrets
+config/google.php
+
+# Environment files
+.env
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs / cache
+*.log
