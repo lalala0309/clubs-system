@@ -1,0 +1,31 @@
+body { font-family: 'Inter', sans-serif; }
+
+/* Hiệu ứng khi chọn CLB để xem chi tiết (Radio checked) */
+.court-input:checked + .court-card {
+    border-color: #4F46E5;
+    background-color: #f5f3ff;
+    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
+}
+
+.court-input:checked + .court-card .status-icon {
+    background-color: #4F46E5 !important;
+    color: white !important;
+}
+
+.active-menu {
+    background: linear-gradient(135deg, #4F46E5 0%, #2A53A2 100%);
+    color: white !important;
+    border-radius: 24px; 
+}
+
+#right-panel {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+#right-panel.active {
+    width: 400px;
+    opacity: 1;
+}

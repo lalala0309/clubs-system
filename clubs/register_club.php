@@ -1,26 +1,33 @@
+<?php
+session_start();
+require_once '../config/database.php';
+
+// /* Check login */
+// if (!isset($_SESSION['user_id'])) {
+//     header('Location: ../public/login.php');
+//     exit;
+// }
+
+/* Lấy user */
+require_once '../includes/get_user.php';
+?>
+
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLB Đã Tham Gia - CTUMP</title>
+    <title>Hệ thống đăng ký Câu lạc bộ thể thao - CTUMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/sidebar_member.css">
-
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* Hiệu ứng khi chọn CLB để xem chi tiết (Radio checked) */
-        .court-input:checked + .court-card {
-            border-color: #4F46E5;
-            background-color: #f5f3ff;
-            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
-        }
-
-        .court-input:checked + .court-card .status-icon {
-            background-color: #4F46E5 !important;
-            color: white !important;
+        .club-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
         }
 
         .active-menu {
@@ -40,20 +47,22 @@
             width: 400px;
             opacity: 1;
         }
+
     </style>
 </head>
 <body class="bg-[#F8FAFF] min-h-screen p-4"> 
     <div class="flex h-[calc(100vh-2rem)] overflow-hidden gap-4">
-    
+        
     <?php include '../includes/sidebar_member.php'; ?>
 
-        <main class="flex-1 flex flex-col overflow-hidden min-w-0">
-            <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
                 <div class="relative w-96">
                     <span class="absolute inset-y-0 left-5 flex items-center text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </span>
-                    <input type="text" placeholder="Tìm kiếm CLB của bạn..." class="w-full pl-14 pr-6 py-3 bg-white/80 rounded-[20px] border-none shadow-sm focus:ring-2 focus:ring-indigo-400 outline-none transition font-medium">
+                    <input type="text" placeholder="Tìm kiếm câu lạc bộ..." class="w-full pl-14 pr-6 py-3 bg-white/80 rounded-[20px] border-none shadow-sm focus:ring-2 focus:ring-indigo-400 outline-none transition font-medium">
                 </div>
 
                 <div class="flex items-center gap-4 bg-white px-5 py-2 rounded-[25px] shadow-sm border border-slate-50">
@@ -65,49 +74,59 @@
                         <img src="https://i.pravatar.cc/150?u=a" class="w-full h-full object-cover">
                     </div>
                 </div>
-            </header>
-            <!-- <?php include '../includes/header.php'; ?> -->
+            </header> -->
+
+            <?php include '../includes/header.php'; ?>
+
             <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-10 border border-white">
                 <div class="flex items-center justify-between mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Câu lạc bộ của tôi</h2>
-                        <p class="text-sm text-slate-400 mt-1">Danh sách các CLB bạn đang hoạt động</p>
-                    </div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Danh sách câu lạc bộ</h2>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <?php 
-                    $myClubs = [
-                        ['id' => '1', 'name' => 'CLB Bóng Đá', 'role' => 'Thành viên chính thức', 'date' => 'Tham gia: 12/2025', 'icon' => '⚽', 'bg' => 'bg-blue-50'],
-                        ['id' => '2', 'name' => 'CLB Âm Nhạc', 'role' => 'Trưởng nhóm Guitar', 'date' => 'Tham gia: 01/2026', 'icon' => '🎸', 'bg' => 'bg-pink-50'],
-                    ];
 
-                    foreach($myClubs as $clb):
+            
+                    <?php 
+                        $clubs = require '../clubs/get_all_clubs.php';
+                        foreach($clubs as $clb):
                     ?>
-                    <div class="relative">
-                        <input type="radio" name="court_select" id="c-<?php echo $clb['id']; ?>" class="hidden court-input" 
-                               onchange="showBookingPanel('<?php echo $clb['name']; ?>', '<?php echo $clb['role']; ?>')">
-                        
-                        <label for="c-<?php echo $clb['id']; ?>" class="court-card p-5 flex items-center justify-between shadow-sm group">
-                            <div class="flex items-center gap-5">
-                                <div class="w-16 h-16 <?php echo $clb['bg']; ?> rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110">
-                                    <?php echo $clb['icon']; ?>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-slate-800"><?php echo $clb['name']; ?></h3>
-                                    <p class="text-sm text-indigo-500 font-semibold"><?php echo $clb['role']; ?></p>
-                                    <p class="text-[11px] text-slate-400 uppercase tracking-wider mt-1"><?php echo $clb['date']; ?></p>
-                                </div>
-                            </div>
-                            
-                            <div class="status-icon w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 transition-all duration-300 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </div>
-                        </label>
-                    </div>
-                    <?php endforeach; ?>
+<div class="relative">
+
+    <input 
+        type="radio" 
+        name="court_select"
+        id="c-<?php echo $clb['id']; ?>"
+        class="hidden court-input"
+        onchange="showBookingPanel('<?php echo $clb['name']; ?>', '<?php echo $clb['desc']; ?>')"
+    >
+
+    <label for="c-<?php echo $clb['id']; ?>" 
+           class="club-card p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group">
+
+        <div class="flex items-center gap-5">
+            <div class="w-16 h-16 <?php echo $clb['bg']; ?> rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-people-fill">
+                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                </svg>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-slate-800"><?php echo $clb['name']; ?></h3>
+                <p class="text-sm text-slate-400 font-medium"><?php echo $clb['desc']; ?></p>
+            </div>
+        </div>
+
+        <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+        </div>
+
+    </label>
+</div>
+<?php endforeach; ?>
+
                 </div>
             </div>
         </main>

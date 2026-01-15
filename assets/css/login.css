@@ -1,0 +1,37 @@
+* {
+    max-width: 800px;
+    margin: auto;
+  }
+  
+  .item {
+    background: url("assets/images/old-web_bg-5.png") bottom right no-repeat #2A53A2;
+   
+  }
+  
+  .item1 {
+    background-color:white;	
+    border-radius: 20px;
+    border-radius: 20px;
+    text-align: center;
+    padding: 40px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    margin-top: 200px;
+  }
+  
+  .btn-primary {
+      color: #fff;
+      background-color: #2A53A2;
+      padding: 12px 30px;
+      display: inline-block;
+      border-radius: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      transition: all .3s;
+      
+  }
+  
+  .input_tb {
+      padding: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+  }

@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLB Đã Tham Gia - CTUMP</title>
+    <title>Hệ thống Đặt sân - CTUMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/sidebar_member.css">
-
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Hiệu ứng khi chọn CLB để xem chi tiết (Radio checked) */
+        /* Hiệu ứng khi được click chọn (Radio checked) */
         .court-input:checked + .court-card {
             border-color: #4F46E5;
             background-color: #f5f3ff;
-            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
         }
 
         .court-input:checked + .court-card .status-icon {
@@ -44,16 +41,16 @@
 </head>
 <body class="bg-[#F8FAFF] min-h-screen p-4"> 
     <div class="flex h-[calc(100vh-2rem)] overflow-hidden gap-4">
-    
+        
     <?php include '../includes/sidebar_member.php'; ?>
 
         <main class="flex-1 flex flex-col overflow-hidden min-w-0">
-            <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
+            <!-- <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
                 <div class="relative w-96">
                     <span class="absolute inset-y-0 left-5 flex items-center text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </span>
-                    <input type="text" placeholder="Tìm kiếm CLB của bạn..." class="w-full pl-14 pr-6 py-3 bg-white/80 rounded-[20px] border-none shadow-sm focus:ring-2 focus:ring-indigo-400 outline-none transition font-medium">
+                    <input type="text" placeholder="Tìm kiếm CLB..." class="w-full pl-14 pr-6 py-3 bg-white/80 rounded-[20px] border-none shadow-sm focus:ring-2 focus:ring-indigo-400 outline-none transition font-medium">
                 </div>
 
                 <div class="flex items-center gap-4 bg-white px-5 py-2 rounded-[25px] shadow-sm border border-slate-50">
@@ -65,38 +62,37 @@
                         <img src="https://i.pravatar.cc/150?u=a" class="w-full h-full object-cover">
                     </div>
                 </div>
-            </header>
-            <!-- <?php include '../includes/header.php'; ?> -->
+            </header> -->
+            <?php include '../includes/header.php'; ?>
+
             <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-10 border border-white">
                 <div class="flex items-center justify-between mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Câu lạc bộ của tôi</h2>
-                        <p class="text-sm text-slate-400 mt-1">Danh sách các CLB bạn đang hoạt động</p>
-                    </div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Câu lạc bộ của tôi</h2>
+                    <div class="text-sm font-medium text-slate-400">Thứ Ba, 13 Tháng 1</div>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <?php 
-                    $myClubs = [
-                        ['id' => '1', 'name' => 'CLB Bóng Đá', 'role' => 'Thành viên chính thức', 'date' => 'Tham gia: 12/2025', 'icon' => '⚽', 'bg' => 'bg-blue-50'],
-                        ['id' => '2', 'name' => 'CLB Âm Nhạc', 'role' => 'Trưởng nhóm Guitar', 'date' => 'Tham gia: 01/2026', 'icon' => '🎸', 'bg' => 'bg-pink-50'],
+                    $clubs = [
+                        ['id' => '1', 'name' => 'Bóng Đá A1', 'desc' => 'CLB 11 người - Sân cỏ tự nhiên', 'icon' => '⚽', 'bg' => 'bg-blue-50'],
+                        ['id' => '2', 'name' => 'Cầu Lông Số 4', 'desc' => 'Thảm tiêu chuẩn - Khán đài B', 'icon' => '🏸', 'bg' => 'bg-purple-50'],
+                        ['id' => '3', 'name' => 'Bóng Rổ Trong Nhà', 'desc' => 'Sân gỗ - Khu phức hợp', 'icon' => '🏀', 'bg' => 'bg-orange-50'],
+                        ['id' => '4', 'name' => 'Âm Nhạc & Nghệ Thuật', 'desc' => 'Phòng cách âm - Nhạc cụ hiện đại', 'icon' => '🎸', 'bg' => 'bg-pink-50'],
                     ];
-
-                    foreach($myClubs as $clb):
+                    foreach($clubs as $c):
                     ?>
                     <div class="relative">
-                        <input type="radio" name="court_select" id="c-<?php echo $clb['id']; ?>" class="hidden court-input" 
-                               onchange="showBookingPanel('<?php echo $clb['name']; ?>', '<?php echo $clb['role']; ?>')">
+                        <input type="radio" name="court_select" id="c-<?php echo $c['id']; ?>" class="hidden court-input" 
+                               onchange="showBookingPanel('<?php echo $c['name']; ?>')">
                         
-                        <label for="c-<?php echo $clb['id']; ?>" class="court-card p-5 flex items-center justify-between shadow-sm group">
+                        <label for="c-<?php echo $c['id']; ?>" class="court-card p-5 flex items-center justify-between shadow-sm group">
                             <div class="flex items-center gap-5">
-                                <div class="w-16 h-16 <?php echo $clb['bg']; ?> rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110">
-                                    <?php echo $clb['icon']; ?>
+                                <div class="w-16 h-16 <?php echo $c['bg']; ?> rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110">
+                                    <?php echo $c['icon']; ?>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800"><?php echo $clb['name']; ?></h3>
-                                    <p class="text-sm text-indigo-500 font-semibold"><?php echo $clb['role']; ?></p>
-                                    <p class="text-[11px] text-slate-400 uppercase tracking-wider mt-1"><?php echo $clb['date']; ?></p>
+                                    <h3 class="text-lg font-bold text-slate-800"><?php echo $c['name']; ?></h3>
+                                    <p class="text-sm text-slate-400 font-medium"><?php echo $c['desc']; ?></p>
                                 </div>
                             </div>
                             
@@ -115,31 +111,17 @@
         <aside id="right-panel" class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[40px] border-l border-indigo-50">
             <div class="p-8 h-full flex flex-col w-[400px]">
                 <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase italic">Tên CLB</h2>
-                        <p id="display-role" class="text-xs font-bold text-slate-400"></p>
-                    </div>
+                    <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase italic">Tên CLB</h2>
                     <button onclick="closePanel()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">✕</button>
                 </div>
                 
-                <div class="flex-1 space-y-6">
-                    <div class="bg-indigo-50/50 p-6 rounded-[30px] border border-indigo-100">
-                        <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Lịch sinh hoạt tuần này
-                        </h4>
-                        <ul class="space-y-3 text-sm text-slate-600">
-                            <li class="flex justify-between"><span>Thứ 2 (18:00)</span> <span class="font-bold">Sân A1</span></li>
-                            <li class="flex justify-between"><span>Thứ 5 (17:30)</span> <span class="font-bold">Hội trường</span></li>
-                        </ul>
-                    </div>
-
-                    <div class="p-6">
-                        <h4 class="text-sm font-bold text-slate-800 mb-4">Thông báo mới nhất</h4>
-                        <p class="text-xs text-slate-500 leading-relaxed italic">"Chuẩn bị cho giải đấu CTUMP Open vào tháng sau..."</p>
+                <div class="flex-1 space-y-4">
+                    <div class="bg-indigo-50/50 p-6 rounded-[30px] border border-dashed border-indigo-200 text-center">
+                        <p class="text-slate-400 font-medium italic">Thông tin hoạt động của CLB...</p>
                     </div>
                 </div>
 
-                <button class="mt-auto w-full py-4 bg-slate-800 text-white rounded-[22px] font-bold shadow-xl hover:bg-slate-900 transition transform active:scale-95">
+                <button class="mt-auto w-full py-4 bg-indigo-600 text-white rounded-[22px] font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition transform active:scale-95">
                     Rời câu lạc bộ
                 </button>
             </div>
@@ -149,11 +131,9 @@
     <script>
         const panel = document.getElementById('right-panel');
         const displayName = document.getElementById('display-name');
-        const displayRole = document.getElementById('display-role');
 
-        function showBookingPanel(name, role) {
-            displayName.innerText = name;
-            displayRole.innerText = role;
+        function showBookingPanel(courtName) {
+            displayName.innerText = courtName;
             panel.classList.add('active');
         }
 

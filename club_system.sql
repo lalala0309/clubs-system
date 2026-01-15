@@ -39,6 +39,13 @@ CREATE TABLE sports (
     sport_name VARCHAR(100) NOT NULL
 );
 
+INSERT INTO sports (sport_name) VALUES
+('Bóng đá'),
+('Cầu lông'),
+('Bóng bàn'),
+('Bóng chuyền'),
+('Bóng rổ');
+
 
 -- BẢNG CLB - MÔN THỂ THAO
 CREATE TABLE club_sports (
@@ -52,6 +59,12 @@ CREATE TABLE club_sports (
     FOREIGN KEY (sportID) REFERENCES sports(sportID)
         ON DELETE CASCADE
 );
+
+INSERT INTO club_sports (clubID, sportID)
+VALUES
+(1, (SELECT sportID FROM sports WHERE sport_name = 'Bóng đá')),
+(2, (SELECT sportID FROM sports WHERE sport_name = 'Bóng bàn'));
+
 
 
 -- BẢNG THÀNH VIÊN CÂU LẠC BỘ
@@ -78,37 +91,18 @@ CREATE TABLE grounds (
 );
 
 
--- BẢNG KHUNG GIỜ
-CREATE TABLE time_slots (
-    timeID INT AUTO_INCREMENT PRIMARY KEY,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-      CHECK (start_time < end_time)
-);
-
-
--- BẢNG LỊCH 
-CREATE TABLE ground_schedules (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    groundID INT NOT NULL,
-     schedule_date DATE NOT NULL,
-    time_slot_id INT NOT NULL,
-
-    FOREIGN KEY (groundID) REFERENCES grounds(groundID),
-    FOREIGN KEY (time_slot_id) REFERENCES time_slots(timeID),
-
-    UNIQUE (groundID, schedule_date, time_slot_id)
-);
-
-
-
 -- BẢNG ĐẶT SÂN 
 CREATE TABLE bookings (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    ground_schedules_id INT NOT NULL,
     userID INT NOT NULL,
-    booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ground_schedules_id) REFERENCES ground_schedules(id) ON DELETE CASCADE,
-    FOREIGN KEY (userID) REFERENCES users(userID) ON DELETE CASCADE
+    booking_date DATE NOT NULL,
+    groundID  INT NOT NULL
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    UNIQUE (groundID, booking_date, start_time, end_time),
+
+    FOREIGN KEY (groundID) REFERENCES grounds(groundID),
+    FOREIGN KEY (userID) REFERENCES users(userID),
+    CHECK (start_time < end_time)
 );
 
