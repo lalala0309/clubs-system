@@ -42,6 +42,15 @@ $email     = $userInfo->email;
 $full_name = $userInfo->name;
 $google_id = $userInfo->id;
 
+
+// Set session
+// $_SESSION['user'] = [
+//     'id'    => md5($email), // hoặc id trong DB
+//     'email' => $email,
+//     'name'  => $name,
+//     'role'  => 'member'
+// ];
+
 // Xem thông tin json trả về
 // header('Content-Type: application/json; charset=utf-8');
 // echo json_encode(
@@ -49,7 +58,7 @@ $google_id = $userInfo->id;
 //     JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
 // );
 
-/* ================= DOMAIN CHECK ================= */
+// Kiểm tra domain
 $allowedDomains = [
     'gmail.com',
     'student.ctu.edu.vn',

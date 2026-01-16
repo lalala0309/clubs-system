@@ -1,3 +1,10 @@
+<?php
+session_start();
+
+require_once '../includes/get_user.php';
+?>
+
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/sidebar_member.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -48,7 +56,7 @@
     <?php include '../includes/sidebar_member.php'; ?>
 
         <main class="flex-1 flex flex-col overflow-hidden min-w-0">
-            <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
+            <!-- <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
                 <div class="relative w-96">
                     <span class="absolute inset-y-0 left-5 flex items-center text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -65,8 +73,8 @@
                         <img src="https://i.pravatar.cc/150?u=a" class="w-full h-full object-cover">
                     </div>
                 </div>
-            </header>
-            <!-- <?php include '../includes/header.php'; ?> -->
+            </header> -->
+            <?php include '../includes/header.php'; ?>
             <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-10 border border-white">
                 <div class="flex items-center justify-between mb-8">
                     <div>

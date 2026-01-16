@@ -1,6 +1,3 @@
-<?php
-$currentPage = basename($_SERVER['PHP_SELF']);
-?>
 
 
 <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
@@ -20,11 +17,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <?= htmlspecialchars($fullName) ?>
             </p>
             <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter">
-                <?= htmlspecialchars($userCode) ?> • <?= htmlspecialchars($roleName) ?>
+                <?= htmlspecialchars($userEmail) ?>
+                 <!-- • <?= htmlspecialchars($roleName) ?> -->
             </p>
         </div>
-        <div class="w-11 h-11 rounded-full bg-slate-200 overflow-hidden border-2 border-indigo-50">
-            <img src="https://i.pravatar.cc/150?u=<?= $userID ?>" class="w-full h-full object-cover">
-        </div>
+        <div class="w-11 h-11 rounded-full bg-slate-200 overflow-hidden border-2 border-indigo-50 flex items-center justify-center">
+    <i class="bi bi-person-circle text-3xl text-black"></i>
+</div>
+
     </div>
 </header>

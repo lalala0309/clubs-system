@@ -1,3 +1,9 @@
+<?php
+session_start();
+
+require_once '../includes/get_user.php';
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,6 +13,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/sidebar_member.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         /* Hiệu ứng khi được click chọn (Radio checked) */

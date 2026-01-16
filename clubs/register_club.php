@@ -1,14 +1,6 @@
 <?php
 session_start();
-require_once '../config/database.php';
 
-// /* Check login */
-// if (!isset($_SESSION['user_id'])) {
-//     header('Location: ../public/login.php');
-//     exit;
-// }
-
-/* Lấy user */
 require_once '../includes/get_user.php';
 ?>
 
@@ -21,7 +13,9 @@ require_once '../includes/get_user.php';
     <title>Hệ thống đăng ký Câu lạc bộ thể thao - CTUMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/sidebar_member.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
         
@@ -51,7 +45,7 @@ require_once '../includes/get_user.php';
     </style>
 </head>
 <body class="bg-[#F8FAFF] min-h-screen p-4"> 
-    <div class="flex h-[calc(100vh-2rem)] overflow-hidden gap-4">
+    <div class="flex h-[calc(100vh-2rem)] gap-4">
         
     <?php include '../includes/sidebar_member.php'; ?>
 
@@ -91,21 +85,29 @@ require_once '../includes/get_user.php';
                         foreach($clubs as $clb):
                     ?>
 <div class="relative">
-
+  <!-- onchange="showBookingPanel('<?php echo $clb['name']; ?>', '<?php echo $clb['desc']; ?>')" -->
     <input 
         type="radio" 
         name="court_select"
         id="c-<?php echo $clb['id']; ?>"
         class="hidden court-input"
-        onchange="showBookingPanel('<?php echo $clb['name']; ?>', '<?php echo $clb['desc']; ?>')"
+        onchange="loadClubDetail(<?php echo $clb['id']; ?>)"
+
     >
 
     <label for="c-<?php echo $clb['id']; ?>" 
            class="club-card p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group">
 
         <div class="flex items-center gap-5">
-            <div class="w-16 h-16 <?php echo $clb['bg']; ?> rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-people-fill">
+
+
+            <div class="w-14 h-14 <?php echo $clb['bg']; ?> rounded-2xl 
+                        flex items-center justify-center 
+                        transition-transform group-hover:scale-110">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    class="w-9 h-9 text-slate-700 block">
                     <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
                 </svg>
             </div>
@@ -131,6 +133,10 @@ require_once '../includes/get_user.php';
             </div>
         </main>
 
+
+
+
+        <!-- CỬA SỔ ĐĂNG KÝ -->
         <aside id="right-panel" class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[40px] border-l border-indigo-50">
             <div class="p-8 h-full flex flex-col w-[400px]">
                 <div class="flex justify-between items-center mb-8">
@@ -144,42 +150,87 @@ require_once '../includes/get_user.php';
                 <div class="flex-1 space-y-6">
                     <div class="bg-indigo-50/50 p-6 rounded-[30px] border border-indigo-100">
                         <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Lịch sinh hoạt tuần này
+                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Thông tin câu lạc bộ
                         </h4>
                         <ul class="space-y-3 text-sm text-slate-600">
-                            <li class="flex justify-between"><span>Thứ 2 (18:00)</span> <span class="font-bold">Sân A1</span></li>
-                            <li class="flex justify-between"><span>Thứ 5 (17:30)</span> <span class="font-bold">Hội trường</span></li>
+                        <li class="flex justify-between">
+                            <span>Ngày thành lập</span>
+                            <span id="founded" class="font-bold"></span>
+                        </li>
+
+                        <li class="flex justify-between">
+                            <span>Thành viên</span>
+                            <span id="members" class="font-bold"></span>
+                        </li>
+
+                        <li class="flex justify-between">
+                            <span>Môn thể thao</span>
+                            <span id="sports" class="font-bold"></span>
+                        </li>
+
+                        <li class="flex justify-between">
+                            <span>Số lượng sân</span>
+                            <span id="grounds" class="font-bold"></span>
+                        </li>
+
                         </ul>
                     </div>
 
                     <div class="p-6">
-                        <h4 class="text-sm font-bold text-slate-800 mb-4">Thông báo mới nhất</h4>
-                        <p class="text-xs text-slate-500 leading-relaxed italic">"Chuẩn bị cho giải đấu CTUMP Open vào tháng sau..."</p>
+                        <h4 class="text-sm font-bold text-slate-800 mb-4">Lưu ý</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed italic">"Việc đăng ký tham gia câu lạc bộ thể hiện sự đồng ý của bạn trong việc thực hiện nghĩa vụ đóng góp phí vận hành, đồng thời được quyền sử dụng các cơ sở vật chất phục vụ hoạt động của câu lạc bộ theo quy định."</p>
                     </div>
                 </div>
 
-                <button class="mt-auto w-full py-4 bg-slate-800 text-white rounded-[22px] font-bold shadow-xl hover:bg-slate-900 transition transform active:scale-95">
-                    Rời câu lạc bộ
-                </button>
+                <button class="mt-auto w-full py-4 bg-blue-600 text-white rounded-[22px] font-bold shadow-xl 
+               hover:bg-blue-700 transition transform active:scale-95">
+    Đăng ký
+</button>
+
             </div>
         </aside>
     </div>
-
     <script>
-        const panel = document.getElementById('right-panel');
-        const displayName = document.getElementById('display-name');
-        const displayRole = document.getElementById('display-role');
+const panel = document.getElementById('right-panel');
 
-        function showBookingPanel(name, role) {
-            displayName.innerText = name;
-            displayRole.innerText = role;
+function loadClubDetail(clubID) {
+    fetch(`./get_club_detail.php?clubID=${clubID}`)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('HTTP error ' + res.status);
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log('DATA:', data);
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            document.getElementById('display-name').innerText = data.name;
+            document.getElementById('display-role').innerText = 'Câu lạc bộ thể thao';
+            document.getElementById('founded').innerText  = data.founded;
+            document.getElementById('members').innerText = data.members;
+            document.getElementById('sports').innerText  = data.sports;
+            document.getElementById('grounds').innerText = data.grounds;
+
             panel.classList.add('active');
-        }
+        })
+        .catch(err => {
+            console.error('FETCH FAIL:', err);
+            alert('Không thể tải dữ liệu CLB');
+        });
+}
 
-        function closePanel() {
-            panel.classList.remove('active');
-            document.querySelectorAll('.court-input').forEach(input => input.checked = false);
-        }
-    </script>
+
+function closePanel() {
+    panel.classList.remove('active');
+    document.querySelectorAll('.court-input')
+        .forEach(i => i.checked = false);
+}
+</script>
+
 </body>
 </html>

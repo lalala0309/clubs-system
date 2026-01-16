@@ -1,18 +1,21 @@
-<!-- <?php
-// get_user.php
-session_start();
-require_once '../config/database.php';
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// if (!isset($_SESSION['user_id'])) {
-//     header('Location: ../public/login.php');
-//     exit;
-// }
+require_once __DIR__ . '/../config/database.php';
 
-$userID = $_SESSION['user_id'];
+/* KIỂM TRA ĐĂNG NHẬP */
+if (!isset($_SESSION['userID'])) {
+    header("Location: /clubs-system/public/login.php");
+    exit;
+}
 
+$userID = $_SESSION['userID'];
+
+/* LẤY THÔNG TIN USER + ROLE */
 $sql = "
     SELECT 
-        u.userID,
         u.full_name,
         u.email,
         r.role_name
@@ -25,12 +28,18 @@ $sql = "
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userID);
 $stmt->execute();
+$result = $stmt->get_result();
 
-$user = $stmt->get_result()->fetch_assoc();
+if ($result->num_rows === 0) {
+    session_destroy();
+    header("Location: /clubs-system/public/login.php");
+    exit;
+}
 
-/* Biến dùng cho giao diện */
-$fullName = $user['full_name'] ?: 'Người dùng';
-$roleName = $user['role_name'];
-$userCode = 'ID: ' . str_pad($user['userID'], 5, '0', STR_PAD_LEFT);
-$avatarUrl = "https://i.pravatar.cc/150?u=" . $userID;
-?> -->
+$user = $result->fetch_assoc();
+
+/* BIẾN DÙNG CHUNG */
+$fullName  = $user['full_name'];
+$userEmail = $user['email'];
+$roleName  = $user['role_name']; // ADMIN | MANAGER | MEMBER
+?>

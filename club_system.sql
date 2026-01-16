@@ -90,6 +90,13 @@ CREATE TABLE grounds (
     status TINYINT DEFAULT 1
 );
 
+ALTER TABLE grounds
+ADD clubID INT NOT NULL,
+ADD CONSTRAINT fk_ground_club
+FOREIGN KEY (clubID) REFERENCES clubs(clubID)
+ON DELETE CASCADE;
+
+
 
 -- BẢNG ĐẶT SÂN 
 CREATE TABLE bookings (
