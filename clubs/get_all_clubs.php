@@ -1,31 +1,56 @@
 <?php
-    require_once '../config/database.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-    // truy vấn lấy toàn bộ câu lạc bộ
-    $sql = "
-        SELECT c.clubID AS id, c.club_name AS name, s.sport_name
-        FROM clubs c
-        JOIN club_sports cs ON c.clubID = cs.clubID
-        JOIN sports s ON cs.sportID = s.sportID
-        ORDER BY c.club_name
-    ";
+require_once __DIR__ . '/../config/database.php';
 
-    $result = $conn->query($sql);
+$userID = $_SESSION['userID'] ?? 0;
+if (!$userID) {
+    return [];
+}
 
-    // Lưu danh sách câu lạc bộ
-    $clubs = [];
+$sql = "
+    SELECT 
+        c.clubID AS id,
+        c.club_name AS name,
+        GROUP_CONCAT(DISTINCT s.sport_name SEPARATOR ', ') AS sport_name
+    FROM clubs c
+    LEFT JOIN club_sports cs ON c.clubID = cs.clubID
+    LEFT JOIN sports s ON cs.sportID = s.sportID
+    WHERE c.clubID NOT IN (
+        SELECT clubID
+        FROM club_members
+        WHERE userID = ?
+    )
+    GROUP BY c.clubID
+    ORDER BY c.club_name
+";
 
-    while ($row = $result->fetch_assoc()) {
-        $sport = $row['sport_name'];
-    
-        $clubs[] = [
-            'id'   => $row['id'],
-            'name' => $row['name'],
-            'desc' => $sportMap[$sport]['desc'] ?? 'Câu lạc bộ thể thao',
-            'bg'   => $sportMap[$sport]['bg'] ?? 'bg-slate-100',
-           // 'role' => 'Xem chi tiết'
-        ];
-    }
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userID);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    return $clubs;
-?>
+$clubs = [];
+
+$bgList = [
+    'bg-indigo-100',
+    'bg-blue-100',
+    'bg-emerald-100',
+    'bg-purple-100',
+    'bg-rose-100'
+];
+
+$i = 0;
+while ($row = $result->fetch_assoc()) {
+    $clubs[] = [
+        'id'   => $row['id'],
+        'name' => $row['name'],
+        'desc' => $row['sport_name'] ?: 'Chưa có môn',
+        'bg'   => $bgList[$i % count($bgList)]
+    ];
+    $i++;
+}
+
+return $clubs;

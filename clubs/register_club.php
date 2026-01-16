@@ -141,7 +141,7 @@ require_once '../includes/get_user.php';
             <div class="p-8 h-full flex flex-col w-[400px]">
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase italic">Tên CLB</h2>
+                        <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase">Tên CLB</h2>
                         <p id="display-role" class="text-xs font-bold text-slate-400"></p>
                     </div>
                     <button onclick="closePanel()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">✕</button>
@@ -182,15 +182,20 @@ require_once '../includes/get_user.php';
                     </div>
                 </div>
 
-                <button class="mt-auto w-full py-4 bg-blue-600 text-white rounded-[22px] font-bold shadow-xl 
-               hover:bg-blue-700 transition transform active:scale-95">
-    Đăng ký
-</button>
+                <button id="btn-register"
+                        class="mt-auto w-full py-4 bg-blue-600 text-white rounded-[22px] font-bold shadow-xl 
+                            hover:bg-blue-700 transition transform active:scale-95">
+                    Đăng ký
+                </button>
 
             </div>
         </aside>
     </div>
     <script>
+
+let selectedClubID   = null;
+let selectedClubName = '';
+
 const panel = document.getElementById('right-panel');
 
 function loadClubDetail(clubID) {
@@ -208,6 +213,11 @@ function loadClubDetail(clubID) {
                 alert(data.error);
                 return;
             }
+
+            
+            selectedClubID   = clubID;
+            selectedClubName = data.name;
+
 
             document.getElementById('display-name').innerText = data.name;
             document.getElementById('display-role').innerText = 'Câu lạc bộ thể thao';
@@ -227,9 +237,73 @@ function loadClubDetail(clubID) {
 
 function closePanel() {
     panel.classList.remove('active');
+    selectedClubID = null;
+    selectedClubName = '';
     document.querySelectorAll('.court-input')
         .forEach(i => i.checked = false);
 }
+
+// function closePanel() {
+//     panel.classList.remove('active');
+//     selectedClubID = null;
+//     selectedClubName = '';
+// }
+
+
+// function loadClubDetail(clubID) {
+//     selectedClubID = clubID;
+
+//     fetch(`./get_club_detail.php?clubID=${clubID}`)
+//         .then(res => {
+//             if (!res.ok) throw new Error('HTTP error ' + res.status);
+//             return res.json();
+//         })
+//         .then(data => {
+//             document.getElementById('display-name').innerText = data.name;
+//             document.getElementById('display-role').innerText = 'Câu lạc bộ thể thao';
+//             document.getElementById('founded').innerText  = data.founded;
+//             document.getElementById('members').innerText = data.members;
+//             document.getElementById('sports').innerText  = data.sports;
+//             document.getElementById('grounds').innerText = data.grounds;
+
+//             panel.classList.add('active');
+//         })
+//         .catch(err => {
+//             console.error(err);
+//             alert('Không thể tải dữ liệu CLB');
+//         });
+// }
+
+document.getElementById('btn-register').addEventListener('click', () => {
+    if (!selectedClubID) {
+        alert('Vui lòng chọn câu lạc bộ');
+        return;
+    }
+
+    if (!confirm('Bạn chắc chắn muốn đăng ký tham gia câu lạc bộ này?')) return;
+
+    fetch('./register_club_action.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ clubID: selectedClubID })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert(`Đăng ký thành công!\nBạn là thành viên của ${selectedClubName}`);
+            closePanel();
+            window.location.reload();
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Lỗi khi đăng ký');
+    });
+});
 </script>
 
 </body>
