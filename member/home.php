@@ -2,6 +2,7 @@
 session_start();
 
 require_once '../includes/get_user.php';
+require_once './get_my_clubs.php';
 ?>
 
 
@@ -75,47 +76,77 @@ require_once '../includes/get_user.php';
                 </div>
             </header> -->
             <?php include '../includes/header.php'; ?>
-            <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-10 border border-white">
-                <div class="flex items-center justify-between mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Câu lạc bộ của tôi</h2>
-                        <p class="text-sm text-slate-400 mt-1">Danh sách các CLB bạn đang hoạt động</p>
-                    </div>
+            <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-8 border border-white mt-3">
+                <div class="mb-6"> <div class="flex items-end justify-between">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight uppercase">Câu lạc bộ của tôi</h2>
+                    <p class="text-[13px] text-slate-400 mt-0.5 font-medium">Bạn đang tham gia <?php echo count($myClubs); ?> câu lạc bộ chính thức</p>
                 </div>
-
+                <div class="pb-1">
+                    <i class="bi bi-grid-fill text-indigo-500 text-xl"></i>
+                </div>
+            </div>
+    <div class="h-[2px] w-full bg-slate-200 mt-4 relative">
+        <div class="absolute left-0 top-0 h-full w-20 bg-indigo-500"></div>
+    </div>
+</div>
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <?php 
-                    $myClubs = [
-                        ['id' => '1', 'name' => 'CLB Bóng Đá', 'role' => 'Thành viên chính thức', 'date' => 'Tham gia: 12/2025', 'icon' => '⚽', 'bg' => 'bg-blue-50'],
-                        ['id' => '2', 'name' => 'CLB Âm Nhạc', 'role' => 'Trưởng nhóm Guitar', 'date' => 'Tham gia: 01/2026', 'icon' => '🎸', 'bg' => 'bg-pink-50'],
-                    ];
+                <?php foreach ($myClubs as $clb): ?>
+<div class="relative">
+    <input type="radio"
+           name="court_select"
+           id="c-<?php echo $clb['clubID']; ?>"
+           class="hidden court-input"
+           onchange="showBookingPanel(
+               '<?php echo htmlspecialchars($clb['club_name']); ?>',
+               'Thành viên chính thức'
+           )">
 
-                    foreach($myClubs as $clb):
-                    ?>
-                    <div class="relative">
-                        <input type="radio" name="court_select" id="c-<?php echo $clb['id']; ?>" class="hidden court-input" 
-                               onchange="showBookingPanel('<?php echo $clb['name']; ?>', '<?php echo $clb['role']; ?>')">
-                        
-                        <label for="c-<?php echo $clb['id']; ?>" class="court-card p-5 flex items-center justify-between shadow-sm group">
-                            <div class="flex items-center gap-5">
-                                <div class="w-16 h-16 <?php echo $clb['bg']; ?> rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110">
-                                    <?php echo $clb['icon']; ?>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-slate-800"><?php echo $clb['name']; ?></h3>
-                                    <p class="text-sm text-indigo-500 font-semibold"><?php echo $clb['role']; ?></p>
-                                    <p class="text-[11px] text-slate-400 uppercase tracking-wider mt-1"><?php echo $clb['date']; ?></p>
-                                </div>
-                            </div>
-                            
-                            <div class="status-icon w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 transition-all duration-300 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </div>
-                        </label>
-                    </div>
-                    <?php endforeach; ?>
+    <label for="c-<?php echo $clb['clubID']; ?>"
+           class="court-card p-5 flex items-center justify-between shadow-sm group">
+
+        <div class="flex items-center gap-5">
+            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                     class="w-9 h-9 text-slate-700 block">
+                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1z
+                             m4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6
+                             m-5.784 6A2.24 2.24 0 0 1 5 13
+                             c0-1.355.68-2.75 1.936-3.72
+                             A6.3 6.3 0 0 0 5 9
+                             c-4 0-5 3-5 4s1 1 1 1z
+                             M4.5 8a2.5 2.5 0 1 0 0-5
+                             2.5 2.5 0 0 0 0 5"/>
+                </svg>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">
+                    <?php echo htmlspecialchars($clb['club_name']); ?>
+                </h3>
+                <p class="text-sm text-indigo-500 font-semibold">
+                    Thành viên chính thức
+                </p>
+                <p class="text-[11px] text-slate-400 uppercase tracking-wider mt-1">
+                    Tham gia: <?php echo date('d/m/Y', strtotime($clb['join_date'])); ?>
+                </p>
+            </div>
+        </div>
+
+        <div class="status-icon w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center
+                    text-slate-300 transition-all duration-300
+                    group-hover:bg-indigo-600 group-hover:text-white
+                    group-hover:shadow-lg group-hover:shadow-indigo-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+        </div>
+    </label>
+</div>
+<?php endforeach; ?>
+
+                 
                 </div>
             </div>
         </main>
@@ -124,29 +155,58 @@ require_once '../includes/get_user.php';
             <div class="p-8 h-full flex flex-col w-[400px]">
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase italic">Tên CLB</h2>
+                        <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase">Tên CLB</h2>
                         <p id="display-role" class="text-xs font-bold text-slate-400"></p>
                     </div>
                     <button onclick="closePanel()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">✕</button>
                 </div>
-                
                 <div class="flex-1 space-y-6">
                     <div class="bg-indigo-50/50 p-6 rounded-[30px] border border-indigo-100">
                         <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Lịch sinh hoạt tuần này
+                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Thông tin câu lạc bộ
                         </h4>
                         <ul class="space-y-3 text-sm text-slate-600">
-                            <li class="flex justify-between"><span>Thứ 2 (18:00)</span> <span class="font-bold">Sân A1</span></li>
-                            <li class="flex justify-between"><span>Thứ 5 (17:30)</span> <span class="font-bold">Hội trường</span></li>
+                        <li class="flex justify-between">
+                            <span>Ngày thành lập</span>
+                            <span id="founded" class="font-bold"></span>
+                        </li>
+
+                        <li class="flex justify-between">
+                            <span>Thành viên</span>
+                            <span id="members" class="font-bold"></span>
+                        </li>
+
+                        <li class="flex justify-between">
+                            <span>Môn thể thao</span>
+                            <span id="sports" class="font-bold"></span>
+                        </li>
+
+                        <li class="flex justify-between">
+                            <span>Số lượng sân</span>
+                            <span id="grounds" class="font-bold"></span>
+                        </li>
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="flex-1 space-y-6">
+                    <div class="p-6 min-h-[200px]">
+                        <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Lịch đã đặt tuần này
+                        </h4>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex justify-between"><span>Thứ 2 (18:00-19:00)</span> <span class="font-bold">Sân số 1</span></li>
+                            <li class="flex justify-between"><span>Thứ 5 (17:00-18:00)</span> <span class="font-bold">Sân số 2</span></li>
                         </ul>
                     </div>
 
-                    <div class="p-6">
+                    <!-- <div class="p-6">
                         <h4 class="text-sm font-bold text-slate-800 mb-4">Thông báo mới nhất</h4>
                         <p class="text-xs text-slate-500 leading-relaxed italic">"Chuẩn bị cho giải đấu CTUMP Open vào tháng sau..."</p>
-                    </div>
+                    </div> -->
                 </div>
 
+            
                 <button class="mt-auto w-full py-4 bg-slate-800 text-white rounded-[22px] font-bold shadow-xl hover:bg-slate-900 transition transform active:scale-95">
                     Rời câu lạc bộ
                 </button>

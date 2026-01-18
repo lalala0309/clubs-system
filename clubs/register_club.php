@@ -14,7 +14,6 @@ require_once '../includes/get_user.php';
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -73,9 +72,19 @@ require_once '../includes/get_user.php';
             <?php include '../includes/header.php'; ?>
 
             <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-10 border border-white">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Danh sách câu lạc bộ</h2>
+            <div class="mb-6"> <div class="flex items-end justify-between">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight uppercase">Câu lạc bộ của tôi</h2>
+                        <p class="text-[13px] text-slate-400 mt-0.5 font-medium">Bạn đang tham gia câu lạc bộ chính thức</p>
+                    </div>
+                    <div class="pb-1">
+                        <i class="bi bi-grid-fill text-indigo-500 text-xl"></i>
+                    </div>
                 </div>
+                <div class="h-[2px] w-full bg-slate-200 mt-4 relative">
+                    <div class="absolute left-0 top-0 h-full w-20 bg-indigo-500"></div>
+                </div>
+            </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 

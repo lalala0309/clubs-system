@@ -1,7 +1,14 @@
 <?php
 session_start();
-
 require_once '../includes/get_user.php';
+require_once './get_my_grounds.php';
+require_once './get_sports.php';
+
+
+$days = [
+    ['Thứ 2', '19/01'], ['Thứ 3', '20/01'], ['Thứ 4', '21/01'], 
+    ['Thứ 5', '22/01'], ['Thứ 6', '23/01'], ['Thứ 7', '24/01'], ['CN', '25/01']
+];
 ?>
 
 <!DOCTYPE html>
@@ -11,144 +18,370 @@ require_once '../includes/get_user.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Đặt sân - CTUMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/sidebar_member.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Hiệu ứng khi được click chọn (Radio checked) */
-        .court-input:checked + .court-card {
-            border-color: #4F46E5;
-            background-color: #f5f3ff;
-        }
-
-        .court-input:checked + .court-card .status-icon {
-            background-color: #4F46E5 !important;
-            color: white !important;
-        }
-
-        .active-menu {
-            background: linear-gradient(135deg, #4F46E5 0%, #2A53A2 100%);
-            color: white !important;
-            border-radius: 24px; 
-        }
-
         #right-panel {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 0;
-            opacity: 0;
-            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0; opacity: 0; pointer-events: none;
         }
-        
-        #right-panel.active {
-            width: 400px;
-            opacity: 1;
+        #right-panel.active { width: 300px; opacity: 1; pointer-events: auto; }
+        .view-hidden { display: none !important; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+
+        /* Kẻ bảng rõ hơn và thu hẹp độ rộng */
+        .grid-table { border-collapse: collapse; min-width: 100%; table-layout: fixed; }
+        .grid-table th, .grid-table td { border: 1px solid #e2e8f0; }
+
+        .grid-cell {
+            height: 38px; 
+            transition: all 0.15s;
+            /* Độ rộng ô cực gọn */
+            min-width: 55px; 
         }
+        .cell-available { background: white; cursor: pointer; }
+        .cell-available:hover { background: #f5f8ff; outline: 2px solid #6366f1; outline-offset: -2px; z-index: 10; }
+        .cell-booked {
+    background: #fee2e2;
+    color: #ef4444;
+    cursor: not-allowed;
+    text-align: center;
+    line-height: 38px;   /* căn giữa dọc */
+}
+
+        .court-tab.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .time-cell {
+    height: 38px;
+    white-space: nowrap;   
+    line-height: 38px;     /* căn giữa dọc */
+    padding: 0;
+}
+
+.grid-table tr {
+    height: 38px;
+}
+
+.grid-table td {
+    vertical-align: middle;
+}
+
+
     </style>
 </head>
-<body class="bg-[#F8FAFF] min-h-screen p-4"> 
-    <div class="flex h-[calc(100vh-2rem)] overflow-hidden gap-4">
+<body class="bg-[#F8FAFF] min-h-screen p-4 overflow-x-hidden">
+
+    <div class="flex h-[calc(100vh-2rem)] gap-4">
         
-    <?php include '../includes/sidebar_member.php'; ?>
+        <?php if(file_exists('../includes/sidebar_member.php')) include '../includes/sidebar_member.php'; ?>
 
-        <main class="flex-1 flex flex-col overflow-hidden min-w-0">
-            <!-- <header class="flex items-center justify-between px-10 py-5 bg-white/60 backdrop-blur-md rounded-[35px] mb-4 border border-white">
-                <div class="relative w-96">
-                    <span class="absolute inset-y-0 left-5 flex items-center text-slate-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </span>
-                    <input type="text" placeholder="Tìm kiếm CLB..." class="w-full pl-14 pr-6 py-3 bg-white/80 rounded-[20px] border-none shadow-sm focus:ring-2 focus:ring-indigo-400 outline-none transition font-medium">
-                </div>
+        <main class="flex-1 flex flex-col overflow-hidden">
+            
+            <?php if(file_exists('../includes/header.php')) include '../includes/header.php'; ?>
 
-                <div class="flex items-center gap-4 bg-white px-5 py-2 rounded-[25px] shadow-sm border border-slate-50">
-                    <div class="text-right">
-                        <p class="text-sm font-black text-slate-800">Nguyễn Văn A</p>
-                        <p class="text-[10px] text-indigo-500 font-bold uppercase tracking-tighter">ID: SV12345</p>
+            <div id="view-clubs" class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-8 border border-white mt-3 custom-scroll">
+                <div class="mb-6"> 
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 tracking-tight uppercase leading-none">Đặt sân</h2>
+                            <p class="text-[13px] text-slate-400 mt-2 font-medium">Vui lòng chọn loại sân bạn muốn sử dụng</p>
+                        </div>
                     </div>
-                    <div class="w-11 h-11 rounded-[15px] bg-slate-200 overflow-hidden border-2 border-indigo-50">
-                        <img src="https://i.pravatar.cc/150?u=a" class="w-full h-full object-cover">
+                    <div class="h-[2px] w-full bg-slate-200 mt-4 relative">
+                        <div class="absolute left-0 top-0 h-full w-20 bg-indigo-500"></div>
                     </div>
-                </div>
-            </header> -->
-            <?php include '../includes/header.php'; ?>
-
-            <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[45px] p-10 border border-white">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Câu lạc bộ của tôi</h2>
-                    <div class="text-sm font-medium text-slate-400">Thứ Ba, 13 Tháng 1</div>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <?php 
-                    $clubs = [
-                        ['id' => '1', 'name' => 'Bóng Đá A1', 'desc' => 'CLB 11 người - Sân cỏ tự nhiên', 'icon' => '⚽', 'bg' => 'bg-blue-50'],
-                        ['id' => '2', 'name' => 'Cầu Lông Số 4', 'desc' => 'Thảm tiêu chuẩn - Khán đài B', 'icon' => '🏸', 'bg' => 'bg-purple-50'],
-                        ['id' => '3', 'name' => 'Bóng Rổ Trong Nhà', 'desc' => 'Sân gỗ - Khu phức hợp', 'icon' => '🏀', 'bg' => 'bg-orange-50'],
-                        ['id' => '4', 'name' => 'Âm Nhạc & Nghệ Thuật', 'desc' => 'Phòng cách âm - Nhạc cụ hiện đại', 'icon' => '🎸', 'bg' => 'bg-pink-50'],
-                    ];
-                    foreach($clubs as $c):
-                    ?>
-                    <div class="relative">
-                        <input type="radio" name="court_select" id="c-<?php echo $c['id']; ?>" class="hidden court-input" 
-                               onchange="showBookingPanel('<?php echo $c['name']; ?>')">
-                        
-                        <label for="c-<?php echo $c['id']; ?>" class="court-card p-5 flex items-center justify-between shadow-sm group">
-                            <div class="flex items-center gap-5">
-                                <div class="w-16 h-16 <?php echo $c['bg']; ?> rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110">
-                                    <?php echo $c['icon']; ?>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-slate-800"><?php echo $c['name']; ?></h3>
-                                    <p class="text-sm text-slate-400 font-medium"><?php echo $c['desc']; ?></p>
-                                </div>
-                            </div>
-                            
-                            <div class="status-icon w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 transition-all duration-300 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </div>
-                        </label>
+
+<?php foreach ($sports as $sport): ?>
+    <div onclick="openTimetable(<?php echo $sport['sportID']; ?>, '<?php echo $sport['sport_name']; ?>')"
+         class="group relative bg-white p-5 flex items-center justify-between rounded-[25px]
+                border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-300 cursor-pointer">
+
+        <div class="flex items-center gap-5">
+            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center">
+                <i class="bi bi-dribbble text-indigo-500 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">
+                    Sân <?php echo htmlspecialchars($sport['sport_name']); ?>
+                </h3>
+                <p class="text-sm text-indigo-500 font-semibold">
+                    Các sân thuộc CLB bạn tham gia
+                </p>
+            </div>
+        </div>
+
+        <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+            <i class="bi bi-arrow-right"></i>
+        </div>
+    </div>
+<?php endforeach; ?>
+
+</div>
+
+            </div>
+
+            <div id="view-timetable" class="view-hidden flex flex-col h-full overflow-hidden bg-white/70 backdrop-blur-sm rounded-[30px] border border-white mt-3">
+                <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white/50">
+                    <div class="flex items-center gap-3">
+                        <button onclick="backToClubs()" class="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all border border-slate-100">
+                            <i class="bi bi-chevron-left text-xs"></i>
+                        </button>
+                        <div>
+                            <h2 id="current-club-title" class="text-xs font-black text-indigo-700 uppercase leading-none">ĐẶT SÂN</h2>
+                            <p id="selected-court-label" class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">SÂN SỐ 01</p>
+                        </div>
                     </div>
-                    <?php endforeach; ?>
+                    
+                    <div class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
+                        <button class="hover:text-indigo-600"><i class="bi bi-caret-left-fill text-[10px]"></i></button>
+                        <span class="text-[9px] font-bold text-slate-500 uppercase">19/01 - 25/01</span>
+                        <button class="hover:text-indigo-600"><i class="bi bi-caret-right-fill text-[10px]"></i></button>
+                    </div>
+                </div>
+
+                <div class="flex flex-1 overflow-hidden">
+                    <div class="w-12 border-r border-slate-100 flex flex-col items-center py-4 gap-2 bg-slate-50/30 overflow-y-auto custom-scroll">
+                        <?php for($s=1; $s<=5; $s++): ?>
+                        <button onclick="changeCourt(<?php echo $s; ?>)" 
+                                class="court-tab w-8 h-8 rounded-md border border-white bg-white shadow-sm text-[9px] font-black text-slate-400 hover:border-indigo-200 transition-all <?php echo $s==1 ? 'active' : ''; ?>">
+                            S<?php echo $s; ?>
+                        </button>
+                        <?php endfor; ?>
+                    </div>
+
+                    <div class="flex-1 overflow-auto custom-scroll">
+                        <table class="grid-table">
+                            <thead class="sticky top-0 z-20 bg-slate-50">
+                                <tr>
+                                    <th class="p-2 text-[8px] font-black text-slate-400 uppercase w-20 bg-slate-100/50">Giờ</th>
+                                    <?php foreach($days as $d): ?>
+                                    <th class="p-1">
+                                        <div class="text-[7px] text-indigo-500 font-black uppercase leading-none"><?php echo $d[0]; ?></div>
+                                        <div class="text-[9px] text-slate-600 font-bold"><?php echo $d[1]; ?></div>
+                                    </th>
+                                    <?php endforeach; ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                               $timeRanges = [
+                                "06:00-07:00",
+                                "07:00-08:00",
+                                "08:00-09:00",
+                                "09:00-10:00",
+                                "13:00-14:00",
+                                "14:00-15:00",
+                                "15:00-16:00",
+                                "16:00-17:00",
+                                "17:00-18:00",
+                                "18:00-19:00",
+                                "19:00-20:00",
+                                "20:00-21:00"
+                            ];
+                            
+                            foreach ($timeRanges as $range):
+                            
+                                ?>
+                                <tr>
+                                    <td class="time-cell text-center bg-[#FDFDFF] px-1">
+                                        <span class="text-[9px] font-bold text-slate-500 tracking-tighter"><?php echo $range; ?></span>
+                                    </td>
+                                    <?php for($i=0; $i<7; $i++): ?>
+                                        <td class="grid-cell cell-available"
+    data-day="<?php echo $days[$i][1]; ?>"
+    data-time="<?php echo $range; ?>"
+    onclick="openPanel('<?php echo $range; ?>', '<?php echo $days[$i][0] . ' - ' . $days[$i][1]; ?>')">
+</td>
+
+                                    <?php endfor; ?>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
 
-        <aside id="right-panel" class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[40px] border-l border-indigo-50">
-            <div class="p-8 h-full flex flex-col w-[400px]">
+        <aside id="right-panel" class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[30px] border-l border-indigo-50">
+            <div class="p-6 h-full flex flex-col">
                 <div class="flex justify-between items-center mb-8">
-                    <h2 id="display-name" class="text-xl font-black text-indigo-600 uppercase italic">Tên CLB</h2>
-                    <button onclick="closePanel()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">✕</button>
+                    <h2 class="text-xs font-black text-indigo-600 uppercase tracking-widest">Xác nhận đặt sân</h2>
+                    <button onclick="closePanel()" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400"><i class="bi bi-x-lg text-xs"></i></button>
                 </div>
                 
                 <div class="flex-1 space-y-4">
-                    <div class="bg-indigo-50/50 p-6 rounded-[30px] border border-dashed border-indigo-200 text-center">
-                        <p class="text-slate-400 font-medium italic">Thông tin hoạt động của CLB...</p>
+                    <div class="p-6 bg-indigo-50 rounded-[25px] border border-indigo-100 text-center">
+                        <div class="text-indigo-600 font-black text-xl" id="info-time">00:00-00:00</div>
+                        <div class="text-slate-500 font-bold text-[10px] uppercase mt-1 tracking-widest" id="info-date">Thứ ...</div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-2xl flex items-center gap-4">
+                        <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-indigo-500">
+                             <i class="bi bi-geo-alt-fill text-lg"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-700 tracking-tight uppercase italic" id="info-court">Sân số 01</span>
                     </div>
                 </div>
 
-                <button class="mt-auto w-full py-4 bg-indigo-600 text-white rounded-[22px] font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition transform active:scale-95">
-                    Rời câu lạc bộ
-                </button>
+                <button id="btn-confirm"
+    class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase">
+    Xác nhận gửi yêu cầu
+</button>
+
             </div>
         </aside>
     </div>
 
     <script>
-        const panel = document.getElementById('right-panel');
-        const displayName = document.getElementById('display-name');
+        let currentCourtName = "Sân số 01";
+        let selectedBooking = {
+            groundID: null,
+            booking_date: null,
+            start_time: null,
+            end_time: null
+        };
+        function openTimetable(sportID, sportName) {
+                    document.getElementById('current-club-title').innerText = 'Đặt sân ' + sportName;
+                    document.getElementById('view-clubs').classList.add('view-hidden');
+                    document.getElementById('view-timetable').classList.remove('view-hidden');
 
-        function showBookingPanel(courtName) {
-            displayName.innerText = courtName;
-            panel.classList.add('active');
+                    fetch(`get_grounds_by_sport.php?sportID=${sportID}&userID=<?php echo $userID; ?>`)
+                        .then(res => res.json())
+                        .then(data => renderCourts(data));
+        }
+        function renderCourts(grounds) {
+    const container = document.querySelector('.court-tab').parentElement;
+    container.innerHTML = '';
+
+    grounds.forEach((g, i) => {
+        container.innerHTML += `
+            <button 
+                data-ground-id="${g.groundID}"
+                onclick="changeCourt(${i+1}, this)"
+                class="court-tab w-8 h-8 rounded-md border bg-white text-[9px] font-black ${i==0?'active':''}">
+                S${i+1}
+            </button>
+        `;
+    });
+
+    //  TỰ ĐỘNG LOAD BOOKING CHO SÂN ĐẦU TIÊN
+    const firstBtn = container.querySelector('.court-tab');
+    if (firstBtn) {
+        changeCourt(1, firstBtn);
+    }
+}
+
+
+
+
+        function backToClubs() {
+            document.getElementById('view-timetable').classList.add('view-hidden');
+            document.getElementById('view-clubs').classList.remove('view-hidden');
+            closePanel();
+        }
+        function changeCourt(index, btn) {
+    const label = index < 10 ? '0' + index : index;
+    currentCourtName = 'Sân số ' + label;
+
+    document.getElementById('selected-court-label').innerText = currentCourtName;
+
+    document.querySelectorAll('.court-tab').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+
+    const groundID = btn.dataset.groundId;
+
+    // reset bảng
+    document.querySelectorAll('.grid-cell').forEach(cell => {
+        cell.classList.remove('cell-booked');
+        cell.classList.add('cell-available');
+        cell.innerHTML = '';
+    });
+
+    fetch(`get_booked_slots.php?groundID=${groundID}`)
+        .then(res => res.json())
+        .then(data => markBookedSlots(data));
+}
+
+
+
+function openPanel(time, date) {
+    const [start, end] = time.split('-');
+
+    selectedBooking.start_time = start;
+    selectedBooking.end_time = end;
+    selectedBooking.booking_date = date.split(' - ')[1]; // 19/01
+    selectedBooking.groundID = document.querySelector('.court-tab.active')
+        ?.getAttribute('data-ground-id');
+
+    document.getElementById('info-time').innerText = time;
+    document.getElementById('info-date').innerText = date;
+    document.getElementById('info-court').innerText = currentCourtName;
+    document.getElementById('right-panel').classList.add('active');
+}
+
+
+        function closePanel() { 
+            document.getElementById('right-panel').classList.remove('active'); 
         }
 
-        function closePanel() {
-            panel.classList.remove('active');
-            document.querySelectorAll('.court-input').forEach(input => input.checked = false);
-        }
+        document.getElementById('btn-confirm').addEventListener('click', () => {
+    if (!selectedBooking.groundID) {
+        alert('Vui lòng chọn sân');
+        return;
+    }
+
+    const formData = new FormData();
+    for (let k in selectedBooking) {
+        formData.append(k, selectedBooking[k]);
+    }
+
+    fetch('./handle_booking.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+    if (data.status === 'success') {
+        alert('Đặt sân thành công');
+        closePanel();
+
+        // reload lại lịch của sân đang chọn
+        const activeBtn = document.querySelector('.court-tab.active');
+        const index = activeBtn.innerText.replace('S', '');
+        changeCourt(index, activeBtn);
+    } else {
+        alert('' + data.message);
+    }
+});
+
+});
+
+function markBookedSlots(bookings) {
+    bookings.forEach(b => {
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            if (
+                cell.dataset.day === b.booking_date &&
+                cell.dataset.time === `${b.start_time}-${b.end_time}`
+            ) {
+                cell.classList.remove('cell-available');
+                cell.classList.add('cell-booked');
+                cell.innerHTML = '<i class="bi bi-lock-fill text-[9px] opacity-40"></i>';
+                cell.onclick = null;
+            }
+        });
+    });
+}
+
     </script>
 </body>
 </html>
