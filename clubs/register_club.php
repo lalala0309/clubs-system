@@ -78,14 +78,14 @@ require_once '../includes/get_user.php';
                 <div class="mb-6"> 
                     <div class="flex items-end justify-between">
                         <div>
-                            <h2 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight uppercase">Đăng ký câu lạc bộ</h2>
+                            <h2 class="text-base text-lg md:text-2xl font-black text-slate-800 tracking-tight uppercase">Đăng ký câu lạc bộ</h2>
                             <p class="text-[11px] md:text-[13px] text-slate-400 mt-0.5 font-medium">Đăng ký để sử dụng các tiện ích của câu lạc bộ</p>
                         </div>
                         <div class="pb-1 hidden md:block">
                             <i class="bi bi-grid-fill text-indigo-500 text-xl"></i>
                         </div>
                     </div>
-                    <div class="h-[2px] w-full bg-slate-200 mt-4 relative">
+                    <div class="h-[2px] w-full bg-slate-200 mt-3 md:mt-4 relative">
                         <div class="absolute left-0 top-0 h-full w-12 md:w-20 bg-indigo-500"></div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@ require_once '../includes/get_user.php';
                     ?>
                     <div class="relative">
                         <input type="radio" name="court_select" id="c-<?php echo $clb['id']; ?>" class="hidden court-input" onchange="loadClubDetail(<?php echo $clb['id']; ?>)">
-                        <label for="c-<?php echo $clb['id']; ?>" class="club-card p-4 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
+                        <label for="c-<?php echo $clb['id']; ?>" class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
                             <div class="flex items-center gap-4 md:gap-5">
                                 <div class="w-12 h-12 md:w-14 md:h-14 <?php echo $clb['bg']; ?> rounded-xl md:rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="w-7 h-7 md:w-9 md:h-9 text-slate-700 block">

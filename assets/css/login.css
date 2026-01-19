@@ -1,37 +1,73 @@
+/* Reset & base */
 * {
-    max-width: 800px;
-    margin: auto;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body */
+body.item {
+  min-height: 100vh;
+  background: #2A53A2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Card login */
+.item1 {
+  background-color: #fff;
+  border-radius: 20px;
+  text-align: center;
+  padding: 36px 20px; 
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2),
+              0 6px 20px rgba(0,0,0,0.19);
+}
+
+/* Title */
+.item1 h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* Button */
+.btn-primary {
+  color: #fff;
+  background-color: #2A53A2;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all .3s;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  max-width: 260px;
+}
+
+.btn-primary:hover {
+  background-color: #1f3f82;
+}
+
+/* Responsive text */
+@media (max-width: 480px) {
+  body.item {
+    padding: 16px;
   }
-  
-  .item {
-    background: url("assets/images/old-web_bg-5.png") bottom right no-repeat #2A53A2;
-   
-  }
-  
+
   .item1 {
-    background-color:white;	
-    border-radius: 20px;
-    border-radius: 20px;
-    text-align: center;
-    padding: 40px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    margin-top: 200px;
+    max-width: 300px;     /* hẹp hơn nữa trên mobile */
+    padding: 40px 18px;   /* cao lên rõ */
   }
-  
+
+  .item1 h2 {
+    font-size: 22px;
+  }
+
   .btn-primary {
-      color: #fff;
-      background-color: #2A53A2;
-      padding: 12px 30px;
-      display: inline-block;
-      border-radius: 12px;
-      font-weight: 500;
-      text-transform: uppercase;
-      transition: all .3s;
-      
+    max-width: 220px;
   }
-  
-  .input_tb {
-      padding: 10px;
-      font-size: 1.2rem;
-      font-weight: bold;
-  }
+}

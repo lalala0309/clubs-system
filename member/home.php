@@ -16,7 +16,6 @@ require_once './get_my_clubs.php';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        /* GIỮ NGUYÊN STYLE CỦA BẠN */
         body { font-family: 'Inter', sans-serif; }
         .court-input:checked + .court-card {
             border-color: #4F46E5;
@@ -86,8 +85,8 @@ require_once './get_my_clubs.php';
                 <div class="mb-5 md:mb-6"> 
                     <div class="flex items-end justify-between">
                         <div>
-                            <h2 class="text-lg md:text-2xl font-black text-slate-800 tracking-tight uppercase">Câu lạc bộ của tôi</h2>
-                            <p class="text-[11px] md:text-[13px] text-slate-400 mt-0.5 font-medium">Bạn có <?php echo count($myClubs); ?> CLB chính thức</p>
+                            <h2 class="text-base text-lg md:text-2xl font-black text-slate-800 tracking-tight uppercase">Câu lạc bộ của tôi</h2>
+                            <p class="text-[11px] md:text-[13px] text-slate-400 mt-0.5 font-medium">Bạn tham gia <?php echo count($myClubs); ?> câu lạc bộ</p>
                         </div>
                         <div class="pb-1 hidden md:block">
                             <i class="bi bi-grid-fill text-indigo-500 text-xl"></i>
@@ -104,7 +103,7 @@ require_once './get_my_clubs.php';
                         <input type="radio" name="court_select" id="c-<?php echo $clb['clubID']; ?>" class="hidden court-input"
                                onchange="showBookingPanel('<?php echo htmlspecialchars($clb['club_name']); ?>', 'Thành viên chính thức')">
 
-                        <label for="c-<?php echo $clb['clubID']; ?>" class="court-card p-4 md:p-5 flex items-center justify-between shadow-sm group bg-white rounded-[20px] md:rounded-[25px] border border-transparent cursor-pointer transition-all">
+                        <label for="c-<?php echo $clb['clubID']; ?>" class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
                             <div class="flex items-center gap-3 md:gap-5">
                                 <div class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl transition-transform group-hover:scale-110">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="w-6 h-6 md:w-9 md:h-9 text-slate-700 block">
