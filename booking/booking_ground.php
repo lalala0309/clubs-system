@@ -376,7 +376,7 @@ function markBookedSlots(bookings) {
                 cell.classList.remove('cell-available');
                 cell.classList.add('cell-booked');
                 cell.innerHTML = '<i class="bi bi-lock-fill text-[9px] opacity-40"></i>';
-                cell.onclick = null;
+                // cell.onclick = null;
             }
         });
     });
