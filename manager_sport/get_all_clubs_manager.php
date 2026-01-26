@@ -1,0 +1,52 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../config/database.php';
+
+/*
+|--------------------------------------------------------------------------
+| MANAGER VIEW: LẤY TẤT CẢ CÂU LẠC BỘ
+|--------------------------------------------------------------------------
+| Không lọc theo userID
+| Thêm CLB mới là hiển thị ngay
+*/
+
+$sql = "
+    SELECT 
+        c.clubID AS id,
+        c.club_name AS name,
+        GROUP_CONCAT(DISTINCT s.sport_name SEPARATOR ', ') AS sport_name
+    FROM clubs c
+    LEFT JOIN club_sports cs ON c.clubID = cs.clubID
+    LEFT JOIN sports s ON cs.sportID = s.sportID
+    GROUP BY c.clubID
+    ORDER BY c.club_name
+";
+
+$result = $conn->query($sql);
+
+$clubs = [];
+
+$bgList = [
+    'bg-indigo-100',
+    'bg-blue-100',
+    'bg-emerald-100',
+    'bg-purple-100',
+    'bg-rose-100'
+];
+
+$i = 0;
+while ($row = $result->fetch_assoc()) {
+    $clubs[] = [
+        'id'   => $row['id'],
+        'name' => $row['name'],
+        'desc' => $row['sport_name'] ?: 'Chưa có môn',
+        'bg'   => $bgList[$i % count($bgList)]
+    ];
+    $i++;
+}
+
+return $clubs;
+?>
