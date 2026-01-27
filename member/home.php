@@ -6,6 +6,7 @@ require_once './get_my_clubs.php';
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,36 +17,49 @@ require_once './get_my_clubs.php';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .court-input:checked + .court-card {
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .court-input:checked+.court-card {
             border-color: #4F46E5;
             background-color: #f5f3ff;
             box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
         }
-        .court-input:checked + .court-card .status-icon {
+
+        .court-input:checked+.court-card .status-icon {
             background-color: #4F46E5 !important;
             color: white !important;
         }
+
         .active-menu {
             background: linear-gradient(135deg, #4F46E5 0%, #2A53A2 100%);
             color: white !important;
-            border-radius: 24px; 
+            border-radius: 24px;
         }
+
         #right-panel {
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 0; opacity: 0; overflow: hidden;
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
         }
-        #right-panel.active { width: 400px; opacity: 1; }
+
+        #right-panel.active {
+            width: 400px;
+            opacity: 1;
+        }
 
         /* Bổ sung để hiển thị sidebar trên mobile */
         #main-sidebar.show {
             transform: translateX(0);
         }
-        
+
         /* Overlay khi mở menu trên mobile */
         .sidebar-overlay {
             display: none;
         }
+
         .sidebar-overlay.active {
             display: block;
         }
@@ -58,22 +72,26 @@ require_once './get_my_clubs.php';
                 top: 0;
                 height: 100vh;
                 z-index: 60;
-                width: 100%; /* Chiếm toàn màn hình trên mobile */
+                width: 100%;
+                /* Chiếm toàn màn hình trên mobile */
             }
         }
     </style>
 </head>
-<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4"> 
 
-    <div id="sidebar-overlay" onclick="toggleSidebar()" class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
+<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()"
+        class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
     <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
-    
+
         <?php include '../includes/sidebar_member.php'; ?>
 
         <main class="flex-1 flex flex-col overflow-hidden min-w-0">
             <div class="flex items-center gap-3 mb-2">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-indigo-600">
+                <button onclick="toggleSidebar()"
+                    class="lg:hidden p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-indigo-600">
                     <i class="bi bi-list text-2xl"></i>
                 </button>
                 <div class="flex-1">
@@ -81,12 +99,17 @@ require_once './get_my_clubs.php';
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
-                <div class="mb-5 md:mb-6"> 
+            <div
+                class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
+                <div class="mb-5 md:mb-6">
                     <div class="flex items-end justify-between">
                         <div>
-                            <h2 class="text-base text-lg md:text-2xl font-black text-slate-800 tracking-tight uppercase">Câu lạc bộ của tôi</h2>
-                            <p class="text-[11px] md:text-[13px] text-slate-400 mt-0.5 font-medium">Bạn tham gia <?php echo count($myClubs); ?> câu lạc bộ</p>
+                            <h2
+                                class="text-base text-lg md:text-2xl font-black text-slate-800 tracking-tight uppercase">
+                                Câu lạc bộ của tôi</h2>
+                            <p class="text-[11px] md:text-[13px] text-slate-400 mt-0.5 font-medium">Bạn tham gia
+                                <?php echo count($myClubs); ?> câu lạc bộ
+                            </p>
                         </div>
                         <div class="pb-1 hidden md:block">
                             <i class="bi bi-grid-fill text-indigo-500 text-xl"></i>
@@ -99,172 +122,197 @@ require_once './get_my_clubs.php';
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
                     <?php foreach ($myClubs as $clb): ?>
-                    <div class="relative">
-                        <input type="radio" name="court_select" id="c-<?php echo $clb['clubID']; ?>" class="hidden court-input"
-                        onchange="loadClubDetail(<?php echo $clb['clubID']; ?>)">
+                        <div class="relative">
+                            <input type="radio" name="court_select" id="c-<?php echo $clb['clubID']; ?>"
+                                class="hidden court-input" onchange="loadClubDetail(<?php echo $clb['clubID']; ?>)">
 
-                        <label for="c-<?php echo $clb['clubID']; ?>" class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
-                            <div class="flex items-center gap-3 md:gap-5">
-                                <div class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl transition-transform group-hover:scale-110">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="w-6 h-6 md:w-9 md:h-9 text-slate-700 block">
-                                        <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1z m4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6 m-5.784 6A2.24 2.24 0 0 1 5 13 c0-1.355.68-2.75 1.936-3.72 A6.3 6.3 0 0 0 5 9 c-4 0-5 3-5 4s1 1 1 1z M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/>
+                            <label for="c-<?php echo $clb['clubID']; ?>"
+                                class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
+                                <div class="flex items-center gap-3 md:gap-5">
+                                    <div
+                                        class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl transition-transform group-hover:scale-110">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                            class="w-6 h-6 md:w-9 md:h-9 text-slate-700 block">
+                                            <path
+                                                d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1z m4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6 m-5.784 6A2.24 2.24 0 0 1 5 13 c0-1.355.68-2.75 1.936-3.72 A6.3 6.3 0 0 0 5 9 c-4 0-5 3-5 4s1 1 1 1z M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm md:text-lg font-bold text-slate-800 line-clamp-1">
+                                            <?php echo htmlspecialchars($clb['club_name']); ?>
+                                        </h3>
+                                        <p
+                                            class="text-[10px] md:text-sm text-indigo-500 font-semibold uppercase md:capitalize">
+                                            Thành viên</p>
+                                        <p class="text-[9px] md:text-[11px] text-slate-400 mt-0.5">Tham gia:
+                                            <?php echo date('d/m/Y', strtotime($clb['join_date'])); ?>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div
+                                    class="status-icon w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <h3 class="text-sm md:text-lg font-bold text-slate-800 line-clamp-1"><?php echo htmlspecialchars($clb['club_name']); ?></h3>
-                                    <p class="text-[10px] md:text-sm text-indigo-500 font-semibold uppercase md:capitalize">Thành viên</p>
-                                    <p class="text-[9px] md:text-[11px] text-slate-400 mt-0.5">Tham gia: <?php echo date('d/m/Y', strtotime($clb['join_date'])); ?></p>
-                                </div>
-                            </div>
-                            <div class="status-icon w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
-                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </div>
-                        </label>
-                    </div>
+                            </label>
+                        </div>
                     <?php endforeach; ?>
                 </div>
             </div>
         </main>
 
-        <aside id="right-panel" class="bg-white flex flex-col shrink-0 shadow-2xl lg:rounded-l-[40px] border-l border-indigo-50">
-    <div class="p-5 md:p-8 h-full flex flex-col w-full lg:w-[400px]">
+        <aside id="right-panel"
+            class="bg-white flex flex-col shrink-0 shadow-2xl lg:rounded-l-[40px] border-l border-indigo-50">
+            <div class="p-5 md:p-8 h-full flex flex-col w-full lg:w-[400px]">
 
-        <div class="flex justify-between items-center mb-6 md:mb-8">
-            <div>
-                <h2 id="club-name" class="text-lg md:text-xl font-black text-indigo-600 uppercase tracking-tight"></h2>
-                <p class="text-[10px] md:text-xs font-bold text-slate-400">Thành viên</p>
-            </div>
-            <button onclick="closePanel()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">✕</button>
-        </div>
+                <div class="flex justify-between items-center mb-6 md:mb-8">
+                    <div>
+                        <h2 id="club-name"
+                            class="text-lg md:text-xl font-black text-indigo-600 uppercase tracking-tight"></h2>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-400">Thành viên</p>
+                    </div>
+                    <button onclick="closePanel()"
+                        class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">✕</button>
+                </div>
 
-        <div class="flex-1 space-y-4 md:space-y-6 overflow-y-auto">
-            <div class="bg-indigo-50/50 p-4 md:p-6 rounded-[20px] md:rounded-[30px] border border-indigo-100">
-                <h4 class="text-xs md:text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Thông tin
-                </h4>
+                <div class="flex-1 space-y-4 md:space-y-6 overflow-y-auto">
+                    <div class="bg-indigo-50/50 p-4 md:p-6 rounded-[20px] md:rounded-[30px] border border-indigo-100">
+                        <h4 class="text-xs md:text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Thông tin
+                        </h4>
 
-                <ul class="space-y-3 text-sm text-slate-600">
-                    <li class="flex justify-between"><span>Ngày thành lập</span> <span id="founded-date" class="font-bold"></span></li>
-                    <li class="flex justify-between"><span>Thành viên</span> <span id="member-count" class="font-bold"></span></li>
-                    <li class="flex justify-between"><span>Sân bãi</span> <span id="ground-count" class="font-bold"></span></li>
-                    <li class="flex justify-between"><span>Ngày gia nhập</span> <span id="join-date" class="font-bold"></span></li>
-                    <li class="flex justify-between"><span>Đóng phí</span> <span id="fee-paid" class="font-bold"></span></li>
-                    <li class="flex justify-between"><span>Hết hạn</span> <span id="fee-expire" class="font-bold"></span></li>
-                </ul>
-            </div>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex justify-between"><span>Ngày thành lập</span> <span id="founded-date"
+                                    class="font-bold"></span></li>
+                            <li class="flex justify-between"><span>Thành viên</span> <span id="member-count"
+                                    class="font-bold"></span></li>
+                            <li class="flex justify-between"><span>Sân bãi</span> <span id="ground-count"
+                                    class="font-bold"></span></li>
+                            <li class="flex justify-between"><span>Ngày gia nhập</span> <span id="join-date"
+                                    class="font-bold"></span></li>
+                            <li class="flex justify-between"><span>Đóng phí</span> <span id="fee-paid"
+                                    class="font-bold"></span></li>
+                            <li class="flex justify-between"><span>Hết hạn</span> <span id="fee-expire"
+                                    class="font-bold"></span></li>
+                        </ul>
+                    </div>
 
-            <div class="p-4 md:p-6">
+                    <div class="p-4 md:p-6">
                         <h4 class="text-xs md:text-sm font-bold text-slate-800 mb-3 md:mb-4 flex items-center gap-2">
                             <span class="w-1.5 h-1.5 md:w-2 md:h-2 bg-indigo-500 rounded-full"></span> Sân đã đặt
                         </h4>
-                        <ul id="weekly-schedule"
-                            class="space-y-2 text-[11px] md:text-sm text-slate-600">
+                        <ul id="weekly-schedule" class="space-y-2 text-[11px] md:text-sm text-slate-600">
                         </ul>
 
-                            <li class="flex justify-between"><span></span> <span class="font-bold"></span></li>
+                        <li class="flex justify-between"><span></span> <span class="font-bold"></span></li>
                         </ul>
                     </div>
-        </div>
+                </div>
 
-        <button class="mt-auto w-full py-4 bg-slate-800 text-white rounded-[22px] font-bold shadow-xl active:scale-95 transition">
-           hihi
-        </button>
-    </div>
-</aside>
+                <button
+                    class="mt-auto w-full py-4 bg-slate-800 text-white rounded-[22px] font-bold shadow-xl active:scale-95 transition">
+                    Rời câu lạc bộ
+                </button>
+            </div>
+        </aside>
 
     </div>
 
     <script>
-function toggleSidebar() {
-    document.getElementById('main-sidebar').classList.toggle('show');
-    document.getElementById('sidebar-overlay').classList.toggle('active');
-}
+        function toggleSidebar() {
+            document.getElementById('main-sidebar').classList.toggle('show');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        }
 
-const panel = document.getElementById('right-panel');
+        const panel = document.getElementById('right-panel');
 
-function loadClubDetail(clubID) {
-    fetch(`get_club_detail.php?clubID=${clubID}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) return;
+        function loadClubDetail(clubID) {
+            fetch(`get_club_detail.php?clubID=${clubID}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) return;
 
-            document.getElementById('club-name').innerText = data.club_name;
-            document.getElementById('founded-date').innerText = formatDate(data.founded_date);
-            document.getElementById('member-count').innerText = data.member_count;
-            document.getElementById('ground-count').innerText = data.ground_count;
-            document.getElementById('join-date').innerText = formatDate(data.join_date);
-            document.getElementById('fee-paid').innerText = formatDate(data.fee_paid_date);
-            document.getElementById('fee-expire').innerText = formatDate(data.fee_expire_date);
+                    document.getElementById('club-name').innerText = data.club_name;
+                    document.getElementById('founded-date').innerText = formatDate(data.founded_date);
+                    document.getElementById('member-count').innerText = data.member_count;
+                    document.getElementById('ground-count').innerText = data.ground_count;
+                    document.getElementById('join-date').innerText = formatDate(data.join_date);
+                    document.getElementById('fee-paid').innerText = formatDate(data.fee_paid_date);
+                    document.getElementById('fee-expire').innerText = formatDate(data.fee_expire_date);
 
-            renderSchedule(data.schedule);
+                    renderSchedule(data.schedule);
 
-            panel.classList.add('active');
-        });
-}
+                    panel.classList.add('active');
+                });
+        }
 
-function renderSchedule(schedule) {
-    const ul = document.getElementById('weekly-schedule');
-    ul.innerHTML = '';
+        function renderSchedule(schedule) {
+            const ul = document.getElementById('weekly-schedule');
+            ul.innerHTML = '';
 
-    if (!schedule || schedule.length === 0) {
-        ul.innerHTML = `<li class="text-slate-400 italic">Chưa có lịch tập tuần này</li>`;
-        return;
-    }
+            if (!schedule || schedule.length === 0) {
+                ul.innerHTML = `<li class="text-slate-400 italic">Chưa có lịch tập tuần này</li>`;
+                return;
+            }
 
-    schedule.forEach(item => {
-        const date = new Date(item.booking_date);
-        const weekday = date.toLocaleDateString('vi-VN', { weekday: 'long' });
-        const day = date.toLocaleDateString('vi-VN');
+            schedule.forEach(item => {
+                const date = new Date(item.booking_date);
+                const weekday = date.toLocaleDateString('vi-VN', { weekday: 'long' });
+                const day = date.toLocaleDateString('vi-VN');
 
-        ul.innerHTML += `
+                ul.innerHTML += `
             <li class="flex justify-between">
                 <span>${weekday} (${day})</span>
                 <span class="font-bold">
-                    ${item.start_time.slice(0,5)} - ${item.end_time.slice(0,5)}
+                    ${item.start_time.slice(0, 5)} - ${item.end_time.slice(0, 5)}
                     / ${item.ground_name}
                 </span>
             </li>
         `;
-    });
-}
+            });
+        }
 
-function renderSchedule(schedule) {
-    const ul = document.getElementById('weekly-schedule');
-    ul.innerHTML = '';
+        function renderSchedule(schedule) {
+            const ul = document.getElementById('weekly-schedule');
+            ul.innerHTML = '';
 
-    if (!schedule || schedule.length === 0) {
-        ul.innerHTML = `<li class="text-slate-400 italic">Chưa có lịch tập tuần này</li>`;
-        return;
-    }
+            if (!schedule || schedule.length === 0) {
+                ul.innerHTML = `<li class="text-slate-400 italic">Chưa có lịch tập tuần này</li>`;
+                return;
+            }
 
-    schedule.forEach(item => {
-        const date = new Date(item.booking_date);
-        const weekday = date.toLocaleDateString('vi-VN', { weekday: 'long' });
-        const day = date.toLocaleDateString('vi-VN');
+            schedule.forEach(item => {
+                const date = new Date(item.booking_date);
+                const weekday = date.toLocaleDateString('vi-VN', { weekday: 'long' });
+                const day = date.toLocaleDateString('vi-VN');
 
-        ul.innerHTML += `
+                ul.innerHTML += `
             <li class="flex justify-between">
                 <span>${weekday} (${day})</span>
                 <span class="font-bold">
-                    ${item.start_time.slice(0,5)} - ${item.end_time.slice(0,5)}
+                    ${item.start_time.slice(0, 5)} - ${item.end_time.slice(0, 5)}
                     / ${item.ground_name}
                 </span>
             </li>
         `;
-    });
-}
+            });
+        }
 
 
-function closePanel() {
-    panel.classList.remove('active');
-    document.querySelectorAll('.court-input').forEach(i => i.checked = false);
-}
+        function closePanel() {
+            panel.classList.remove('active');
+            document.querySelectorAll('.court-input').forEach(i => i.checked = false);
+        }
 
-function formatDate(date) {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('vi-VN');
-}
-</script>
+        function formatDate(date) {
+            if (!date) return '-';
+            return new Date(date).toLocaleDateString('vi-VN');
+        }
+    </script>
 
 </body>
+
 </html>

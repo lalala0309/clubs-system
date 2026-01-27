@@ -10,7 +10,7 @@ if (!isset($_SESSION['userID'])) {
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
-$clubID = (int)($data['clubID'] ?? 0);
+$clubID = (int) ($data['clubID'] ?? 0);
 $userID = $_SESSION['userID'];
 
 if (!$clubID) {
@@ -34,8 +34,8 @@ if ($stmt->num_rows > 0) {
 
 /* Đăng ký */
 $stmt = $conn->prepare("
-    INSERT INTO club_members (userID, clubID, join_date, status)
-    VALUES (?, ?, CURDATE(), 1)
+INSERT INTO club_members (userID, clubID, request_date, status)
+VALUES (?, ?, CURDATE(), 0)
 ");
 $stmt->bind_param("ii", $userID, $clubID);
 

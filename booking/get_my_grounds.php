@@ -1,5 +1,4 @@
 <?php
-// File: member/get_my_grounds.php
 
 if (!isset($conn)) {
     require_once __DIR__ . '/../config/database.php';

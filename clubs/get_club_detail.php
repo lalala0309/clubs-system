@@ -5,10 +5,11 @@ ob_start();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/pdo.php';
+session_start();
 
-
-
+$userID = $_SESSION['userID'] ?? 0;
 $clubID = $_GET['clubID'] ?? 0;
+
 if (!$clubID) {
     echo json_encode(['error' => 'Missing clubID']);
     exit;
@@ -26,6 +27,19 @@ $club = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$club) {
     echo json_encode(['error' => 'Club not found']);
     exit;
+}
+
+/* join_status */
+$joinStatus = null;
+if ($userID) {
+    $stmt = $pdo->prepare("
+        SELECT status
+        FROM club_members
+        WHERE clubID = ? AND userID = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$clubID, $userID]);
+    $joinStatus = $stmt->fetchColumn();
 }
 
 /* Thành viên */
@@ -47,22 +61,21 @@ $stmt = $pdo->prepare("
 $stmt->execute([$clubID]);
 $sports = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-/* Sân của CLB */
+/* Sân */
 $stmt = $pdo->prepare("
     SELECT COUNT(*) 
     FROM grounds
-    WHERE clubID = ? AND status = 1
+    WHERE clubID = ? AND status = 1 
 ");
 $stmt->execute([$clubID]);
 $grounds = $stmt->fetchColumn();
 
 echo json_encode([
-    'name'     => $club['club_name'],
-    'founded'  => $club['founded_date'],
-    'members' => (int)$members,
-    'sports'  => implode(', ', $sports),
-    'grounds' => (int)$grounds
+    'name'        => $club['club_name'],
+    'founded'     => $club['founded_date'],
+    'members'     => (int)$members,
+    'sports'      => implode(', ', $sports),
+    'grounds'     => (int)$grounds,
+    'join_status' => $joinStatus === false ? null : (int)$joinStatus
 ]);
-
 exit;
-?>

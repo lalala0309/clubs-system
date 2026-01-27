@@ -11,21 +11,22 @@ if (!$userID) {
 }
 
 $sql = "
-    SELECT 
-        c.clubID AS id,
-        c.club_name AS name,
-        GROUP_CONCAT(DISTINCT s.sport_name SEPARATOR ', ') AS sport_name
-    FROM clubs c
-    LEFT JOIN club_sports cs ON c.clubID = cs.clubID
-    LEFT JOIN sports s ON cs.sportID = s.sportID
-    WHERE c.clubID NOT IN (
-        SELECT clubID
-        FROM club_members
-        WHERE userID = ?
-    )
-    GROUP BY c.clubID
-    ORDER BY c.club_name
+SELECT 
+    c.clubID AS id,
+    c.club_name AS name,
+    GROUP_CONCAT(DISTINCT s.sport_name SEPARATOR ', ') AS sport_name,
+    cm.status AS join_status
+FROM clubs c
+LEFT JOIN club_members cm 
+    ON c.clubID = cm.clubID 
+    AND cm.userID = ?
+LEFT JOIN club_sports cs ON c.clubID = cs.clubID
+LEFT JOIN sports s ON cs.sportID = s.sportID
+WHERE cm.status IS NULL OR cm.status = 0
+GROUP BY c.clubID
+ORDER BY c.club_name
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userID);
