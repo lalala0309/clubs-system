@@ -7,17 +7,20 @@ if (!isset($conn)) {
 
 
 $sql = "
-    SELECT 
+    SELECT DISTINCT
         g.groundID,
         g.name AS ground_name,
         c.club_name
     FROM club_members cm
     JOIN clubs c ON cm.clubID = c.clubID
-    JOIN grounds g ON g.clubID = c.clubID
+    JOIN club_sports cs ON cs.clubID = c.clubID
+    JOIN sports s ON cs.sportID = s.sportID
+    JOIN grounds g ON g.sportID = s.sportID
     WHERE cm.userID = ?
       AND cm.status = 1
       AND g.status = 1
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userID);

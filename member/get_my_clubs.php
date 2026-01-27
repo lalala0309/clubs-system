@@ -4,8 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../includes/get_user.php';
-
 
 if (!isset($_SESSION['userID'])) {
     $myClubs = [];
@@ -31,11 +29,6 @@ $stmt->bind_param("i", $userID);
 $stmt->execute();
 
 $result = $stmt->get_result();
-
-$myClubs = [];
-while ($row = $result->fetch_assoc()) {
-    $myClubs[] = $row;
-}
+$myClubs = $result->fetch_all(MYSQLI_ASSOC);
 
 $stmt->close();
-?>

@@ -8,8 +8,8 @@ if (!isset($_SESSION['userID'])) {
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
-$clubID = (int)($data['clubID'] ?? 0);
-$userID = (int)$_SESSION['userID'];
+$clubID = (int) ($data['clubID'] ?? 0);
+$userID = (int) $_SESSION['userID'];
 
 if (!$clubID) {
     echo json_encode(['error' => 'Thiếu clubID']);

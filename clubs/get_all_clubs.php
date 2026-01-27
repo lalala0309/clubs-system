@@ -22,7 +22,7 @@ LEFT JOIN club_members cm
     AND cm.userID = ?
 LEFT JOIN club_sports cs ON c.clubID = cs.clubID
 LEFT JOIN sports s ON cs.sportID = s.sportID
-WHERE cm.status IS NULL OR cm.status = 0
+WHERE cm.status IS NULL OR cm.status <> 1
 GROUP BY c.clubID
 ORDER BY c.club_name
 ";
@@ -45,11 +45,17 @@ $bgList = [
 
 $i = 0;
 while ($row = $result->fetch_assoc()) {
+
+    // Nếu đã là thành viên thì không cho đăng ký nữa
+    if ((int) $row['join_status'] === 1) {
+        continue;
+    }
+
     $clubs[] = [
-        'id'   => $row['id'],
+        'id' => $row['id'],
         'name' => $row['name'],
         'desc' => $row['sport_name'] ?: 'Chưa có môn',
-        'bg'   => $bgList[$i % count($bgList)]
+        'bg' => $bgList[$i % count($bgList)]
     ];
     $i++;
 }

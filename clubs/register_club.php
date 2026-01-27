@@ -247,7 +247,10 @@ require_once '../includes/get_user.php';
 
                     panel.classList.add('active');
                 })
-                .catch(() => alert('Không thể tải dữ liệu CLB'));
+                .catch(err => {
+                    console.error(err);
+                    alert('JS ERROR:\n' + err.message);
+                });
         }
 
         function closePanel() {
@@ -283,7 +286,10 @@ require_once '../includes/get_user.php';
                     }
                 })
 
-                .catch(() => alert('Lỗi khi gửi yêu cầu'));
+                .catch(err => {
+                    console.error(err);
+                    alert('JS ERROR:\n' + err.message);
+                });
         });
 
     </script>

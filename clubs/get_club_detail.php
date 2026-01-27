@@ -63,19 +63,22 @@ $sports = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 /* Sân */
 $stmt = $pdo->prepare("
-    SELECT COUNT(*) 
-    FROM grounds
-    WHERE clubID = ? AND status = 1 
+SELECT COUNT(DISTINCT g.groundID)
+FROM grounds g
+JOIN club_sports cs ON g.sportID = cs.sportID
+WHERE cs.clubID = ? AND g.status = 1
+
 ");
 $stmt->execute([$clubID]);
 $grounds = $stmt->fetchColumn();
 
+
 echo json_encode([
-    'name'        => $club['club_name'],
-    'founded'     => $club['founded_date'],
-    'members'     => (int)$members,
-    'sports'      => implode(', ', $sports),
-    'grounds'     => (int)$grounds,
-    'join_status' => $joinStatus === false ? null : (int)$joinStatus
+    'name' => $club['club_name'],
+    'founded' => $club['founded_date'],
+    'members' => (int) $members,
+    'sports' => implode(', ', $sports),
+    'grounds' => (int) $grounds,
+    'join_status' => $joinStatus === false ? null : (int) $joinStatus
 ]);
 exit;
