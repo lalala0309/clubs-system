@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 27, 2026 lúc 02:49 AM
+-- Thời gian đã tạo: Th1 27, 2026 lúc 09:06 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -36,33 +36,6 @@ CREATE TABLE `bookings` (
   `end_time` time NOT NULL
 ) ;
 
---
--- Đang đổ dữ liệu cho bảng `bookings`
---
-
-INSERT INTO `bookings` (`id`, `userID`, `booking_date`, `groundID`, `start_time`, `end_time`) VALUES
-(23, 1, '2026-01-19', 6, '08:00:00', '09:00:00'),
-(24, 1, '2026-01-23', 6, '08:00:00', '09:00:00'),
-(25, 1, '2026-01-19', 7, '08:00:00', '09:00:00'),
-(26, 1, '2026-01-19', 8, '08:00:00', '09:00:00'),
-(27, 2, '2026-01-19', 1, '08:00:00', '09:00:00'),
-(28, 2, '2026-01-19', 2, '08:00:00', '09:00:00'),
-(29, 1, '2026-01-19', 6, '09:00:00', '10:00:00'),
-(30, 1, '2026-01-20', 2, '07:00:00', '08:00:00'),
-(31, 1, '2026-01-19', 6, '06:00:00', '07:00:00'),
-(32, 1, '2026-01-19', 1, '06:00:00', '07:00:00'),
-(33, 1, '2026-01-19', 1, '07:00:00', '08:00:00'),
-(34, 2, '2026-01-21', 1, '09:00:00', '10:00:00'),
-(35, 2, '2026-01-21', 1, '14:00:00', '15:00:00'),
-(36, 2, '2026-01-21', 1, '13:00:00', '14:00:00'),
-(37, 2, '2026-01-20', 1, '06:00:00', '07:00:00'),
-(38, 2, '2026-01-21', 1, '06:00:00', '07:00:00'),
-(39, 2, '2026-01-21', 1, '08:00:00', '09:00:00'),
-(40, 2, '2026-01-19', 3, '09:00:00', '10:00:00'),
-(41, 3, '2026-01-20', 1, '07:00:00', '08:00:00'),
-(42, 3, '2026-01-19', 2, '06:00:00', '07:00:00'),
-(43, 3, '2026-01-20', 1, '08:00:00', '09:00:00');
-
 -- --------------------------------------------------------
 
 --
@@ -82,7 +55,9 @@ CREATE TABLE `clubs` (
 INSERT INTO `clubs` (`clubID`, `club_name`, `founded_date`) VALUES
 (1, 'Câu lạc bộ Bóng đá', '2020-09-01'),
 (2, 'Câu lạc bộ Bóng bàn', '2021-03-15'),
-(3, 'Câu lạc bộ Cầu lông', '2023-01-01');
+(3, 'Câu lạc bộ Cầu lông', '2023-01-01'),
+(6, 'Câu lạc bộ Rồng rắn lên mây', '2026-01-27'),
+(7, 'Câu lạc bộ Cá sấu lên bờ', '2026-01-27');
 
 -- --------------------------------------------------------
 
@@ -105,7 +80,11 @@ CREATE TABLE `club_members` (
 --
 
 INSERT INTO `club_members` (`userID`, `clubID`, `join_date`, `fee_paid_date`, `fee_expire_date`, `status`, `request_date`) VALUES
-(3, 2, NULL, NULL, NULL, 0, NULL);
+(1, 2, '2026-01-27', NULL, NULL, 1, '2026-01-27'),
+(1, 6, NULL, NULL, NULL, 0, '2026-01-27'),
+(2, 2, NULL, NULL, NULL, 0, '2026-01-27'),
+(2, 6, '2026-01-27', NULL, NULL, 1, '2026-01-27'),
+(3, 3, '2026-01-27', NULL, NULL, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -126,7 +105,9 @@ CREATE TABLE `club_sports` (
 INSERT INTO `club_sports` (`id`, `clubID`, `sportID`) VALUES
 (3, 1, 1),
 (4, 2, 3),
-(5, 3, 2);
+(5, 3, 2),
+(8, 6, 12),
+(9, 7, 7);
 
 -- --------------------------------------------------------
 
@@ -139,29 +120,8 @@ CREATE TABLE `grounds` (
   `name` varchar(100) NOT NULL,
   `location` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT 1,
-  `clubID` int(11) NOT NULL
+  `sportID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Đang đổ dữ liệu cho bảng `grounds`
---
-
-INSERT INTO `grounds` (`groundID`, `name`, `location`, `status`, `clubID`) VALUES
-(1, 'Sân bóng đá 1', NULL, 1, 1),
-(2, 'Sân bóng đá 2', NULL, 1, 1),
-(3, 'Sân bóng đá 3', NULL, 1, 1),
-(4, 'Sân bóng đá 4', NULL, 1, 1),
-(5, 'Sân bóng đá 5', NULL, 1, 1),
-(6, 'Sân bóng bàn 1', NULL, 1, 2),
-(7, 'Sân bóng bàn 2', NULL, 1, 2),
-(8, 'Sân bóng bàn 3', NULL, 1, 2),
-(9, 'Sân bóng bàn 4', NULL, 1, 2),
-(10, 'Sân bóng bàn 5', NULL, 1, 2),
-(11, 'Sân bóng bàn 6', NULL, 1, 2),
-(12, 'Sân cầu lông 1', NULL, 1, 3),
-(13, 'Sân cầu lông 2', NULL, 1, 3),
-(14, 'Sân cầu lông 3', NULL, 1, 3),
-(15, 'Sân cầu lông 4', NULL, 1, 3);
 
 -- --------------------------------------------------------
 
@@ -272,7 +232,7 @@ ALTER TABLE `club_sports`
 --
 ALTER TABLE `grounds`
   ADD PRIMARY KEY (`groundID`),
-  ADD KEY `fk_ground_club` (`clubID`);
+  ADD KEY `fk_ground_sport` (`sportID`);
 
 --
 -- Chỉ mục cho bảng `roles`
@@ -310,13 +270,13 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT cho bảng `clubs`
 --
 ALTER TABLE `clubs`
-  MODIFY `clubID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `clubID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `club_sports`
 --
 ALTER TABLE `club_sports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `grounds`
@@ -371,7 +331,7 @@ ALTER TABLE `club_sports`
 -- Các ràng buộc cho bảng `grounds`
 --
 ALTER TABLE `grounds`
-  ADD CONSTRAINT `fk_ground_club` FOREIGN KEY (`clubID`) REFERENCES `clubs` (`clubID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_ground_sport` FOREIGN KEY (`sportID`) REFERENCES `sports` (`sportID`) ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `users`
