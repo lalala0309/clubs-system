@@ -135,6 +135,25 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             display: block;
         }
 
+        .cell-past {
+            background: #f1f5f9 !important;
+            cursor: not-allowed !important;
+            position: relative;
+        }
+
+        .cell-past::after {
+            content: "";
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 900;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
         @media (max-width: 1024px) {
             #right-panel.active {
                 position: fixed;
@@ -427,7 +446,10 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             });
             fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
                 .then(res => res.json())
-                .then(data => markBookedSlots(data));
+                .then(data => {
+                    markBookedSlots(data);
+                    disablePastSlots();
+                });
         }
 
         function changeWeek(offset) {
@@ -510,6 +532,34 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         cell.innerHTML = '<i class="bi bi-lock-fill text-[9px] opacity-40"></i>';
                     }
                 });
+            });
+        }
+
+        function disablePastSlots() {
+            const now = new Date();
+
+            // Giới hạn đặt trước tối đa 14 ngày
+            const maxBookingDate = new Date();
+            maxBookingDate.setDate(now.getDate() + 14);
+
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                const day = cell.dataset.day;
+                const time = cell.dataset.time;
+                if (!day || !time) return;
+
+                const [d, m] = day.split('/');
+                const [start] = time.split('-');
+                const [h, min] = start.split(':');
+
+                const year = new Date().getFullYear();
+                const cellTime = new Date(year, m - 1, d, h, min);
+
+                //  Quá khứ or quá 2 tuần
+                if (cellTime < now || cellTime > maxBookingDate) {
+                    cell.classList.remove('cell-available');
+                    cell.classList.add('cell-past');
+                    cell.onclick = null;
+                }
             });
         }
 
