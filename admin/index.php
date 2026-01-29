@@ -43,9 +43,75 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <title>Quản lý Phân quyền</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../css/sidebar_admin.css">
+    <link rel="stylesheet" href="../css/sidebar_member.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .court-input:checked+.court-card {
+            border-color: #4F46E5;
+            background-color: #f5f3ff;
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.15);
+        }
+
+        .court-input:checked+.court-card .status-icon {
+            background-color: #4F46E5 !important;
+            color: white !important;
+        }
+
+        .active-menu {
+            background: linear-gradient(135deg, #4F46E5 0%, #2A53A2 100%);
+            color: white !important;
+            border-radius: 24px;
+        }
+
+        #right-panel {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        #right-panel.active {
+            width: 400px;
+            opacity: 1;
+        }
+
+        /* Bổ sung để hiển thị sidebar trên mobile */
+        #main-sidebar.show {
+            transform: translateX(0);
+        }
+
+        /* Overlay khi mở menu trên mobile */
+        .sidebar-overlay {
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Responsive cỡ chữ cho Right Panel trên Mobile */
+        @media (max-width: 1024px) {
+            #right-panel.active {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 60;
+                width: 100%;
+                /* Chiếm toàn màn hình trên mobile */
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
@@ -53,9 +119,9 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 <div id="sidebar-overlay" onclick="toggleSidebar()"
      class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
 
-<div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
+     <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
 
-    <?php include '../admin/sidebar.php'; ?>
+    <?php include '../includes/sidebar_admin.php'; ?>
 
     <main class="flex-1 flex flex-col overflow-hidden min-w-0">
 
