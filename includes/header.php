@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/get_user.php';
+?>
 <header class="w-full rounded-[20px] max-md:rounded-[15px] flex items-center justify-between px-8 max-md:px-4 py-3 max-md:py-2 bg-[#4F46E5] shadow-lg z-50">
     
     <div class="flex items-center gap-4 max-md:gap-2">

@@ -2,7 +2,11 @@
 session_start();
 
 if (isset($_SESSION['user'])) {
-    header("Location: dashboard.php");
+    if ($_SESSION['user']['roleID'] == 1) {
+        header("Location: ../admin/index.php");
+    } else {
+        header("Location: ../member/home.php");
+    }
     exit;
 }
 
