@@ -212,7 +212,7 @@ require_once './get_my_clubs.php';
                     </div>
                 </div>
 
-                <button
+                <button id="btn-leave" data-id=""
                     class="mt-auto w-full py-4 bg-slate-800 text-white rounded-[22px] font-bold shadow-xl active:scale-95 transition">
                     Rời câu lạc bộ
                 </button>
@@ -235,6 +235,7 @@ require_once './get_my_clubs.php';
                 .then(data => {
                     if (data.error) return;
 
+                    // Cập nhật thông tin text
                     document.getElementById('club-name').innerText = data.club_name;
                     document.getElementById('founded-date').innerText = formatDate(data.founded_date);
                     document.getElementById('member-count').innerText = data.member_count;
@@ -243,8 +244,10 @@ require_once './get_my_clubs.php';
                     document.getElementById('fee-paid').innerText = formatDate(data.fee_paid_date);
                     document.getElementById('fee-expire').innerText = formatDate(data.fee_expire_date);
 
-                    renderSchedule(data.schedule);
+                    // QUAN TRỌNG: Cập nhật ID vào nút bấm để biết đang rời CLB nào
+                    document.getElementById('btn-leave').setAttribute('data-id', clubID);
 
+                    renderSchedule(data.schedule);
                     panel.classList.add('active');
                 });
         }
@@ -311,6 +314,46 @@ require_once './get_my_clubs.php';
             if (!date) return '-';
             return new Date(date).toLocaleDateString('vi-VN');
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnLeave = document.getElementById('btn-leave');
+
+            if (btnLeave) {
+                btnLeave.onclick = function () { // Dùng onclick để tránh bị gán sự kiện nhiều lần
+                    const clubID = this.getAttribute('data-id');
+
+                    if (!clubID || clubID === "") {
+                        alert('Vui lòng chọn một câu lạc bộ trước!');
+                        return;
+                    }
+
+                    if (!confirm('Bạn có chắc chắn muốn rời khỏi câu lạc bộ này?')) return;
+
+                    // Kiểm tra lại đường dẫn: ../clubs/leave_club.php hay ../api/leave_club.php?
+                    // Tôi dùng đường dẫn bạn đã cung cấp gần nhất
+                    fetch('../clubs/leave_club.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ clubID: parseInt(clubID) })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Đã rời câu lạc bộ thành công!');
+                                location.reload();
+                            } else {
+                                alert('Lỗi: ' + data.error);
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Fetch error:", err);
+                            alert('Có lỗi xảy ra khi kết nối máy chủ. Hãy kiểm tra đường dẫn file PHP.');
+                        });
+                };
+            }
+        });
+
+
     </script>
 
 </body>
