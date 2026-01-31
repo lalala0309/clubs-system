@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 require_once '../manager/get_all_clubs.php';
 require_once '../manager_sport/get_pending_request.php';
 $clubs = require '../manager_sport/get_all_clubs_manager.php';
@@ -114,6 +115,7 @@ $sports = require '../manager_sport/get_all_sports.php';
 
             <div
                 class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
+                <div id="main-content">
                 <div class="mb-5 md:mb-6">
                     <div class="flex items-end justify-between">
                         <h2 id="page-title" class="text-2xl font-bold text-slate-800">Danh sách câu lạc bộ</h2>
@@ -298,6 +300,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                             </div>
                         </div>
                     <?php endforeach; ?>
+                </div>
                 </div>
             </div>
         </main>
@@ -689,6 +692,20 @@ $sports = require '../manager_sport/get_all_sports.php';
 
 
     </script>
+    <script>
+        function loadManagerPage(page) {
+            fetch(page)
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('main-content').innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById('main-content').innerHTML =
+                        '<div class="text-red-500">Không thể tải dữ liệu</div>';
+                });
+        }
+    </script>
+
 </body>
 
 </html>

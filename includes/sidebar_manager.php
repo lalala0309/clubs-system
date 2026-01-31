@@ -29,13 +29,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             Quản lý thành viên
         </a>
 
-        <a href="../clubs/register_club.php"
-           class="text-sm md:text-base <?php echo ($currentPage == 'register_club.php')
-                ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
-                : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-            Quản lý đặt sân
+        <a href="javascript:void(0)"
+                onclick="loadManagerPage('manage_view_bookings.php')"
+                class="flex items-center gap-4 px-5 py-3 rounded-[22px] text-slate-500 hover:bg-indigo-50 font-semibold">
+                Quản lý đặt sân
         </a>
+
+
 
         <!-- <a href="../booking/booking_ground.php"
            class="text-sm md:text-base <?php echo ($currentPage == 'booking_ground.php')
