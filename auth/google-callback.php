@@ -119,7 +119,7 @@ $_SESSION['role']   = $role;
 
 /* REDIRECT THEO QUYỀN */
 if ($role === 'ADMIN') {
-    header("Location: ../admin/dashboard.php");
+    header("Location: ../admin/index.php");
 } elseif ($role === 'MANAGER') {
     header("Location: ../manager/dashboard.php");
 } else {
