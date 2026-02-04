@@ -19,13 +19,17 @@ $endDate = $sunday->format('Y-m-d');
 
 $sql = "
     SELECT 
-        DATE_FORMAT(booking_date, '%d/%m') AS booking_date,
-        DATE_FORMAT(start_time, '%H:%i') AS start_time,
-        DATE_FORMAT(end_time, '%H:%i') AS end_time
-    FROM bookings
-    WHERE groundID = ?
-      AND booking_date BETWEEN ? AND ?
+        DATE_FORMAT(b.booking_date, '%d/%m') AS booking_date,
+        DATE_FORMAT(b.start_time, '%H:%i') AS start_time,
+        DATE_FORMAT(b.end_time, '%H:%i') AS end_time,
+        u.full_name,
+        u.email
+    FROM bookings b
+    JOIN users u ON b.userID = u.userID
+    WHERE b.groundID = ?
+      AND b.booking_date BETWEEN ? AND ?
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("iss", $groundID, $startDate, $endDate);

@@ -84,11 +84,24 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             border: 1px solid #e2e8f0;
         }
 
-        .grid-cell {
-            height: 38px;
-            transition: all 0.15s;
-            min-width: 55px;
+        .grid-table th,
+        .grid-table td {
+            width: calc(100% / 8);
+            /* 1 cột giờ + 7 ngày */
         }
+
+        .grid-cell {
+
+            height: 38px;
+
+            padding: 0;
+            overflow: hidden;
+            vertical-align: middle;
+            position: relative;
+
+            transition: background 0.15s;
+        }
+
 
         .cell-available {
             background: white;
@@ -102,13 +115,31 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             z-index: 10;
         }
 
+        /* 
         .cell-booked {
-            background: #fee2e2;
-            color: #ef4444;
-            cursor: not-allowed;
+            font-size: 8px;
+            line-height: 1.1;
+            padding: 2px;
+        } */
+
+        .cell-content {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 8px;
+            line-height: 1.1;
+
+            padding: 2px;
             text-align: center;
-            line-height: 38px;
+            overflow: hidden;
         }
+
+
 
         .court-tab.active {
             background: #6366f1 !important;
@@ -529,7 +560,14 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                     if (cell.dataset.day === b.booking_date && cell.dataset.time === `${b.start_time}-${b.end_time}`) {
                         cell.classList.remove('cell-available');
                         cell.classList.add('cell-booked');
-                        cell.innerHTML = '<i class="bi bi-lock-fill text-[9px] opacity-40"></i>';
+                        cell.innerHTML = `
+<div class="cell-content">
+    <div class="font-semibold truncate">${b.full_name}</div>
+    <div class="opacity-60 truncate">${b.email}</div>
+</div>
+`;
+
+
                     }
                 });
             });
