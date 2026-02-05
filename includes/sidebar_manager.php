@@ -1,6 +1,12 @@
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
+
+$role = $_SESSION['role'];
+
+$isAdmin   = ($role === 'ADMIN');
+// $isManager = ($role === 'MANAGER');
 ?>
+
 
 <aside id="main-sidebar"
     class="fixed inset-y-0 left-0 z-50 w-72 bg-white lg:static lg:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out glass-sidebar border border-indigo-100 flex flex-col p-6 shadow-xl shrink-0">
@@ -19,35 +25,42 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </button>
     </div>
 
-    <nav class="flex-1 space-y-2 md:space-y-3">
-        <a href="../manager/dashboard.php"
-            class="<?php echo ($currentPage === 'dashboard.php')
-                ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
-                : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+        <nav class="flex-1 space-y-2 md:space-y-3">
 
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                </path>
-            </svg>
-            Quản lý thành viên
-        </a>
+            <?php?>
+                <a href="../manager/dashboard.php"
+                class="text-sm md:text-base <?php echo ($currentPage == 'dashboard.php')
+                        ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
+                        : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Quản lý thành viên
+                </a>
 
-        <a href="../booking/manage_booking.php"
-            class="<?php echo ($currentPage === 'manage_booking.php')
-                ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
-                : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+                <a href="../booking/manage_booking.php"
+                class="text-sm md:text-base <?php echo ($currentPage == 'booking_ground.php')
+                        ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
+                        : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Quản lý đặt sân
+                </a>
+            <?php ?>
 
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-            <path
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-            </path>
-            </svg>
-            Quản lý đặt sân
-        </a>
+            <?php if ($isAdmin): ?>
+                <a href="../admin/index.php"
+                class="text-sm md:text-base <?php echo ($currentPage == 'booking_ground.php')
+                        ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
+                        : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Quản lý phân quyền
+                </a>
+            <?php endif; ?>
 
+        </nav>
+
+
+        
 
 
         <!-- <a href="../booking/booking_ground.php"

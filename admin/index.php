@@ -121,7 +121,7 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
      <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
 
-    <?php include '../includes/sidebar_admin.php'; ?>
+    <?php include '../includes/sidebar_manager.php'; ?>
 
     <main class="flex-1 flex flex-col overflow-hidden min-w-0">
 
