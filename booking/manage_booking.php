@@ -241,6 +241,30 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
         }
     </style>
 </head>
+<!-- ADD GROUND MODAL -->
+<div id="add-ground-modal"
+    class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl">
+
+        <h3 class="font-bold text-indigo-600 text-lg">Thêm sân mới</h3>
+
+        <input id="ground-name" placeholder="Tên sân"
+            class="w-full p-3 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500">
+
+        <input id="ground-location" placeholder="Vị trí (tuỳ chọn)"
+            class="w-full p-3 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500">
+
+        <div class="flex justify-end gap-2">
+            <button onclick="closeAddGroundModal()" class="px-4 py-2 text-slate-500">Huỷ</button>
+
+            <button onclick="submitAddGround()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold">
+                Thêm
+            </button>
+        </div>
+
+    </div>
+</div>
 
 <body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
     <div id="sidebar-overlay" onclick="toggleSidebar()"
@@ -322,20 +346,35 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                             </div>
                         </div>
 
-                        <div
-                            class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
-                            <button onclick="changeWeek(<?php echo $week_offset - 1; ?>)"
-                                class="hover:text-indigo-600 px-1">
-                                <i class="bi bi-caret-left-fill text-[10px]"></i>
+                        <div class="flex items-center gap-3">
+
+                            <!-- Chuyển tuần -->
+                            <div
+                                class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
+                                <button onclick="changeWeek(<?php echo $week_offset - 1; ?>)"
+                                    class="hover:text-indigo-600 px-1">
+                                    <i class="bi bi-caret-left-fill text-[10px]"></i>
+                                </button>
+
+                                <span class="text-[9px] font-bold text-slate-500 uppercase">
+                                    <?php echo $week_range; ?>
+                                </span>
+
+                                <button onclick="changeWeek(<?php echo $week_offset + 1; ?>)"
+                                    class="hover:text-indigo-600 px-1">
+                                    <i class="bi bi-caret-right-fill text-[10px]"></i>
+                                </button>
+                            </div>
+
+                            <!-- Nút thêm sân -->
+                            <button onclick="openAddGroundModal()"
+                                class="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shadow-sm hover:bg-indigo-700 transition">
+                                <i class="bi bi-plus-lg text-[10px]"></i>
+                                Thêm sân
                             </button>
-                            <span class="text-[9px] font-bold text-slate-500 uppercase">
-                                <?php echo $week_range; ?>
-                            </span>
-                            <button onclick="changeWeek(<?php echo $week_offset + 1; ?>)"
-                                class="hover:text-indigo-600 px-1">
-                                <i class="bi bi-caret-right-fill text-[10px]"></i>
-                            </button>
+
                         </div>
+
                     </div>
 
                     <div class="flex flex-1 overflow-hidden">
@@ -612,6 +651,53 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             document.getElementById('main-sidebar').classList.toggle('show');
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
+
+        /* ===============================
+   ADD GROUND
+================================ */
+
+        function openAddGroundModal() {
+            if (!currentSportID) return alert("Chọn môn trước");
+            document.getElementById('add-ground-modal').classList.remove('hidden');
+        }
+
+        function closeAddGroundModal() {
+            document.getElementById('add-ground-modal').classList.add('hidden');
+        }
+
+        function submitAddGround() {
+
+            const name = document.getElementById('ground-name').value.trim();
+            const location = document.getElementById('ground-location').value.trim();
+
+            if (!name) return alert("Nhập tên sân");
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('location', location);
+            formData.append('sportID', currentSportID);
+
+            fetch('handle_add_ground.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+
+                        closeAddGroundModal();
+
+                        // reload lại danh sách sân
+                        fetch(`get_grounds_by_sport.php?sportID=${currentSportID}&userID=<?php echo $userID; ?>`)
+                            .then(res => res.json())
+                            .then(data => renderCourts(data));
+
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+
     </script>
 </body>
 
