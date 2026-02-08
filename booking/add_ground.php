@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../includes/get_user.php';
-require_once '../config/db.php'; // file connect DB của bạn
+require_once '../config/database.php'; // file connect DB của bạn
 
 if (!isset($_GET['sportID'])) {
     header("Location: manage_grounds.php");

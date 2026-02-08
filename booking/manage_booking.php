@@ -1,8 +1,9 @@
 <?php
 session_start();
 require_once '../includes/get_user.php';
-require_once './get_my_grounds.php';
-require_once './get_sports.php';
+// require_once './get_my_grounds.php';
+require_once './get_all_sports.php';
+
 
 $week_offset = isset($_GET['week_offset']) ? (int) $_GET['week_offset'] : 0;
 // Lấy sportID từ URL để giữ trạng thái sau khi load lại trang
@@ -471,7 +472,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             document.getElementById('view-clubs').classList.add('view-hidden');
             document.getElementById('view-timetable').classList.remove('view-hidden');
 
-            fetch(`get_grounds_by_sport.php?sportID=${sportID}&userID=<?php echo $userID; ?>`)
+            fetch(`get_all_grounds_by_sport.php?sportID=${sportID}`)
                 .then(res => res.json())
                 .then(data => renderCourts(data));
         }
@@ -688,7 +689,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         closeAddGroundModal();
 
                         // reload lại danh sách sân
-                        fetch(`get_grounds_by_sport.php?sportID=${currentSportID}&userID=<?php echo $userID; ?>`)
+                        fetch(`get_all_grounds_by_sport.php?sportID=${currentSportID}`)
+
                             .then(res => res.json())
                             .then(data => renderCourts(data));
 
