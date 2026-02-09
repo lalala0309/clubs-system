@@ -239,6 +239,38 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             .grid-table th div:last-child {
                 font-size: 7px !important;
             }
+
+
+
+        }
+
+        #lock-panel {
+            width: 300px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(40px);
+            transition: all .3s ease;
+        }
+
+        #lock-panel.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+
+        /* LOCK SLOT */
+        .cell-locked {
+            background: #fef2f2 !important;
+            /* xám đậm */
+            cursor: not-allowed !important;
+            position: relative;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cell-locked:hover {
+            background: #9ca3af !important;
+            outline: none;
         }
     </style>
 </head>
@@ -267,6 +299,31 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
     </div>
 </div>
 
+<!-- SETTING MODAL -->
+<div id="setting-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl">
+
+        <h3 class="font-bold text-slate-700 text-lg">
+            <i class="bi bi-gear text-[14px] p-2"></i>Cài đặt hệ thống
+        </h3>
+
+        <label class="text-sm font-semibold">Giới hạn đặt sân / tuần / môn</label>
+
+        <input id="weekly-limit-input" type="number" min="1"
+            class="w-full p-3 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500">
+
+        <div class="flex justify-end gap-2">
+            <button onclick="closeSettingModal()" class="px-4 py-2 text-slate-500">Huỷ</button>
+
+            <button onclick="saveSetting()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold">
+                Lưu
+            </button>
+        </div>
+
+    </div>
+</div>
+
 <body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
     <div id="sidebar-overlay" onclick="toggleSidebar()"
         class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
@@ -275,6 +332,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
         <?php include '../includes/sidebar_manager.php'; ?>
 
         <main class="flex-1 flex flex-col overflow-hidden min-w-0">
+
             <div class="flex-shrink-0 flex items-center gap-3 mb-2">
                 <button onclick="toggleSidebar()"
                     class="lg:hidden p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-indigo-600">
@@ -367,12 +425,32 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                                 </button>
                             </div>
 
-                            <!-- Nút thêm sân -->
-                            <button onclick="openAddGroundModal()"
-                                class="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shadow-sm hover:bg-indigo-700 transition">
-                                <i class="bi bi-plus-lg text-[10px]"></i>
-                                Thêm sân
-                            </button>
+                            <div class="flex items-center gap-2">
+
+                                <!-- Thêm sân -->
+                                <button onclick="openAddGroundModal()"
+                                    class="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shadow-sm hover:bg-indigo-700 transition">
+                                    <i class="bi bi-plus-lg text-[10px]"></i>
+                                    Thêm sân
+                                </button>
+
+
+                                <!-- Cài đặt -->
+                                <button onclick="openSettingModal()"
+                                    class="flex items-center gap-1 bg-slate-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shadow-sm hover:bg-slate-800 transition">
+                                    <i class="bi bi-gear text-[10px]"></i>
+                                    Cài đặt
+                                </button>
+                                <!-- Khoá sân (admin) -->
+                                <button onclick="openLockPanelManual()"
+                                    class="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shadow-sm hover:bg-red-700 transition">
+                                    <i class="bi bi-lock-fill text-[10px]"></i>
+                                    Khoá sân
+                                </button>
+
+
+                            </div>
+
 
                         </div>
 
@@ -427,6 +505,45 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 </div>
             </div>
         </main>
+        <aside id="lock-panel"
+            class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[30px] border-l border-slate-100 hidden">
+
+            <div class="p-6 space-y-4">
+
+                <h3 class="font-bold text-slate-700 uppercase text-xs">
+                    Khoá sân nhiều ngày
+                </h3>
+
+                <!-- FROM -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Từ</label>
+                    <input type="datetime-local" id="lock-from" class="w-full p-2 bg-slate-50 rounded-xl">
+                </div>
+
+                <!-- TO -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Đến</label>
+                    <input type="datetime-local" id="lock-to" class="w-full p-2 bg-slate-50 rounded-xl">
+                </div>
+
+                <!-- MULTI GROUND -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Chọn sân</label>
+                    <div id="lock-ground-list"
+                        class="max-h-32 overflow-auto bg-slate-50 rounded-xl p-2 space-y-1 text-xs">
+                    </div>
+                </div>
+
+                <button onclick="submitLock()" class="w-full py-2 bg-red-600 text-white rounded-xl font-bold">
+                    Khoá
+                </button>
+
+                <button onclick="closeLockPanel()" class="text-xs text-slate-400">
+                    Huỷ
+                </button>
+
+            </div>
+        </aside>
 
         <!-- <aside id="right-panel"
             class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[30px] border-l border-indigo-50">
@@ -492,6 +609,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                     </button>`;
             });
 
+            renderLockGroundList(grounds);
+
             const targetBtn = savedGroundID
                 ? container.querySelector(`[data-ground-id="${savedGroundID}"]`)
                 : container.querySelector('.court-tab');
@@ -499,6 +618,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             if (targetBtn) {
                 const idx = targetBtn.innerText.replace('S', '');
                 changeCourt(parseInt(idx), targetBtn);
+
+                selectedBooking.groundID = targetBtn.dataset.groundId;
             }
             sessionStorage.removeItem('reopen_ground_id');
         }
@@ -518,16 +639,26 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             selectedBooking.groundID = groundID;
 
             document.querySelectorAll('.grid-cell').forEach(cell => {
-                cell.classList.remove('cell-booked');
-                cell.classList.add('cell-available');
+                cell.className = 'grid-cell cell-available';
+
                 cell.innerHTML = '';
             });
+            // document.querySelectorAll('.cell-available').forEach(cell => {
+            //     cell.onclick = () => openLockPanel(cell);
+            // });
+
             fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
                 .then(res => res.json())
                 .then(data => {
                     markBookedSlots(data);
                     disablePastSlots();
-                });
+
+                    return fetch(`get_locked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`);
+                })
+                .then(r => r.json())
+                .then(markLockedSlots);
+
+
         }
 
         function changeWeek(offset) {
@@ -584,22 +715,28 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
         //     closePanel();
         // }
 
-        document.getElementById('btn-confirm').addEventListener('click', () => {
-            if (!selectedBooking.groundID) return alert('Lỗi: Chưa chọn sân');
-            const formData = new FormData();
-            for (let k in selectedBooking) formData.append(k, selectedBooking[k]);
+        const confirmBtn = document.getElementById('btn-confirm');
 
-            fetch('./handle_booking.php', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert('Đặt sân thành công');
-                        closePanel();
-                        const activeBtn = document.querySelector('.court-tab.active');
-                        if (activeBtn) changeCourt(parseInt(activeBtn.innerText.replace('S', '')), activeBtn);
-                    } else { alert(data.message); }
-                });
-        });
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                if (!selectedBooking.groundID) return alert('Lỗi: Chưa chọn sân');
+
+                const formData = new FormData();
+                for (let k in selectedBooking) formData.append(k, selectedBooking[k]);
+
+                fetch('./handle_booking.php', { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Đặt sân thành công');
+                            closePanel();
+                            const activeBtn = document.querySelector('.court-tab.active');
+                            if (activeBtn) changeCourt(parseInt(activeBtn.innerText.replace('S', '')), activeBtn);
+                        } else alert(data.message);
+                    });
+            });
+        }
+
 
         function markBookedSlots(bookings) {
             bookings.forEach(b => {
@@ -678,7 +815,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             formData.append('location', location);
             formData.append('sportID', currentSportID);
 
-            fetch('handle_add_ground.php', {
+            fetch('./handle_add_ground.php', {
                 method: 'POST',
                 body: formData
             })
@@ -699,6 +836,174 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                     }
                 });
         }
+        /* ===============================
+           SETTING
+        ================================ */
+
+        function openSettingModal() {
+
+            fetch('get_setting.php')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('weekly-limit-input').value = data.limit;
+                    document.getElementById('setting-modal').classList.remove('hidden');
+                });
+        }
+
+        function closeSettingModal() {
+            document.getElementById('setting-modal').classList.add('hidden');
+        }
+
+        function saveSetting() {
+
+            const limit = document.getElementById('weekly-limit-input').value;
+
+            const formData = new FormData();
+            formData.append('limit', limit);
+
+            fetch('update_setting.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    closeSettingModal();
+                });
+        }
+        function closeLockPanel() {
+            const panel = document.getElementById('lock-panel');
+            panel.classList.remove('show');
+            setTimeout(() => panel.classList.add('hidden'), 300);
+        }
+
+        function submitLock() {
+
+            const from = document.getElementById('lock-from').value;
+            const to = document.getElementById('lock-to').value;
+
+            if (!from || !to) return alert("Chọn thời gian");
+
+            const checked = document.querySelectorAll('.lock-ground-checkbox:checked');
+
+            if (checked.length === 0) return alert("Chọn ít nhất 1 sân");
+
+            const formData = new FormData();
+
+            formData.append('from', from);
+            formData.append('to', to);
+
+            checked.forEach(c => {
+                formData.append('grounds[]', c.value);
+            });
+
+            fetch('./handle_lock_ground.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+
+                        alert("Khoá sân thành công");
+                        closeLockPanel();
+                        reloadCurrentGround();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+
+        function reloadCurrentGround() {
+            const activeBtn = document.querySelector('.court-tab.active');
+            if (activeBtn) changeCourt(parseInt(activeBtn.innerText.replace('S', '')), activeBtn);
+        }
+
+        function toMin(t) {
+            const [h, m] = t.split(':');
+            return +h * 60 + +m;
+        }
+
+
+        function markLockedSlots(locks) {
+
+            locks.forEach(l => {
+                document.querySelectorAll('.grid-cell').forEach(cell => {
+
+                    if (cell.dataset.day === formatVNDate(l.lock_date)) {
+
+                        const time = cell.dataset.time;
+                        const [s, e] = time.split('-');
+
+                        const lockStart = l.start_time.slice(0, 5);
+                        const lockEnd = l.end_time.slice(0, 5);
+
+                        if (
+                            toMin(s) >= toMin(lockStart) &&
+                            toMin(e) <= toMin(lockEnd)
+                        ) {
+
+                            cell.classList.remove('cell-available');
+                            cell.classList.remove('cell-past');
+                            cell.classList.add('cell-locked');
+
+                            cell.innerHTML = `
+                    <div class="cell-content text-red-500 text-[11px]">
+                    <i class="bi bi-lock-fill text-[12px]"></i>
+
+                    </div>
+                `;
+                            cell.onclick = null;
+                        }
+                    }
+                });
+            });
+        }
+
+        function formatVNDate(date) {
+            const [y, m, d] = date.split('-');
+            return `${d.padStart(2, '0')}/${m.padStart(2, '0')}`;
+        }
+
+
+
+        function renderLockGroundList(grounds) {
+            const list = document.getElementById('lock-ground-list');
+            list.innerHTML = '';
+
+            grounds.forEach(g => {
+                list.innerHTML += `
+            <label class="flex items-center gap-2">
+                <input type="checkbox" value="${g.groundID}" class="lock-ground-checkbox">
+                <span>${g.name}</span>
+            </label>
+        `;
+            });
+        }
+
+
+        function openLockPanelManual() {
+
+            const now = new Date();
+
+            const from = now.toISOString().slice(0, 16);
+
+            now.setHours(now.getHours() + 1);
+            const to = now.toISOString().slice(0, 16);
+
+            document.getElementById('lock-from').value = from;
+            document.getElementById('lock-to').value = to;
+
+            const panel = document.getElementById('lock-panel');
+
+            panel.classList.remove('hidden');
+            setTimeout(() => panel.classList.add('show'), 10);
+        }
+
+
+
+
+
 
     </script>
 </body>

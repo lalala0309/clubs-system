@@ -27,6 +27,42 @@ for ($i = 0; $i < 7; $i++) {
 
 $week_range = $days[0][1] . ' - ' . $days[6][1];
 
+// ===== LẤY KHOÁ THEO CẢ TUẦN =====
+$monday = new DateTime();
+$monday->modify('monday this week');
+
+if ($week_offset !== 0) {
+    $monday->modify(($week_offset > 0 ? '+' : '') . $week_offset . ' week');
+}
+
+$start = $monday->format('Y-m-d');
+
+$endDate = clone $monday;
+$endDate->modify('+6 day');
+$end = $endDate->format('Y-m-d');
+
+$sql = "
+SELECT lock_date, start_time, end_time
+FROM ground_locks
+WHERE groundID = ?
+AND lock_date BETWEEN ? AND ?
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("iss", $groundID, $start, $end);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
+
+
+
+
+// while ($row = $result->fetch_assoc()) {
+//     $lockedSlots[] = $row;
+// }
+
 ?>
 
 <!DOCTYPE html>
@@ -208,6 +244,39 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             }
         }
 
+        .cell-locked {
+            background: #fef2f2 !important;
+            /* đỏ pastel */
+            cursor: not-allowed !important;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .cell-locked .lock-content {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 9px;
+            font-weight: 700;
+            color: #dc2626;
+            /* red-600 */
+
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .cell-locked .lock-icon {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+
+
         @media (max-width: 768px) {
             .grid-table {
                 font-size: 7px;
@@ -238,6 +307,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             .grid-table th div:last-child {
                 font-size: 7px !important;
             }
+
+
         }
     </style>
 </head>
@@ -478,12 +549,17 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 cell.classList.add('cell-available');
                 cell.innerHTML = '';
             });
+            fetch(`get_locked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
+                .then(res => res.json())
+                .then(data => markLockedSlots(data));
+
             fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
                 .then(res => res.json())
                 .then(data => {
                     markBookedSlots(data);
                     disablePastSlots();
                 });
+
         }
 
         function changeWeek(offset) {
@@ -608,6 +684,58 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             document.getElementById('main-sidebar').classList.toggle('show');
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
+
+        // const lockedSlots = <?= json_encode($lockedSlots) ?>;
+
+        function toMin(t) {
+            const [h, m] = t.split(':');
+            return (+h) * 60 + (+m);
+        }
+
+        function markLockedSlots(locks) {
+
+            locks.forEach(lock => {
+
+                const lockDate = formatVNDate(lock.lock_date); // 2026-02-09 → 09/02
+                const lockStart = lock.start_time.slice(0, 5);
+                const lockEnd = lock.end_time.slice(0, 5);
+
+                document.querySelectorAll('.grid-cell').forEach(cell => {
+
+                    if (cell.dataset.day !== lockDate) return;
+
+                    const [s, e] = cell.dataset.time.split('-');
+
+                    // ⭐ OVERLAP CHUẨN (giống SQL)
+                    if (
+                        toMin(s) < toMin(lockEnd) &&
+                        toMin(e) > toMin(lockStart)
+                    ) {
+                        cell.classList.remove('cell-available');
+                        cell.classList.add('cell-locked');
+                        cell.onclick = null;
+
+                        cell.innerHTML = `
+    <div class="lock-content">
+        <i class="bi bi-lock-fill lock-icon"></i>
+    </div>
+`;
+
+                    }
+                });
+            });
+        }
+
+        function formatVNDate(mysqlDate) {
+            const d = new Date(mysqlDate);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month}`;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            markLockedSlots(lockedSlots);
+        });
+
     </script>
 </body>
 
