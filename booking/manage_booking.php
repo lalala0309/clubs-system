@@ -272,6 +272,20 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             background: #9ca3af !important;
             outline: none;
         }
+
+        #setting-panel {
+            width: 300px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(40px);
+            transition: all .3s ease;
+        }
+
+        #setting-panel.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
     </style>
 </head>
 <!-- ADD GROUND MODAL -->
@@ -299,30 +313,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
     </div>
 </div>
 
-<!-- SETTING MODAL -->
-<div id="setting-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
 
-    <div class="bg-white w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl">
-
-        <h3 class="font-bold text-slate-700 text-lg">
-            <i class="bi bi-gear text-[14px] p-2"></i>Cài đặt hệ thống
-        </h3>
-
-        <label class="text-sm font-semibold">Giới hạn đặt sân / tuần / môn</label>
-
-        <input id="weekly-limit-input" type="number" min="1"
-            class="w-full p-3 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500">
-
-        <div class="flex justify-end gap-2">
-            <button onclick="closeSettingModal()" class="px-4 py-2 text-slate-500">Huỷ</button>
-
-            <button onclick="saveSetting()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold">
-                Lưu
-            </button>
-        </div>
-
-    </div>
-</div>
 
 <body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
     <div id="sidebar-overlay" onclick="toggleSidebar()"
@@ -399,9 +390,18 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                             <div>
                                 <h2 id="current-club-title"
                                     class="text-xs font-black text-indigo-700 uppercase leading-none">SÂN</h2>
-                                <p id="selected-court-label"
-                                    class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">SÂN SỐ 01
-                                </p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p id="selected-court-label"
+                                        class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                        SÂN SỐ 01
+                                    </p>
+
+                                    <span id="court-limit-badge"
+                                        class="hidden text-[9px] px-2 py-[2px] rounded-full bg-indigo-600 text-white font-bold">
+                                        4/tuần
+                                    </span>
+                                </div>
+
                             </div>
                         </div>
 
@@ -545,6 +545,42 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             </div>
         </aside>
 
+        <!-- SETTING PANEL -->
+        <aside id="setting-panel"
+            class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[30px] border-l border-slate-100 hidden">
+
+            <div class="p-6 space-y-4">
+
+                <h3 class="font-bold text-slate-700 uppercase text-xs">
+                    Cài đặt giới hạn đặt sân
+                </h3>
+
+                <!-- CHỌN SÂN -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Chọn sân</label>
+
+                    <div id="setting-ground-list"
+                        class="max-h-40 overflow-auto bg-slate-50 rounded-xl p-2 space-y-1 text-xs">
+                    </div>
+                </div>
+
+                <!-- LIMIT -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Số lần / tuần</label>
+                    <input id="weekly-limit-input" type="number" min="1" class="w-full p-2 bg-slate-50 rounded-xl">
+                </div>
+
+                <button onclick="saveGroundSetting()" class="w-full py-2 bg-indigo-600 text-white rounded-xl font-bold">
+                    Lưu
+                </button>
+
+                <button onclick="closeSettingPanel()" class="text-xs text-slate-400">
+                    Huỷ
+                </button>
+
+            </div>
+        </aside>
+
         <!-- <aside id="right-panel"
             class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[30px] border-l border-indigo-50">
             <div class="p-6 h-full flex flex-col">
@@ -579,6 +615,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
     </div>
 
     <script>
+        let currentGrounds = [];
+
         let currentCourtName = "Sân số 01";
         let selectedBooking = { groundID: null, booking_date: null, start_time: null, end_time: null };
         let currentSportID = <?php echo $active_sport_id ?? 'null'; ?>;
@@ -610,6 +648,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             });
 
             renderLockGroundList(grounds);
+            currentGrounds = grounds;
 
             const targetBtn = savedGroundID
                 ? container.querySelector(`[data-ground-id="${savedGroundID}"]`)
@@ -637,6 +676,15 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
             const groundID = btn.dataset.groundId;
             selectedBooking.groundID = groundID;
+            // lấy limit của sân hiện tại
+            const ground = currentGrounds.find(g => g.groundID == groundID);
+
+            const badge = document.getElementById('court-limit-badge');
+
+            if (ground) {
+                badge.innerText = `${ground.weekly_limit}/tuần`;
+                badge.classList.remove('hidden');
+            }
 
             document.querySelectorAll('.grid-cell').forEach(cell => {
                 cell.className = 'grid-cell cell-available';
@@ -836,41 +884,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                     }
                 });
         }
-        /* ===============================
-           SETTING
-        ================================ */
 
-        function openSettingModal() {
-
-            fetch('get_setting.php')
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('weekly-limit-input').value = data.limit;
-                    document.getElementById('setting-modal').classList.remove('hidden');
-                });
-        }
-
-        function closeSettingModal() {
-            document.getElementById('setting-modal').classList.add('hidden');
-        }
-
-        function saveSetting() {
-
-            const limit = document.getElementById('weekly-limit-input').value;
-
-            const formData = new FormData();
-            formData.append('limit', limit);
-
-            fetch('update_setting.php', {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    alert(data.message);
-                    closeSettingModal();
-                });
-        }
         function closeLockPanel() {
             const panel = document.getElementById('lock-panel');
             panel.classList.remove('show');
@@ -1001,8 +1015,86 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
         }
 
 
+        function openSettingModal() {
+
+            if (!currentSportID) return alert("Chọn môn trước");
+
+            const panel = document.getElementById('setting-panel');
+
+            panel.classList.remove('hidden');
+            setTimeout(() => panel.classList.add('show'), 10);
+
+            fetch(`get_all_grounds_by_sport.php?sportID=${currentSportID}`)
+                .then(r => r.json())
+                .then(renderSettingGrounds);
+        }
+        function closeSettingPanel() {
+            const panel = document.getElementById('setting-panel');
+            panel.classList.remove('show');
+            setTimeout(() => panel.classList.add('hidden'), 300);
+        }
+
+        function renderSettingGrounds(grounds) {
+
+            const box = document.getElementById('setting-ground-list');
+            box.innerHTML = '';
+
+            grounds.forEach(g => {
+                box.innerHTML += `
+        <label class="flex items-center gap-2">
+            <input type="checkbox" value="${g.groundID}">
+            <span>${g.name}</span>
+        </label>
+    `;
+            });
+        }
+
+        function saveGroundSetting() {
+
+            const limit = document.getElementById('weekly-limit-input').value;
+
+            const ids = [...document.querySelectorAll('#setting-ground-list input:checked')]
+                .map(cb => cb.value);
+
+            if (ids.length === 0)
+                return alert("Chọn ít nhất 1 sân");
+
+            fetch('save_ground_setting.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    groundIDs: ids,
+                    weekly_limit: limit
+                })
+            })
+                .then(r => r.json())
+                .then(() => {
 
 
+
+                    // cập nhật local data
+                    currentGrounds.forEach(g => {
+                        if (ids.includes(String(g.groundID))) {
+                            g.weekly_limit = limit;
+                        }
+                    });
+
+                    // nếu sân hiện tại nằm trong list vừa set → update badge
+                    const activeBtn = document.querySelector('.court-tab.active');
+                    const activeGroundID = activeBtn?.dataset.groundId;
+
+                    if (ids.includes(activeGroundID)) {
+                        const badge = document.getElementById('court-limit-badge');
+                        badge.innerText = `${limit}/tuần`;
+                        badge.classList.remove('hidden');
+                    }
+
+                    /* ========================= */
+
+                    alert("Đã lưu");
+                    closeSettingPanel();
+                });
+        }
 
 
     </script>

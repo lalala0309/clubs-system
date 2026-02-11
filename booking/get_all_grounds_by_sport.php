@@ -6,14 +6,15 @@ header('Content-Type: application/json');
 $sportID = intval($_GET['sportID']);
 
 $sql = "
-    SELECT 
-        groundID,
-        name
-    FROM grounds
-    WHERE sportID = ?
-      AND status = 1
-    ORDER BY groundID
+SELECT g.*, 
+       COALESCE(gs.weekly_limit, 4) AS weekly_limit
+FROM grounds g
+LEFT JOIN ground_settings gs 
+    ON g.groundID = gs.groundID
+WHERE g.sportID = ?
+ORDER BY g.groundID
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $sportID);

@@ -36,7 +36,7 @@ if ($week_offset !== 0) {
 }
 
 $start = $monday->format('Y-m-d');
-
+$jsMonday = $start;
 $endDate = clone $monday;
 $endDate->modify('+6 day');
 $end = $endDate->format('Y-m-d');
@@ -390,6 +390,12 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                                     class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">SÂN SỐ 01
                                 </p>
                             </div>
+                            <div id="weeklyUsageBadge"
+                                class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300">
+                                <i class="bi bi-calendar-check"></i>
+                                <span>Đang tải...</span>
+                            </div>
+
                         </div>
 
                         <div
@@ -545,7 +551,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             selectedBooking.groundID = groundID;
 
             document.querySelectorAll('.grid-cell').forEach(cell => {
-                cell.classList.remove('cell-booked');
+                cell.classList.remove(
+                    'cell-booked',
+                    'cell-locked',
+                    'cell-past'
+                );
                 cell.classList.add('cell-available');
                 cell.innerHTML = '';
             });
@@ -559,6 +569,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     markBookedSlots(data);
                     disablePastSlots();
                 });
+
+            const mondayDate = "<?= $jsMonday ?>";
+
+            loadWeeklyUsage(groundID, mondayDate);
+
 
         }
 
@@ -732,9 +747,24 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             const month = String(d.getMonth() + 1).padStart(2, '0');
             return `${day}/${month}`;
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            markLockedSlots(lockedSlots);
-        });
+
+        function loadWeeklyUsage(groundID, date) {
+            fetch(`get_weekly_usage.php?groundID=${groundID}&date=${date}`)
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById("weeklyUsageBadge");
+
+                    // 1. Cập nhật nội dung (giữ lại icon nếu muốn)
+                    badge.innerHTML = `<div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300"><i class="bi bi-calendar-check"></i> <span>Còn ${data.remain}/${data.limit}</span></div>`;
+                    // Xóa các class màu cũ
+                    //  badge.classList.remove('bg-emerald-100', 'text-emerald-600', 'bg-red-100', 'text-red-600', 'bg-indigo-100', 'text-indigo-600');
+                    if (data.remain <= 0) {
+                        badge.className = "badge bg-danger ms-2";
+                    } else {
+                        badge.className = "badge bg-success ms-2";
+                    }
+                });
+        }
 
     </script>
 </body>
