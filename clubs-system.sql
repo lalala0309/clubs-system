@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th2 08, 2026 lúc 10:22 AM
+-- Thời gian đã tạo: Th2 18, 2026 lúc 03:32 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -57,7 +57,18 @@ INSERT INTO `bookings` (`id`, `userID`, `booking_date`, `groundID`, `start_time`
 (120, 2, '2026-02-09', 26, '14:00:00', '15:00:00'),
 (121, 2, '2026-02-09', 26, '15:00:00', '16:00:00'),
 (122, 2, '2026-02-09', 26, '16:00:00', '17:00:00'),
-(123, 2, '2026-02-10', 26, '13:00:00', '14:00:00');
+(123, 2, '2026-02-10', 26, '13:00:00', '14:00:00'),
+(124, 2, '2026-02-08', 26, '19:00:00', '20:00:00'),
+(125, 3, '2026-02-13', 26, '15:00:00', '16:00:00'),
+(126, 3, '2026-02-13', 26, '16:00:00', '17:00:00'),
+(127, 3, '2026-02-17', 26, '07:00:00', '08:00:00'),
+(128, 3, '2026-02-18', 26, '07:00:00', '08:00:00'),
+(129, 3, '2026-02-19', 26, '08:00:00', '09:00:00'),
+(130, 3, '2026-02-19', 26, '07:00:00', '08:00:00'),
+(131, 3, '2026-02-18', 26, '08:00:00', '09:00:00'),
+(132, 3, '2026-02-17', 26, '08:00:00', '09:00:00'),
+(133, 3, '2026-02-16', 16, '06:00:00', '07:00:00'),
+(134, 3, '2026-02-24', 16, '08:00:00', '09:00:00');
 
 -- --------------------------------------------------------
 
@@ -176,7 +187,8 @@ INSERT INTO `grounds` (`groundID`, `name`, `location`, `status`, `sportID`) VALU
 (30, 'Sân bóng bàn C5', 'Nhà đa năng', 1, 3),
 (31, 'Sân bóng bàn C6', 'Nhà đa năng', 1, 3),
 (32, 'Sân số 7', 'hihi', 1, 1),
-(33, 'Sân số 7', 'Nhà thi đấu', 1, 3);
+(33, 'Sân số 7', 'Nhà thi đấu', 1, 3),
+(34, 'Sân số 8', 'Nhà thi đấu', 1, 3);
 
 -- --------------------------------------------------------
 
@@ -194,19 +206,45 @@ CREATE TABLE `ground_locks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `ground_locks`
+--
+
+INSERT INTO `ground_locks` (`id`, `groundID`, `lock_date`, `start_time`, `end_time`, `note`, `created_at`) VALUES
+(33, 26, '2026-02-10', '14:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(34, 26, '2026-02-11', '00:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(35, 26, '2026-02-12', '00:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(36, 26, '2026-02-13', '00:00:00', '15:00:00', NULL, '2026-02-09 14:20:55'),
+(37, 27, '2026-02-10', '14:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(38, 27, '2026-02-11', '00:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(39, 27, '2026-02-12', '00:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(40, 27, '2026-02-13', '00:00:00', '15:00:00', NULL, '2026-02-09 14:20:55'),
+(41, 28, '2026-02-10', '14:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(42, 28, '2026-02-11', '00:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(43, 28, '2026-02-12', '00:00:00', '23:59:59', NULL, '2026-02-09 14:20:55'),
+(44, 28, '2026-02-13', '00:00:00', '15:00:00', NULL, '2026-02-09 14:20:55'),
+(45, 26, '2026-02-18', '14:30:00', '03:30:00', NULL, '2026-02-18 14:30:54');
+
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `nguoi_dung`
+-- Cấu trúc bảng cho bảng `ground_settings`
 --
 
-CREATE TABLE `nguoi_dung` (
-  `ma_nguoi_dung` int(11) NOT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `ho_ten` varchar(255) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `ma_vai_tro` int(11) DEFAULT NULL
+CREATE TABLE `ground_settings` (
+  `groundID` int(11) NOT NULL,
+  `weekly_limit` int(11) DEFAULT 4
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `ground_settings`
+--
+
+INSERT INTO `ground_settings` (`groundID`, `weekly_limit`) VALUES
+(26, 10),
+(27, 4),
+(28, 1),
+(29, 4);
 
 -- --------------------------------------------------------
 
@@ -257,24 +295,6 @@ INSERT INTO `sports` (`sportID`, `sport_name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `system_settings`
---
-
-CREATE TABLE `system_settings` (
-  `setting_key` varchar(50) NOT NULL,
-  `setting_value` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Đang đổ dữ liệu cho bảng `system_settings`
---
-
-INSERT INTO `system_settings` (`setting_key`, `setting_value`) VALUES
-('weekly_booking_limit', 5);
-
--- --------------------------------------------------------
-
---
 -- Cấu trúc bảng cho bảng `users`
 --
 
@@ -296,17 +316,6 @@ INSERT INTO `users` (`userID`, `email`, `full_name`, `google_id`, `roleID`, `sta
 (1, 'kietb2204944@student.ctu.edu.vn', 'Nguyen Tan Kiet B2204944', '110113513674435867031', 2, 1, '2026-01-15 09:12:35'),
 (2, 'lalala030904@gmail.com', 'Kiệt Nguyễn Tấn', '110504404248111745804', 1, 1, '2026-01-18 21:52:07'),
 (3, 'tankietn322@gmail.com', 'Tan Kiet Nguyen', '115919598977222801732', 3, 1, '2026-01-26 18:23:44');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `vai_tro`
---
-
-CREATE TABLE `vai_tro` (
-  `ma_vai_tro` int(11) NOT NULL,
-  `ten_vai_tro` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -355,12 +364,10 @@ ALTER TABLE `ground_locks`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `nguoi_dung`
+-- Chỉ mục cho bảng `ground_settings`
 --
-ALTER TABLE `nguoi_dung`
-  ADD PRIMARY KEY (`ma_nguoi_dung`),
-  ADD UNIQUE KEY `UKmajqh5g4djy2tp3p9dvr64brp` (`email`),
-  ADD KEY `FKmmv89ljypmv25yi44275p7qmg` (`ma_vai_tro`);
+ALTER TABLE `ground_settings`
+  ADD PRIMARY KEY (`groundID`);
 
 --
 -- Chỉ mục cho bảng `roles`
@@ -376,12 +383,6 @@ ALTER TABLE `sports`
   ADD PRIMARY KEY (`sportID`);
 
 --
--- Chỉ mục cho bảng `system_settings`
---
-ALTER TABLE `system_settings`
-  ADD PRIMARY KEY (`setting_key`);
-
---
 -- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
@@ -389,12 +390,6 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`),
   ADD UNIQUE KEY `google_id` (`google_id`),
   ADD KEY `roleID` (`roleID`);
-
---
--- Chỉ mục cho bảng `vai_tro`
---
-ALTER TABLE `vai_tro`
-  ADD PRIMARY KEY (`ma_vai_tro`);
 
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
@@ -422,19 +417,13 @@ ALTER TABLE `club_sports`
 -- AUTO_INCREMENT cho bảng `grounds`
 --
 ALTER TABLE `grounds`
-  MODIFY `groundID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `groundID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT cho bảng `ground_locks`
 --
 ALTER TABLE `ground_locks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `nguoi_dung`
---
-ALTER TABLE `nguoi_dung`
-  MODIFY `ma_nguoi_dung` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT cho bảng `roles`
@@ -453,12 +442,6 @@ ALTER TABLE `sports`
 --
 ALTER TABLE `users`
   MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT cho bảng `vai_tro`
---
-ALTER TABLE `vai_tro`
-  MODIFY `ma_vai_tro` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -492,10 +475,10 @@ ALTER TABLE `grounds`
   ADD CONSTRAINT `fk_ground_sport` FOREIGN KEY (`sportID`) REFERENCES `sports` (`sportID`) ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `nguoi_dung`
+-- Các ràng buộc cho bảng `ground_settings`
 --
-ALTER TABLE `nguoi_dung`
-  ADD CONSTRAINT `FKmmv89ljypmv25yi44275p7qmg` FOREIGN KEY (`ma_vai_tro`) REFERENCES `vai_tro` (`ma_vai_tro`);
+ALTER TABLE `ground_settings`
+  ADD CONSTRAINT `ground_settings_ibfk_1` FOREIGN KEY (`groundID`) REFERENCES `grounds` (`groundID`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `users`
@@ -507,3 +490,5 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+ALTER TABLE bookings 
+ADD COLUMN status ENUM('approved','cancelled') DEFAULT 'approved';

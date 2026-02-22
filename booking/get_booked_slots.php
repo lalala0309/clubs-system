@@ -19,6 +19,7 @@ $endDate = $sunday->format('Y-m-d');
 
 $sql = "
     SELECT 
+        b.id,
         DATE_FORMAT(b.booking_date, '%d/%m') AS booking_date,
         DATE_FORMAT(b.start_time, '%H:%i') AS start_time,
         DATE_FORMAT(b.end_time, '%H:%i') AS end_time,
@@ -28,6 +29,7 @@ $sql = "
     JOIN users u ON b.userID = u.userID
     WHERE b.groundID = ?
       AND b.booking_date BETWEEN ? AND ?
+      AND b.status = 'approved'
 ";
 
 

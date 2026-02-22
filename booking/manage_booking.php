@@ -793,11 +793,18 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         cell.classList.remove('cell-available');
                         cell.classList.add('cell-booked');
                         cell.innerHTML = `
-<div class="cell-content">
+<div class="cell-content relative">
     <div class="font-semibold truncate">${b.full_name}</div>
     <div class="opacity-60 truncate">${b.email}</div>
+
+    <button 
+        onclick="cancelBooking(${b.id})"
+        class="absolute top-0 right-0 text-red-500 hover:text-red-700 text-[10px]">
+        <i class="bi bi-x-circle-fill"></i>
+    </button>
 </div>
 `;
+
 
 
                     }
@@ -942,36 +949,54 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
         function markLockedSlots(locks) {
 
             locks.forEach(l => {
+
                 document.querySelectorAll('.grid-cell').forEach(cell => {
 
-                    if (cell.dataset.day === formatVNDate(l.lock_date)) {
+                    if (cell.dataset.day !== formatVNDate(l.lock_date)) return;
 
-                        const time = cell.dataset.time;
-                        const [s, e] = time.split('-');
+                    const [slotStart, slotEnd] = cell.dataset.time.split('-');
 
-                        const lockStart = l.start_time.slice(0, 5);
-                        const lockEnd = l.end_time.slice(0, 5);
+                    const lockStart = l.start_time.slice(0, 5);
+                    const lockEnd = l.end_time.slice(0, 5);
 
-                        if (
-                            toMin(s) >= toMin(lockStart) &&
-                            toMin(e) <= toMin(lockEnd)
-                        ) {
+                    // xử lý trường hợp lock qua ngày (vd 22:00 → 03:00)
+                    let lockStartMin = toMin(lockStart);
+                    let lockEndMin = toMin(lockEnd);
 
-                            cell.classList.remove('cell-available');
-                            cell.classList.remove('cell-past');
-                            cell.classList.add('cell-locked');
-
-                            cell.innerHTML = `
-                    <div class="cell-content text-red-500 text-[11px]">
-                    <i class="bi bi-lock-fill text-[12px]"></i>
-
-                    </div>
-                `;
-                            cell.onclick = null;
-                        }
+                    if (lockEndMin <= lockStartMin) {
+                        lockEndMin += 24 * 60;
                     }
+
+                    let slotStartMin = toMin(slotStart);
+                    let slotEndMin = toMin(slotEnd);
+
+                    // nếu slot nằm sau nửa đêm thì cộng thêm 24h
+                    if (slotEndMin <= slotStartMin) {
+                        slotEndMin += 24 * 60;
+                    }
+
+                    // ✅ kiểm tra giao nhau
+                    if (
+                        slotStartMin < lockEndMin &&
+                        slotEndMin > lockStartMin
+                    ) {
+
+                        cell.classList.remove('cell-available', 'cell-past');
+                        cell.classList.add('cell-locked');
+
+                        cell.innerHTML = `
+                <div class="cell-content text-red-500 text-[11px]">
+                    <i class="bi bi-lock-fill text-[12px]"></i>
+                </div>
+            `;
+
+                        cell.onclick = null;
+                    }
+
                 });
+
             });
+
         }
 
         function formatVNDate(date) {
@@ -1093,6 +1118,25 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                     alert("Đã lưu");
                     closeSettingPanel();
+                });
+        }
+        function cancelBooking(bookingID) {
+
+            if (!confirm("Bạn có chắc muốn huỷ lịch này?")) return;
+
+            fetch('handle_cancel_booking.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingID })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert("Đã huỷ thành công");
+                        reloadCurrentGround();
+                    } else {
+                        alert(data.message);
+                    }
                 });
         }
 
