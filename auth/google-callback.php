@@ -13,7 +13,7 @@ $client->setRedirectUri($config['redirect_uri']);
 $client->addScope('email');
 $client->addScope('profile');
 
-$client->setPrompt('none');
+$client->setPrompt('select_account');
 
 
 $authUrl = $client->createAuthUrl();
@@ -27,7 +27,12 @@ if (!isset($_GET['code'])) {
 $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
 
 if (isset($token['error'])) {
-    die("Google authentication failed");
+    echo "<pre>";
+    print_r($_GET);
+    exit;
+    die("Google authentication failed: " . $token['error'] .
+        " | Description: " . ($token['error_description'] ?? 'No description'));
+
 }
 
 $client->setAccessToken($token);
@@ -38,10 +43,14 @@ $oauth = new Google_Service_Oauth2($client);
 $userInfo = $oauth->userinfo->get();
 $_SESSION['google_json'] = $userInfo->toSimpleObject();
 
-$email     = $userInfo->email;
+$email = $userInfo->email;
 $full_name = $userInfo->name;
 $google_id = $userInfo->id;
+$avatar = $userInfo->picture ?? null;
 
+if ($avatar) {
+    $avatar .= '?sz=200';
+}
 
 // Set session
 // $_SESSION['user'] = [
@@ -72,14 +81,15 @@ if (!in_array($emailDomain, $allowedDomains)) {
 }
 /* ================================================= */
 
+/* ================================================= */
+/* CHECK USER CHỈ ĐỂ LƯU AVATAR */
 
-
-/* CHECK USER + ROLE */
 $stmt = $conn->prepare("
     SELECT u.userID, u.status, r.role_name
     FROM users u
     JOIN roles r ON u.roleID = r.roleID
     WHERE u.email = ?
+    LIMIT 1
 ");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -87,19 +97,22 @@ $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
 
-    // USER MỚI → MEMBER
-    $roleID = 3; // MEMBER
+    $roleID = 3; // MEMBER mặc định
+    $role = 'MEMBER'; // thêm dòng này để tránh undefined
+
+    //Nếu là email sinh viên thì cắt MSSV
+
+    $student_code = strstr($email, '@', true);
+
 
     $stmt = $conn->prepare("
-        INSERT INTO users (email, full_name, google_id, roleID)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO users (email, full_name, google_id, roleID, avatar_url, student_code)
+        VALUES (?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param("sssi", $email, $full_name, $google_id, $roleID);
+    $stmt->bind_param("sssiss", $email, $full_name, $google_id, $roleID, $avatar, $student_code);
     $stmt->execute();
 
     $userID = $conn->insert_id;
-    $role   = 'MEMBER';
-
 } else {
 
     $user = $result->fetch_assoc();
@@ -109,13 +122,34 @@ if ($result->num_rows === 0) {
     }
 
     $userID = $user['userID'];
-    $role   = $user['role_name'];
-}
+    $role = $user['role_name'];   // QUAN TRỌNG
+    $student_code = null;
 
+    if ($role === 'MEMBER') {
+        $student_code = strstr($email, '@', true);
+
+        $updateCode = $conn->prepare("
+            UPDATE users SET student_code = ?
+            WHERE userID = ?
+        ");
+        $updateCode->bind_param("si", $student_code, $userID);
+        $updateCode->execute();
+    }
+    // CẬP NHẬT AVATAR (luôn update cho chắc)
+    $update = $conn->prepare("
+        UPDATE users 
+        SET avatar_url = ?, full_name = ?, google_id = ?
+        WHERE userID = ?
+    ");
+    $update->bind_param("sssi", $avatar, $full_name, $google_id, $userID);
+    $update->execute();
+}
 /* SESSION */
 $_SESSION['userID'] = $userID;
-$_SESSION['email']  = $email;
-$_SESSION['role']   = $role;
+$_SESSION['email'] = $email;
+$_SESSION['role'] = $role;
+$_SESSION['avatar'] = $avatar;
+$_SESSION['full_name'] = $full_name;
 
 /* REDIRECT THEO QUYỀN */
 if ($role === 'ADMIN') {

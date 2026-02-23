@@ -15,9 +15,12 @@ $sports = require '../manager_sport/get_all_sports.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTUMP Clubs - Admin Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/sidebar_member.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../assets/css/sidebar_member.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <style>
         body {
@@ -116,191 +119,192 @@ $sports = require '../manager_sport/get_all_sports.php';
             <div
                 class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
                 <div id="main-content">
-                <div class="mb-5 md:mb-6">
-                    <div class="flex items-end justify-between">
-                        <h2 id="page-title" class="text-2xl font-bold text-slate-800">Danh sách câu lạc bộ</h2>
+                    <div class="mb-5 md:mb-6">
+                        <div class="flex items-end justify-between">
+                            <h2 id="page-title" class="text-2xl font-bold text-slate-800">Danh sách câu lạc bộ</h2>
 
-                        <div class="flex items-center gap-3">
-                            <button id="back-btn" onclick="showAllClubs()"
-                                class="hidden flex items-center gap-2 text-indigo-600 font-bold hover:bg-indigo-50 px-4 py-2 rounded-xl transition">
-                                <i class="fas fa-arrow-left"></i>
-                            </button>
-                            <button id="add-club-btn" onclick="toggleAddClubForm()"
-                                class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
-                                <i class="fas fa-plus"></i> Thêm câu lạc bộ
-                            </button>
-                            <button id="add-sport-btn" onclick="toggleSportPanel()"
-                                class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 flex items-center gap-2">
-                                <i class="fas fa-plus"></i> Môn thể thao
-                            </button>
+                            <div class="flex items-center gap-3">
+                                <button id="back-btn" onclick="showAllClubs()"
+                                    class="hidden flex items-center gap-2 text-indigo-600 font-bold hover:bg-indigo-50 px-4 py-2 rounded-xl transition">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <button id="add-club-btn" onclick="toggleAddClubForm()"
+                                    class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                    <i class="fas fa-plus"></i> Thêm câu lạc bộ
+                                </button>
+                                <button id="add-sport-btn" onclick="toggleSportPanel()"
+                                    class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 flex items-center gap-2">
+                                    <i class="fas fa-plus"></i> Môn thể thao
+                                </button>
+                            </div>
+                        </div>
+                        <div class="h-[2px] w-full bg-slate-200 mt-3 md:mt-4 relative">
+                            <div class="absolute left-0 top-0 h-full w-12 md:w-20 bg-indigo-500"></div>
                         </div>
                     </div>
-                    <div class="h-[2px] w-full bg-slate-200 mt-3 md:mt-4 relative">
-                        <div class="absolute left-0 top-0 h-full w-12 md:w-20 bg-indigo-500"></div>
-                    </div>
-                </div>
-                <div id="club-container" class="space-y-4">
-                    <?php
-                    $clubs = getClubs($pdo);
+                    <div id="club-container" class="space-y-4">
+                        <?php
+                        $clubs = getClubs($pdo);
 
-                    foreach ($clubs as $club):
-                        $clubID = $club['clubID'];
-                        $members = getClubMembers($pdo, $clubID);
-                        $memberCount = count($members);
-                        $pendingRequests = getPendingRequests($pdo, $clubID);
-                        $pendingCount = count($pendingRequests);
+                        foreach ($clubs as $club):
+                            $clubID = $club['clubID'];
+                            $members = getClubMembers($pdo, $clubID);
+                            $memberCount = count($members);
+                            $pendingRequests = getPendingRequests($pdo, $clubID);
+                            $pendingCount = count($pendingRequests);
 
-                        ?>
-                        <div class="club-card bg-white border rounded-2xl overflow-hidden shadow-sm"
-                            id="club-<?= $clubID ?>">
+                            ?>
+                            <div class="club-card bg-white border rounded-2xl overflow-hidden shadow-sm"
+                                id="club-<?= $clubID ?>">
 
-                            <!-- HEADER -->
-                            <div class="club-header p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
-                                onclick="openClub('club-<?= $clubID ?>')">
+                                <!-- HEADER -->
+                                <div class="club-header p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
+                                    onclick="openClub('club-<?= $clubID ?>')">
 
-                                <div class="flex items-center gap-4">
-                                    <div
-                                        class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center">
-                                        <i class="bi bi-people-fill text-2xl text-slate-700"></i>
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center">
+                                            <i class="bi bi-people-fill text-2xl text-slate-700"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm md:text-lg font-bold text-slate-800">
+                                                <?= htmlspecialchars($club['club_name']) ?>
+                                            </h3>
+                                            <p class="text-xs text-slate-500">
+                                                <span class="member-count"><?= $memberCount ?></span> thành viên
+                                                • <span class="header-pending-count"><?= $pendingCount ?></span> yêu cầu mới
+                                            </p>
+
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 class="text-sm md:text-lg font-bold text-slate-800">
-                                            <?= htmlspecialchars($club['club_name']) ?>
-                                        </h3>
-                                        <p class="text-xs text-slate-500">
-                                            <span class="member-count"><?= $memberCount ?></span> thành viên
-                                            • <span class="header-pending-count"><?= $pendingCount ?></span> yêu cầu mới
-                                        </p>
+                                    <div class="flex items-center gap-4">
+                                        <button
+                                            onclick="event.stopPropagation(); toggleApprovals('approvals-<?= $clubID ?>');"
+                                            class="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full border border-orange-100 hover:bg-orange-600 hover:text-white transition group">
+
+                                            <i class="fas fa-user-clock"></i>
+                                            <span class="text-xs font-bold uppercase">Phê duyệt</span>
+                                            <span
+                                                class="pending-badge bg-orange-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white group-hover:bg-white group-hover:text-orange-600">
+                                                <?= $pendingCount ?>
+                                            </span>
+
+
+                                        </button>
+                                        <button onclick="event.stopPropagation(); deleteClub(<?= $clubID ?>)"
+                                            class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50">
+
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        <i class="fas fa-chevron-right text-slate-400 chevron-icon"></i>
+                                    </div>
+
+                                    <!-- <i class="fas fa-chevron-right text-slate-400 chevron-icon"></i> -->
+                                </div>
+
+                                <!-- DETAILS -->
+                                <div class="club-details hidden p-6 bg-slate-50/50 border-t">
+                                    <div id="approvals-<?= $clubID ?>" class="hidden mb-6 space-y-3">
+
+                                        <h4 class="text-orange-700 font-bold text-xs uppercase tracking-widest">
+                                            Yêu cầu chờ (<span class="pending-count"><?= $pendingCount ?></span>)
+                                        </h4>
+
+
+                                        <?php if (empty($pendingRequests)): ?>
+                                            <div class="text-slate-400 text-sm italic">
+                                                Không có yêu cầu nào
+                                            </div>
+                                        <?php else: ?>
+                                            <?php foreach ($pendingRequests as $req): ?>
+                                                <div
+                                                    class="pending-item bg-white p-4 rounded-xl border flex justify-between items-center hover:bg-slate-50 transition">
+
+                                                    <div>
+                                                        <p class="font-bold text-slate-800">
+                                                            <?= htmlspecialchars($req['full_name']) ?>
+                                                        </p>
+                                                        <p class="text-sm text-slate-500">
+                                                            <?= htmlspecialchars($req['email']) ?>
+                                                            • Gửi ngày:
+                                                            <?= $req['request_date']
+                                                                ? date('d/m/Y', strtotime($req['request_date']))
+                                                                : '—' ?>
+
+                                                        </p>
+                                                    </div>
+
+                                                    <button onclick="approveMember(<?= $clubID ?>, <?= $req['userID'] ?>, this)"
+                                                        class="px-3 py-1 bg-green-600 text-white rounded">
+                                                        Duyệt
+                                                    </button>
+
+
+
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
 
                                     </div>
-                                </div>
-                                <div class="flex items-center gap-4">
-                                    <button onclick="event.stopPropagation(); toggleApprovals('approvals-<?= $clubID ?>');"
-                                        class="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full border border-orange-100 hover:bg-orange-600 hover:text-white transition group">
 
-                                        <i class="fas fa-user-clock"></i>
-                                        <span class="text-xs font-bold uppercase">Phê duyệt</span>
-                                        <span
-                                            class="pending-badge bg-orange-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white group-hover:bg-white group-hover:text-orange-600">
-                                            <?= $pendingCount ?>
-                                        </span>
-
-
-                                    </button>
-                                    <button onclick="event.stopPropagation(); deleteClub(<?= $clubID ?>)"
-                                        class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50">
-
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <i class="fas fa-chevron-right text-slate-400 chevron-icon"></i>
-                                </div>
-
-                                <!-- <i class="fas fa-chevron-right text-slate-400 chevron-icon"></i> -->
-                            </div>
-
-                            <!-- DETAILS -->
-                            <div class="club-details hidden p-6 bg-slate-50/50 border-t">
-                                <div id="approvals-<?= $clubID ?>" class="hidden mb-6 space-y-3">
-
-                                    <h4 class="text-orange-700 font-bold text-xs uppercase tracking-widest">
-                                        Yêu cầu chờ (<span class="pending-count"><?= $pendingCount ?></span>)
+                                    <h4 class="text-slate-700 font-bold text-xs uppercase mb-3">
+                                        Danh sách thành viên
                                     </h4>
 
-
-                                    <?php if (empty($pendingRequests)): ?>
-                                        <div class="text-slate-400 text-sm italic">
-                                            Không có yêu cầu nào
-                                        </div>
-                                    <?php else: ?>
-                                        <?php foreach ($pendingRequests as $req): ?>
-                                            <div
-                                                class="pending-item bg-white p-4 rounded-xl border flex justify-between items-center hover:bg-slate-50 transition">
-
-                                                <div>
-                                                    <p class="font-bold text-slate-800">
-                                                        <?= htmlspecialchars($req['full_name']) ?>
-                                                    </p>
-                                                    <p class="text-sm text-slate-500">
-                                                        <?= htmlspecialchars($req['email']) ?>
-                                                        • Gửi ngày:
-                                                        <?= $req['request_date']
-                                                            ? date('d/m/Y', strtotime($req['request_date']))
-                                                            : '—' ?>
-
-                                                    </p>
-                                                </div>
-
-                                                <button onclick="approveMember(<?= $clubID ?>, <?= $req['userID'] ?>, this)"
-                                                    class="px-3 py-1 bg-green-600 text-white rounded">
-                                                    Duyệt
-                                                </button>
-
-
-
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-
-                                </div>
-
-                                <h4 class="text-slate-700 font-bold text-xs uppercase mb-3">
-                                    Danh sách thành viên
-                                </h4>
-
-                                <div class="bg-white rounded-xl border overflow-hidden">
-                                    <table class="w-full text-sm">
-                                        <thead>
-                                            <tr class="bg-slate-50 border-b text-slate-600">
-                                                <th class="p-3 text-left">Họ tên</th>
-                                                <th class="p-3 text-left">Email</th>
-                                                <th class="p-3 text-center">Ngày tham gia</th>
-                                                <th class="p-3 text-center">Ngày đóng phí</th>
-                                                <th class="p-3 text-center">Ngày hết hạn</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (empty($members)): ?>
-                                                <tr>
-                                                    <td colspan="5" class="p-4 text-center text-slate-400">
-                                                        Chưa có thành viên
-                                                    </td>
+                                    <div class="bg-white rounded-xl border overflow-hidden">
+                                        <table class="w-full text-sm">
+                                            <thead>
+                                                <tr class="bg-slate-50 border-b text-slate-600">
+                                                    <th class="p-3 text-left">Họ tên</th>
+                                                    <th class="p-3 text-left">Email</th>
+                                                    <th class="p-3 text-center">Ngày tham gia</th>
+                                                    <th class="p-3 text-center">Ngày đóng phí</th>
+                                                    <th class="p-3 text-center">Ngày hết hạn</th>
                                                 </tr>
-                                            <?php else: ?>
-                                                <?php foreach ($members as $m): ?>
-                                                    <tr class="border-b hover:bg-slate-50 transition">
-                                                        <td class="p-3 font-medium">
-                                                            <?= htmlspecialchars($m['full_name']) ?>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (empty($members)): ?>
+                                                    <tr>
+                                                        <td colspan="5" class="p-4 text-center text-slate-400">
+                                                            Chưa có thành viên
                                                         </td>
-                                                        <td class="p-3 text-slate-600">
-                                                            <?= htmlspecialchars($m['email']) ?>
-                                                        </td>
-                                                        <td class="p-3 text-center">
-                                                            <?= date('d/m/Y', strtotime($m['join_date'])) ?>
-                                                        </td>
-                                                        <td class="p-3 text-center">
-                                                            <?= $m['fee_paid_date']
-                                                                ? date('d/m/Y', strtotime($m['fee_paid_date']))
-                                                                : '<span class="text-slate-400">Chưa đóng</span>' ?>
-                                                        </td>
-                                                        <td class="p-3 text-center font-semibold
+                                                    </tr>
+                                                <?php else: ?>
+                                                    <?php foreach ($members as $m): ?>
+                                                        <tr class="border-b hover:bg-slate-50 transition">
+                                                            <td class="p-3 font-medium">
+                                                                <?= htmlspecialchars($m['full_name']) ?>
+                                                            </td>
+                                                            <td class="p-3 text-slate-600">
+                                                                <?= htmlspecialchars($m['email']) ?>
+                                                            </td>
+                                                            <td class="p-3 text-center">
+                                                                <?= date('d/m/Y', strtotime($m['join_date'])) ?>
+                                                            </td>
+                                                            <td class="p-3 text-center">
+                                                                <?= $m['fee_paid_date']
+                                                                    ? date('d/m/Y', strtotime($m['fee_paid_date']))
+                                                                    : '<span class="text-slate-400">Chưa đóng</span>' ?>
+                                                            </td>
+                                                            <td class="p-3 text-center font-semibold
                                             <?= $m['fee_expire_date'] && strtotime($m['fee_expire_date']) >= time()
                                                 ? 'text-green-600'
                                                 : 'text-red-500' ?>">
-                                                            <?= $m['fee_expire_date']
-                                                                ? date('d/m/Y', strtotime($m['fee_expire_date']))
-                                                                : '—' ?>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                                <?= $m['fee_expire_date']
+                                                                    ? date('d/m/Y', strtotime($m['fee_expire_date']))
+                                                                    : '—' ?>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
 
+                                </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
         </main>

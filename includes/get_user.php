@@ -18,13 +18,16 @@ $sql = "
     SELECT 
         u.full_name,
         u.email,
+        u.avatar_url,
+        u.student_code,
+        u.hobbies,
+        u.created_at,
         r.role_name
     FROM users u
     JOIN roles r ON u.roleID = r.roleID
     WHERE u.userID = ?
     LIMIT 1
 ";
-
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userID);
 $stmt->execute();
@@ -39,7 +42,11 @@ if ($result->num_rows === 0) {
 $user = $result->fetch_assoc();
 
 /* BIẾN DÙNG CHUNG */
-$fullName  = $user['full_name'];
+$fullName = $user['full_name'];
 $userEmail = $user['email'];
-$roleName  = $user['role_name']; // ADMIN | MANAGER | MEMBER
+$roleName = $user['role_name']; // ADMIN | MANAGER | MEMBER
+$avatar = $user['avatar_url'] ?: ($_SESSION['avatar'] ?? null);
+$studentCode = $user['student_code'] ?? '';
+$hobbies = $user['hobbies'] ?? '';
+$createdAt = $user['created_at'] ?? '';
 ?>
