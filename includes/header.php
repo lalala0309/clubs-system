@@ -54,7 +54,7 @@ require_once __DIR__ . '/get_user.php';
         if (avatarBtn) {
             avatarBtn.addEventListener("click", function () {
 
-                fetch("../users/profile.php")
+                fetch("/clubs-system/users/profile.php")
                     .then(res => res.text())
                     .then(data => {
                         content.innerHTML = data;

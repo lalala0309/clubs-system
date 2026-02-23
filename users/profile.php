@@ -10,6 +10,8 @@ if (!empty($hobbies)) {
     $userHobbies = array_map('trim', explode(',', $hobbies));
 }
 ?>
+
+
 <?php if (isset($_GET['profile'])): ?>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -130,7 +132,7 @@ if (!empty($hobbies)) {
 
                 <div class="flex gap-3">
                     <button type="button" onclick="saveHobby()"
-                        class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl transition font-semibold">
+                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl transition font-semibold">
                         Lưu
                     </button>
 

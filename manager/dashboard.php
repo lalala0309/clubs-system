@@ -126,7 +126,8 @@ $sports = require '../manager_sport/get_all_sports.php';
                             <div class="flex items-center gap-3">
                                 <button id="back-btn" onclick="showAllClubs()"
                                     class="hidden flex items-center gap-2 text-indigo-600 font-bold hover:bg-indigo-50 px-4 py-2 rounded-xl transition">
-                                    <i class="fas fa-arrow-left"></i>
+                                    <i class="bi bi-arrow-left"></i>
+                                    Quay lại
                                 </button>
                                 <button id="add-club-btn" onclick="toggleAddClubForm()"
                                     class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
@@ -180,7 +181,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                                     <div class="flex items-center gap-4">
                                         <button
                                             onclick="event.stopPropagation(); toggleApprovals('approvals-<?= $clubID ?>');"
-                                            class="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full border border-orange-100 hover:bg-orange-600 hover:text-white transition group">
+                                            class="approval-btn hidden flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full border border-orange-100 hover:bg-orange-600 hover:text-white transition group">
 
                                             <i class="fas fa-user-clock"></i>
                                             <span class="text-xs font-bold uppercase">Phê duyệt</span>
@@ -260,6 +261,9 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                     <th class="p-3 text-center">Ngày tham gia</th>
                                                     <th class="p-3 text-center">Ngày đóng phí</th>
                                                     <th class="p-3 text-center">Ngày hết hạn</th>
+                                                    <th class="p-3 text-center">Trạng thái</th>
+                                                    <th class="p-3 text-center">Thao tác</th>
+
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -294,9 +298,29 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                                     ? date('d/m/Y', strtotime($m['fee_expire_date']))
                                                                     : '—' ?>
                                                             </td>
+                                                            <td class="p-3 text-center">
+                                                                <?php if ($m['fee_expire_date'] && strtotime($m['fee_expire_date']) >= time()): ?>
+                                                                    <span
+                                                                        class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-semibold">
+                                                                        Đang hoạt động
+                                                                    </span>
+                                                                <?php else: ?>
+                                                                    <span
+                                                                        class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+                                                                        Hết hạn
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="p-3 text-center">
+                                                                <button onclick="payFee(<?= $clubID ?>, <?= $m['userID'] ?>, this)"
+                                                                    class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-indigo-700">
+                                                                    Đóng phí
+                                                                </button>
+                                                            </td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 <?php endif; ?>
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -425,6 +449,8 @@ $sports = require '../manager_sport/get_all_sports.php';
             const allCards = document.querySelectorAll('.club-card');
             allCards.forEach(card => {
                 if (card.id === clubId) {
+                    const approvalBtn = card.querySelector('.approval-btn');
+                    if (approvalBtn) approvalBtn.classList.remove('hidden');
                     card.querySelector('.club-details').classList.remove('hidden');
                     card.querySelector('.chevron-icon')?.classList.add('hidden');
                     document.getElementById('page-title').innerText = "Quản lý thành viên";
@@ -462,6 +488,8 @@ $sports = require '../manager_sport/get_all_sports.php';
         function showAllClubs() {
             const allCards = document.querySelectorAll('.club-card');
             allCards.forEach(card => {
+                const approvalBtn = card.querySelector('.approval-btn');
+                if (approvalBtn) approvalBtn.classList.add('hidden');
                 card.classList.remove('hidden-club');
                 card.querySelector('.club-details').classList.add('hidden');
                 card.querySelector('.chevron-icon')?.classList.remove('hidden');
@@ -691,9 +719,52 @@ $sports = require '../manager_sport/get_all_sports.php';
                 approvals.classList.add('hidden');
             }
         }
+        function payFee(clubID, userID, btn) {
+
+            const months = prompt("Nhập số tháng muốn đóng (1-12):", "1");
+
+            if (months === null) return;
+
+            const m = parseInt(months);
+
+            if (isNaN(m) || m <= 0 || m > 12) {
+                alert("Số tháng không hợp lệ");
+                return;
+            }
+
+            fetch('./pay_fee.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clubID, userID, months: m })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert(data.error || "Lỗi cập nhật");
+                        return;
+                    }
+
+                    alert("Đóng phí thành công");
+
+                    const row = btn.closest("tr");
+
+                    row.cells[3].innerHTML = formatDate(data.fee_paid_date);
+                    row.cells[4].innerHTML = `
+            <span class="text-green-600 font-semibold">
+                ${formatDate(data.fee_expire_date)}
+            </span>
+        `;
+                    // cập nhật trạng thái
+                    row.cells[5].innerHTML = `
+    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-semibold">
+        Đang hoạt động
+    </span>
+`;
 
 
-
+                })
+                .catch(() => alert("Lỗi server"));
+        }
 
     </script>
     <script>
