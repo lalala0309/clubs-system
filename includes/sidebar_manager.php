@@ -28,6 +28,16 @@ $isAdmin   = ($role === 'ADMIN');
         <nav class="flex-1 space-y-2 md:space-y-3">
 
             <?php?>
+                <a href="../manager/home.php"
+                class="text-sm md:text-base <?php echo ($currentPage == 'home.php')
+                        ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
+                        : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Trang chủ
+                </a>
+
                 <a href="../manager/dashboard.php"
                 class="text-sm md:text-base <?php echo ($currentPage == 'dashboard.php')
                         ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
