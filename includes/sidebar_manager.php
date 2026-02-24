@@ -3,7 +3,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
 $role = $_SESSION['role'];
 
-$isAdmin   = ($role === 'ADMIN');
+$isAdmin = ($role === 'ADMIN');
 // $isManager = ($role === 'MANAGER');
 ?>
 
@@ -25,9 +25,8 @@ $isAdmin   = ($role === 'ADMIN');
         </button>
     </div>
 
-        <nav class="flex-1 space-y-2 md:space-y-3">
+    <nav class="flex-1 space-y-2 md:space-y-3">
 
-            <?php?>
                 <a href="../manager/home.php"
                 class="text-sm md:text-base <?php echo ($currentPage == 'home.php')
                         ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
@@ -48,38 +47,42 @@ $isAdmin   = ($role === 'ADMIN');
                     Quản lý thành viên
                 </a>
 
-                <a href="../booking/manage_booking.php"
-                class="text-sm md:text-base <?php echo ($currentPage == 'booking_ground.php')
-                        ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
-                        : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Quản lý đặt sân
-                </a>
-            <?php ?>
+        <a href="../booking/manage_booking.php"
+            class="text-sm md:text-base <?php echo ($currentPage == 'manage_booking.php')
+                ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
+                : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Quản lý đặt sân
+        </a>
+        <?php ?>
 
-            <?php if ($isAdmin): ?>
-                <a href="../admin/index.php"
-                class="text-sm md:text-base <?php echo ($currentPage == 'booking_ground.php')
-                        ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
-                        : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Quản lý phân quyền
-                </a>
-            <?php endif; ?>
+        <?php if ($isAdmin): ?>
+            <a href="../admin/index.php"
+                class="text-sm md:text-base <?php echo ($currentPage == 'index.php')
+                    ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
+                    : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Quản lý phân quyền
+            </a>
+        <?php endif; ?>
 
-        </nav>
+    </nav>
 
 
-        
 
 
-        <!-- <a href="../booking/booking_ground.php"
+
+    <!-- <a href="../booking/booking_ground.php"
            class="text-sm md:text-base <?php echo ($currentPage == 'booking_ground.php')
                ? 'active-menu flex items-center gap-4 px-5 py-3 md:py-3.5 font-bold shadow-lg shadow-indigo-100'
                : 'flex items-center gap-4 px-5 py-3 md:py-3.5 rounded-[22px] text-slate-500 hover:bg-indigo-50 transition font-semibold'; ?>">
              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             Đặt sân -->
-        </a>
+    </a>
     </nav>
 
     <div class="space-y-4">

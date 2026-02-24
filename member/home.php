@@ -13,7 +13,7 @@ require_once './get_my_clubs.php';
     <title>CLB Đã Tham Gia - CTUMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/sidebar_member.css">
+    <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
