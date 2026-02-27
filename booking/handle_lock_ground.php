@@ -57,7 +57,7 @@ try {
 
             $currentDay = $dayObj->format('Y-m-d');
 
-            // ⭐ LOGIC QUAN TRỌNG
+            // LOGIC QUAN TRỌNG
             if ($currentDay === $startDay && $currentDay === $endDay) {
                 // cùng ngày
                 $start = $startDate->format('H:i:s');

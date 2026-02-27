@@ -12,16 +12,16 @@ if (!empty($hobbies)) {
 ?>
 
 
-<?php if (isset($_GET['profile'])): ?>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const modal = document.getElementById("profileModal");
-            if (modal) {
-                modal.classList.remove("hidden");
-            }
-        });
-    </script>
-<?php endif; ?>
+<!-- <?php ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("profileModal");
+        if (modal) {
+            modal.classList.remove("hidden");
+        }
+    });
+</script>
+<?php ?> -->
 <div id="profile" class="p-8 w-full">
 
     <!-- Avatar + Name -->

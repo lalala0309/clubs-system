@@ -236,7 +236,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                     </div>
 
                                                     <button onclick="approveMember(<?= $clubID ?>, <?= $req['userID'] ?>, this)"
-                                                        class="px-3 py-1 bg-green-600 text-white rounded">
+                                                        class="px-3 py-1 bg-blue-600 text-white rounded">
                                                         Duyệt
                                                     </button>
 
@@ -659,18 +659,29 @@ $sports = require '../manager_sport/get_all_sports.php';
                     row.className = 'border-b hover:bg-slate-50 transition';
 
                     row.innerHTML = `
-            <td class="p-3 font-medium">${member.full_name}</td>
-            <td class="p-3 text-slate-600">${member.email}</td>
-            <td class="p-3 text-center">
-                ${formatDate(member.join_date)}
-            </td>
-            <td class="p-3 text-center text-slate-400">
-                Chưa đóng
-            </td>
-            <td class="p-3 text-center text-red-500 font-semibold">
-                —
-            </td>
-        `;
+    <td class="p-3 font-medium">${member.full_name}</td>
+    <td class="p-3 text-slate-600">${member.email}</td>
+    <td class="p-3 text-center">
+        ${formatDate(member.join_date)}
+    </td>
+    <td class="p-3 text-center text-slate-400">
+        Chưa đóng
+    </td>
+    <td class="p-3 text-center text-red-500 font-semibold">
+        —
+    </td>
+    <td class="p-3 text-center">
+        <span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+            Hết hạn
+        </span>
+    </td>
+    <td class="p-3 text-center">
+        <button onclick="payFee(${clubID}, ${member.userID}, this)"
+            class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-indigo-700">
+            Đóng phí
+        </button>
+    </td>
+`;
 
                     /* Nếu bảng đang là "Chưa có thành viên" → xóa dòng đó */
                     const emptyRow = tableBody.querySelector('td[colspan]');

@@ -310,6 +310,12 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
 
         }
+
+        .cell-my-booking {
+            background: #bbf7d0 !important;
+            /* green-200 */
+            color: #111827 !important;
+        }
     </style>
 </head>
 
@@ -495,9 +501,14 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
+        const CURRENT_USER_ID = <?php echo $userID; ?>;
         let currentCourtName = "Sân số 01";
         let selectedBooking = { groundID: null, booking_date: null, start_time: null, end_time: null };
         let currentSportID = <?php echo $active_sport_id ?? 'null'; ?>;
+        let originalTableHTML = '';
+        window.addEventListener('DOMContentLoaded', () => {
+            originalTableHTML = document.querySelector('#view-timetable .flex-1').innerHTML;
+        });
 
         function openTimetable(sportID, sportName) {
             currentSportID = sportID;
@@ -507,7 +518,42 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
             fetch(`get_grounds_by_sport.php?sportID=${sportID}&userID=<?php echo $userID; ?>`)
                 .then(res => res.json())
-                .then(data => renderCourts(data));
+                .then(data => {
+
+                    if (!data || data.length === 0) {
+                        showFeeWarning();
+                        return;
+                    }
+
+                    const expireDateStr = data[0].fee_expire_date;
+
+                    if (!expireDateStr) {
+                        showFeeWarning();
+                        return;
+                    }
+
+                    const today = new Date();
+                    const expireDate = new Date(expireDateStr);
+
+                    // reset giờ để so ngày chính xác
+                    today.setHours(0, 0, 0, 0);
+                    expireDate.setHours(0, 0, 0, 0);
+
+                    if (expireDate < today) {
+                        showFeeWarning();
+                        return;
+                    }
+                    // còn hạn → khôi phục lại bảng nếu đã bị thay thế
+                    const tableContainer = document.querySelector('#view-timetable .flex-1');
+
+                    if (originalTableHTML && tableContainer.innerHTML !== originalTableHTML) {
+                        tableContainer.innerHTML = originalTableHTML;
+                    }
+
+                    document.getElementById("weeklyUsageBadge").style.display = "flex";
+
+                    renderCourts(data);
+                });
         }
 
         function renderCourts(grounds) {
@@ -653,7 +699,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 document.querySelectorAll('.grid-cell').forEach(cell => {
                     if (cell.dataset.day === b.booking_date && cell.dataset.time === `${b.start_time}-${b.end_time}`) {
                         cell.classList.remove('cell-available');
-                        cell.classList.add('cell-booked');
+                        if (b.userID == CURRENT_USER_ID) {
+                            cell.classList.add('cell-my-booking');
+                        } else {
+                            cell.classList.add('cell-booked');
+                        }
                         cell.innerHTML = `
 <div class="cell-content">
     <div class="font-semibold truncate">${b.full_name}</div>
@@ -765,7 +815,23 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     }
                 });
         }
+        function showFeeWarning() {
 
+            const tableContainer = document.querySelector('#view-timetable .flex-1');
+
+            tableContainer.innerHTML = `
+    <div class="w-full h-full flex items-center justify-center">
+        <div class="text-center">
+            <i class="bi bi-exclamation-circle text-4xl text-slate-400 mb-4"></i>
+            <p class="text-slate-500 font-bold text-lg">
+                Vui lòng đóng phí để sử dụng tiện ích câu lạc bộ
+            </p>
+        </div>
+    </div>
+`;
+
+            document.getElementById("weeklyUsageBadge").style.display = "none";
+        }
     </script>
 </body>
 

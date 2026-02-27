@@ -286,6 +286,37 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             pointer-events: auto;
             transform: translateX(0);
         }
+
+        /* Hiệu ứng khi các ô cùng nhóm được highlight */
+        .cell-locked.highlight-group {
+            background: #fee2e2 !important;
+            /* Màu đỏ nhạt hơn hoặc xanh tùy bạn chọn */
+            border: 2px solid #ef4444;
+            z-index: 10;
+        }
+
+        /* Nút huỷ nhỏ hiện lên khi ô được chọn hoặc hover */
+        .unlock-tag {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+            /* Mặc định ẩn */
+        }
+
+        /* Khi ô được chọn (active-lock) hoặc hover thì hiện nút */
+        .cell-locked.active-lock .unlock-tag,
+        .cell-locked:hover .unlock-tag {
+            display: block;
+        }
     </style>
 </head>
 <!-- ADD GROUND MODAL -->
@@ -461,7 +492,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                             id="court-tabs-container">
                         </div>
 
-                        <div class="flex-1 overflow-auto custom-scroll">
+                        <div id="timetable-content" class="flex-1 overflow-auto custom-scroll">
                             <table class="grid-table">
                                 <thead class="sticky top-0 z-20 bg-slate-50">
                                     <tr>
@@ -516,16 +547,25 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                 <!-- FROM -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-500">Từ</label>
-                    <input type="datetime-local" id="lock-from" class="w-full p-2 bg-slate-50 rounded-xl">
+                    <label class="text-xs font-semibold text-slate-500">Từ ngày</label>
+                    <input type="date" id="lock-from-date" class="w-full p-2 bg-slate-50 rounded-xl">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Giờ bắt đầu</label>
+                    <select id="lock-from-hour" class="w-full p-2 bg-slate-50 rounded-xl"></select>
                 </div>
 
                 <!-- TO -->
                 <div>
-                    <label class="text-xs font-semibold text-slate-500">Đến</label>
-                    <input type="datetime-local" id="lock-to" class="w-full p-2 bg-slate-50 rounded-xl">
+                    <label class="text-xs font-semibold text-slate-500">Đến ngày</label>
+                    <input type="date" id="lock-to-date" class="w-full p-2 bg-slate-50 rounded-xl">
                 </div>
 
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">Giờ kết thúc</label>
+                    <select id="lock-to-hour" class="w-full p-2 bg-slate-50 rounded-xl"></select>
+                </div>
                 <!-- MULTI GROUND -->
                 <div>
                     <label class="text-xs font-semibold text-slate-500">Chọn sân</label>
@@ -634,7 +674,42 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
         function renderCourts(grounds) {
             const container = document.getElementById('court-tabs-container');
+            const timetableContent = document.getElementById('timetable-content');
             container.innerHTML = '';
+
+            // ==============================
+            // KHÔNG CÓ SÂN
+            // ==============================
+            if (!grounds || grounds.length === 0) {
+
+                // Reset label
+                document.getElementById('selected-court-label').innerText = 'Chưa có sân';
+
+                // Ẩn badge
+                document.getElementById('court-limit-badge').classList.add('hidden');
+
+                // Clear tab trái
+                container.innerHTML = '';
+
+                // Thay toàn bộ table bằng thông báo
+                timetableContent.innerHTML = `
+    <div class="w-full h-full flex flex-col items-center justify-center text-center">
+        <i class="bi bi-exclamation-circle text-4xl text-slate-300 mb-4"></i>
+        <div class="text-lg font-bold text-slate-400 uppercase">
+            Không có sân
+        </div>
+        <div class="text-sm text-slate-400 mt-2">
+            Vui lòng thêm sân để sử dụng
+        </div>
+
+    </div>
+`;
+
+                return;
+            }
+
+            // Nếu có sân → đảm bảo table hiển thị lại
+            timetableContent.innerHTML = originalTableHTML;
 
             const savedGroundID = sessionStorage.getItem('reopen_ground_id');
 
@@ -737,6 +812,12 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             }
         });
 
+        let originalTableHTML = '';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            originalTableHTML = document.getElementById('timetable-content').innerHTML;
+        });
+
         function openPanel(time, date) {
             const [start, end] = time.split('-');
             selectedBooking.start_time = start;
@@ -751,17 +832,17 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
         function closePanel() { document.getElementById('right-panel').classList.remove('active'); }
 
-        // function backToClubs() {
-        //     document.getElementById('view-timetable').classList.add('view-hidden');
-        //     document.getElementById('view-clubs').classList.remove('view-hidden');
-        //     // Xóa sportID trên URL khi quay lại
-        //     const url = new URL(window.location.href);
-        //     url.searchParams.delete('sportID');
-        //     window.history.replaceState({}, '', url.href);
-        //     currentSportID = null;
-        //     sessionStorage.clear();
-        //     closePanel();
-        // }
+        function backToClubs() {
+            document.getElementById('view-timetable').classList.add('view-hidden');
+            document.getElementById('view-clubs').classList.remove('view-hidden');
+            // Xóa sportID trên URL khi quay lại
+            const url = new URL(window.location.href);
+            url.searchParams.delete('sportID');
+            window.history.replaceState({}, '', url.href);
+            currentSportID = null;
+            sessionStorage.clear();
+            closePanel();
+        }
 
         const confirmBtn = document.getElementById('btn-confirm');
 
@@ -900,19 +981,26 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
         function submitLock() {
 
-            const from = document.getElementById('lock-from').value;
-            const to = document.getElementById('lock-to').value;
+            const fromDate = document.getElementById('lock-from-date').value;
+            const fromHour = document.getElementById('lock-from-hour').value;
 
-            if (!from || !to) return alert("Chọn thời gian");
+            const toDate = document.getElementById('lock-to-date').value;
+            const toHour = document.getElementById('lock-to-hour').value;
+
+            if (!fromDate || !toDate) return alert("Chọn ngày");
+
+            if (fromDate > toDate) return alert("Ngày không hợp lệ");
+
+            if (fromDate === toDate && fromHour >= toHour)
+                return alert("Giờ không hợp lệ");
 
             const checked = document.querySelectorAll('.lock-ground-checkbox:checked');
-
             if (checked.length === 0) return alert("Chọn ít nhất 1 sân");
 
             const formData = new FormData();
 
-            formData.append('from', from);
-            formData.append('to', to);
+            formData.append('from', fromDate + ' ' + fromHour);
+            formData.append('to', toDate + ' ' + toHour);
 
             checked.forEach(c => {
                 formData.append('grounds[]', c.value);
@@ -925,7 +1013,6 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 .then(r => r.json())
                 .then(data => {
                     if (data.status === 'success') {
-
                         alert("Khoá sân thành công");
                         closeLockPanel();
                         reloadCurrentGround();
@@ -975,7 +1062,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         slotEndMin += 24 * 60;
                     }
 
-                    // ✅ kiểm tra giao nhau
+                    // kiểm tra giao nhau
                     if (
                         slotStartMin < lockEndMin &&
                         slotEndMin > lockStartMin
@@ -984,13 +1071,37 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         cell.classList.remove('cell-available', 'cell-past');
                         cell.classList.add('cell-locked');
 
-                        cell.innerHTML = `
-                <div class="cell-content text-red-500 text-[11px]">
-                    <i class="bi bi-lock-fill text-[12px]"></i>
-                </div>
-            `;
+                        // Gán ID nhóm theo ngày để dễ truy vấn
+                        cell.setAttribute('data-lock-group', l.lock_date);
 
-                        cell.onclick = null;
+                        // Chèn thêm nút Unlock Tag vào HTML
+                        cell.innerHTML = `
+                    <div class="cell-content text-red-500 text-[11px]">
+                        <i class="bi bi-lock-fill text-[12px]"></i>
+                        <span class="unlock-tag"
+    onclick="handleUnlockClick(event, '${l.lock_date}', '${selectedBooking.groundID}')">
+    Huỷ khoá
+</span>
+                    </div>
+                `;
+
+                        // Bổ sung sự kiện Hover để sáng cả khối
+                        cell.onmouseenter = () => highlightGroup(l.lock_date, true);
+                        cell.onmouseleave = () => highlightGroup(l.lock_date, false);
+                        // Sự kiện Click để "Chọn" khối
+                        cell.onclick = (e) => {
+                            // Xóa trạng thái active của TẤT CẢ các ô đang có trên màn hình
+                            document.querySelectorAll('.cell-locked').forEach(c => {
+                                c.classList.remove('active-lock');
+                            });
+
+                            //  Thêm active cho TOÀN BỘ các ô cùng nhóm (cùng ngày)
+                            const group = document.querySelectorAll(`[data-lock-group="${l.lock_date}"]`);
+                            group.forEach(c => c.classList.add('active-lock'));
+
+                            // Ngăn sự kiện lan ra ngoài nếu cần
+                            e.stopPropagation();
+                        }
                     }
 
                 });
@@ -1023,15 +1134,15 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
         function openLockPanelManual() {
 
-            const now = new Date();
+            const today = new Date().toISOString().split('T')[0];
 
-            const from = now.toISOString().slice(0, 16);
+            document.getElementById('lock-from-date').value = today;
+            document.getElementById('lock-to-date').value = today;
 
-            now.setHours(now.getHours() + 1);
-            const to = now.toISOString().slice(0, 16);
+            renderHourOptions();
 
-            document.getElementById('lock-from').value = from;
-            document.getElementById('lock-to').value = to;
+            document.getElementById('lock-from-hour').value = "06:00";
+            document.getElementById('lock-to-hour').value = "07:00";
 
             const panel = document.getElementById('lock-panel');
 
@@ -1140,7 +1251,97 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 });
         }
 
+        function unlockSlot(lockDate, startTime, endTime, groundID) {
 
+            if (!confirm("Huỷ toàn bộ khoá trong ngày này?")) return;
+
+            fetch('handle_unlock_ground.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    groundID: groundID,
+                    from: lockDate + ' 00:00',
+                    to: lockDate + ' 23:59'
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Đã huỷ khoá");
+                        reloadCurrentGround();
+                    } else {
+                        alert("Huỷ thất bại");
+                    }
+                });
+        }
+        function renderHourOptions() {
+
+            const fromSelect = document.getElementById('lock-from-hour');
+            const toSelect = document.getElementById('lock-to-hour');
+
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+
+            for (let h = 6; h <= 21; h++) {
+
+                const hour = String(h).padStart(2, '0') + ':00';
+
+                fromSelect.innerHTML += `<option value="${hour}">${hour}</option>`;
+                toSelect.innerHTML += `<option value="${hour}">${hour}</option>`;
+            }
+        }
+
+        function handleUnlockClick(event, lockDate, groundID) {
+            // Ngăn chặn sự kiện click lan xuống ô phía dưới
+            event.stopPropagation();
+
+            if (confirm(`Bạn có chắc muốn mở khoá toàn bộ các ô trong ngày ${lockDate}?`)) {
+                // Gọi API huỷ khoá
+                fetch('handle_unlock_ground.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        groundID: groundID,
+                        from: lockDate + ' 00:00',
+                        to: lockDate + ' 23:59'
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Đã huỷ khoá thành công");
+                            reloadCurrentGround();
+                        } else {
+                            alert("Huỷ thất bại");
+                        }
+                    });
+            }
+        }
+
+        // Hàm highlight group (giữ nguyên hoặc cập nhật nếu chưa có)
+        function highlightGroup(groupId, active) {
+            const groupCells = document.querySelectorAll(`[data-lock-group="${groupId}"]`);
+            groupCells.forEach(cell => {
+                if (active) {
+                    cell.classList.add('highlight-group');
+                } else {
+                    cell.classList.remove('highlight-group');
+                }
+            });
+        }
+
+        document.addEventListener('click', function (e) {
+
+            // Nếu click không phải ô locked
+            if (!e.target.closest('.cell-locked')) {
+
+                document.querySelectorAll('.cell-locked').forEach(c => {
+                    c.classList.remove('active-lock');
+                });
+
+            }
+
+        });
     </script>
 </body>
 

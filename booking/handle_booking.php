@@ -58,7 +58,7 @@ if ($stmt->get_result()->num_rows > 0) {
 
 
 /* ==============================
-   1️⃣ CHECK TRÙNG GIỜ
+   CHECK TRÙNG GIỜ
 ============================== */
 $sqlCheck = "
 SELECT id FROM bookings
@@ -79,7 +79,7 @@ if ($stmt->get_result()->num_rows > 0) {
 
 
 /* ==============================
-   2️⃣ LẤY LIMIT THEO GROUND  ✅ MỚI
+    LẤY LIMIT THEO GROUND 
 ============================== */
 $sqlLimit = "
 SELECT COALESCE(gs.weekly_limit, 4) AS weekly_limit
@@ -96,7 +96,7 @@ $limit = $stmt->get_result()->fetch_assoc()['weekly_limit'];
 
 
 /* ==============================
-   3️⃣ TÍNH TUẦN
+    TÍNH TUẦN
 ============================== */
 $weekDate = new DateTime($booking_date);
 
@@ -112,7 +112,7 @@ $endWeek = $sunday->format('Y-m-d');
 
 
 /* ==============================
-   4️⃣ ĐẾM THEO USER + GROUND  ✅ MỚI
+   ĐẾM THEO USER + GROUND  
 ============================== */
 $sqlCount = "
 SELECT COUNT(*) AS total
@@ -138,7 +138,7 @@ if ($total >= $limit) {
 
 
 /* ==============================
-   5️⃣ INSERT BOOKING
+    INSERT BOOKING
 ============================== */
 $sqlInsert = "
 INSERT INTO bookings (userID, groundID, booking_date, start_time, end_time)

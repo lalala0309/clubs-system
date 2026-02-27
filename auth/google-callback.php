@@ -46,12 +46,39 @@ $_SESSION['google_json'] = $userInfo->toSimpleObject();
 $email = $userInfo->email;
 $full_name = $userInfo->name;
 $google_id = $userInfo->id;
-$avatar = $userInfo->picture ?? null;
 
-if ($avatar) {
-    $avatar .= '?sz=200';
+$avatar = null;
+
+if (!empty($userInfo->picture)) {
+    $avatar = $userInfo->picture . '?sz=200';
 }
 
+// $avatar = null;
+
+// if (!empty($userInfo->picture)) {
+
+//     $googleAvatar = $userInfo->picture . '?sz=200';
+
+//     // Tạo thư mục nếu chưa tồn tại
+//     $uploadDir = '../uploads/avatars/';
+//     if (!is_dir($uploadDir)) {
+//         mkdir($uploadDir, 0777, true);
+//     }
+
+//     // Tạo tên file duy nhất
+//     $fileName = uniqid('avatar_') . '.jpg';
+//     $filePath = $uploadDir . $fileName;
+
+//     // Tải ảnh từ Google
+//     $imageContent = file_get_contents($googleAvatar);
+
+//     if ($imageContent !== false) {
+//         file_put_contents($filePath, $imageContent);
+
+//         // Lưu đường dẫn tương đối vào DB
+//         $avatar = 'uploads/avatars/' . $fileName;
+//     }
+// }
 // Set session
 // $_SESSION['user'] = [
 //     'id'    => md5($email), // hoặc id trong DB
