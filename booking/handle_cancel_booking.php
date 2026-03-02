@@ -42,15 +42,21 @@ $booking = $result->fetch_assoc();
    2. UPDATE STATUS
 ================================= */
 
-$update = $conn->prepare("
-    UPDATE bookings 
-    SET status = 'cancelled'
-    WHERE id = ? AND status = 'approved'
+$delete = $conn->prepare("
+    DELETE FROM bookings 
+    WHERE id = ?
 ");
 
-$update->bind_param("i", $bookingID);
-$update->execute();
+$delete->bind_param("i", $bookingID);
+$delete->execute();
 
+if ($delete->affected_rows === 0) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Không thể xoá lịch'
+    ]);
+    exit;
+}
 /* ===============================
    3. GỬI EMAIL
 ================================= */

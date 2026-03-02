@@ -316,6 +316,26 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             /* green-200 */
             color: #111827 !important;
         }
+
+        .cell-blue-light {
+            background: #dbeafe !important;
+            /* blue-100 */
+            color: #1e3a8a;
+        }
+
+        /* Còn lượt ưu tiên */
+        .cell-available-priority {
+            background-color: #dcfce7 !important;
+            /* green-100 */
+            color: #166534 !important;
+        }
+
+        /* Hết lượt ưu tiên */
+        .cell-no-priority {
+            background-color: #fee2e2 !important;
+            /* red-100 */
+            color: #7f1d1d !important;
+        }
     </style>
 </head>
 
@@ -404,18 +424,71 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
                         </div>
 
-                        <div
-                            class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
-                            <button onclick="changeWeek(<?php echo $week_offset - 1; ?>)"
-                                class="hover:text-indigo-600 px-1">
-                                <i class="bi bi-caret-left-fill text-[10px]"></i>
-                            </button>
-                            <span
-                                class="text-[9px] font-bold text-slate-500 uppercase"><?php echo $week_range; ?></span>
-                            <button onclick="changeWeek(<?php echo $week_offset + 1; ?>)"
-                                class="hover:text-indigo-600 px-1">
-                                <i class="bi bi-caret-right-fill text-[10px]"></i>
-                            </button>
+                        <div class="flex items-center gap-3">
+
+                            <!-- Khung chuyển tuần -->
+                            <div
+                                class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
+                                <button onclick="changeWeek(<?php echo $week_offset - 1; ?>)"
+                                    class="hover:text-indigo-600 px-1">
+                                    <i class="bi bi-caret-left-fill text-[10px]"></i>
+                                </button>
+
+                                <span class="text-[9px] font-bold text-slate-500 uppercase">
+                                    <?php echo $week_range; ?>
+                                </span>
+
+                                <button onclick="changeWeek(<?php echo $week_offset + 1; ?>)"
+                                    class="hover:text-indigo-600 px-1">
+                                    <i class="bi bi-caret-right-fill text-[10px]"></i>
+                                </button>
+                            </div>
+
+                            <!-- Dấu hỏi -->
+                            <div class="relative">
+                                <button id="legendToggle"
+                                    class="w-6 h-6 rounded-full bg-slate-200 hover:bg-indigo-100 text-slate-600 flex items-center justify-center text-[11px] shadow-sm">
+                                    <i class="bi bi-question-lg"></i>
+                                </button>
+
+                                <div id="colorLegend"
+                                    class="hidden absolute top-8 right-0 bg-white shadow-xl border border-slate-200 rounded-xl p-4 w-64 text-[11px] space-y-3 z-50">
+
+                                    <div class="font-bold text-slate-700 uppercase text-[10px] mb-2">
+                                        Chú thích
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 bg-green-100">
+                                        </div>
+                                        <span>Lượt ưu tiên của bạn, bạn có thể đè lịch của người khác không ưu
+                                            tiên</span>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 bg-blue-100">
+                                        </div>
+                                        <span>Người khác còn lượt ưu tiên, bạn không thể đè lịch</span>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 bg-red-100">
+                                        </div>
+                                        <span>Bạn đã hết lượt ưu tiên, có thể bị đè</span>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 border">
+                                        </div>
+                                        <span>Người khác hết lượt ưu tiên, bạn có thể dùng lượt ưu tiên để đặt</span>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -506,6 +579,8 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
         let selectedBooking = { groundID: null, booking_date: null, start_time: null, end_time: null };
         let currentSportID = <?php echo $active_sport_id ?? 'null'; ?>;
         let originalTableHTML = '';
+        let countdownInterval = null;
+
         window.addEventListener('DOMContentLoaded', () => {
             originalTableHTML = document.querySelector('#view-timetable .flex-1').innerHTML;
         });
@@ -532,17 +607,35 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         return;
                     }
 
-                    const today = new Date();
+                    const now = new Date();
                     const expireDate = new Date(expireDateStr);
 
-                    // reset giờ để so ngày chính xác
-                    today.setHours(0, 0, 0, 0);
-                    expireDate.setHours(0, 0, 0, 0);
+                    // nếu DB chỉ lưu yyyy-mm-dd thì set hết ngày 23:59:59
+                    expireDate.setHours(23, 59, 59, 999);
 
-                    if (expireDate < today) {
+                    // TÍNH SỐ NGÀY CÒN LẠI
+                    const diffTime = expireDate - now;
+                    const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (remainingDays < 0) {
                         showFeeWarning();
                         return;
                     }
+
+                    // FORMAT NGÀY GIỜ VIỆT NAM
+                    function formatDateTimeVN(date) {
+                        const d = String(date.getDate()).padStart(2, '0');
+                        const m = String(date.getMonth() + 1).padStart(2, '0');
+                        const y = date.getFullYear();
+                        const h = String(date.getHours()).padStart(2, '0');
+                        const min = String(date.getMinutes()).padStart(2, '0');
+                        return `${d}/${m}/${y} - ${h}:${min}`;
+                    }
+
+                    // window.remainingDays = remainingDays;
+                    // window.expireDateFormatted = formatDateTimeVN(expireDate);
+                    window.expireDate = expireDate;
+                    startCountdown();
                     // còn hạn → khôi phục lại bảng nếu đã bị thay thế
                     const tableContainer = document.querySelector('#view-timetable .flex-1');
 
@@ -597,13 +690,15 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             selectedBooking.groundID = groundID;
 
             document.querySelectorAll('.grid-cell').forEach(cell => {
-                cell.classList.remove(
-                    'cell-booked',
-                    'cell-locked',
-                    'cell-past'
-                );
-                cell.classList.add('cell-available');
+                cell.className = 'grid-cell cell-available';
+                // reset sạch toàn bộ class về mặc định
+
                 cell.innerHTML = '';
+
+                delete cell.dataset.bookingId;
+                delete cell.dataset.bookedBy;
+                delete cell.dataset.priority;
+
             });
             fetch(`get_locked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
                 .then(res => res.json())
@@ -611,7 +706,9 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
             fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
                 .then(res => res.json())
+
                 .then(data => {
+                    console.log("BOOKINGS:", data);
                     markBookedSlots(data);
                     disablePastSlots();
                 });
@@ -650,17 +747,34 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 }
             }
         });
-
         function openPanel(time, date) {
+
+            // RESET bookingID để đảm bảo đây là đặt mới
+            delete selectedBooking.bookingID;
+
             const [start, end] = time.split('-');
             selectedBooking.start_time = start;
             selectedBooking.end_time = end;
             selectedBooking.booking_date = date.split(' - ')[1];
 
+            const btn = document.getElementById('btn-confirm');
+            btn.innerText = "Xác nhận gửi yêu cầu";
+            btn.classList.remove('bg-red-600');
+            btn.classList.add('bg-indigo-600');
+
             document.getElementById('info-time').innerText = time;
             document.getElementById('info-date').innerText = date;
             document.getElementById('info-court').innerText = currentCourtName;
             document.getElementById('right-panel').classList.add('active');
+
+            const cell = document.querySelector(
+                `.grid-cell[data-day="${selectedBooking.booking_date}"][data-time="${time}"]`
+            );
+
+            if (cell) {
+                selectedBooking.bookedBy = cell.dataset.bookedBy || null;
+                selectedBooking.oldPriority = cell.dataset.priority || 0;
+            }
         }
 
         function closePanel() { document.getElementById('right-panel').classList.remove('active'); }
@@ -678,6 +792,74 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
         }
 
         document.getElementById('btn-confirm').addEventListener('click', () => {
+            // ====== NẾU LÀ HUỶ ======
+            if (selectedBooking.bookingID) {
+
+                if (!confirm("Bạn chắc chắn muốn huỷ lịch này?")) return;
+
+                fetch('./cancel_booking.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingID: selectedBooking.bookingID })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+
+                            alert('Huỷ thành công');
+
+                            closePanel();
+
+                            const activeBtn = document.querySelector('.court-tab.active');
+
+                            if (activeBtn) {
+                                changeCourt(
+                                    parseInt(activeBtn.textContent.replace('S', '')),
+                                    activeBtn
+                                );
+                            }
+
+                            // reset luôn selectedBooking để tránh giữ bookingID cũ
+                            selectedBooking = {
+                                groundID: activeBtn?.dataset.groundId || null
+                            };
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+
+                return;
+            }
+
+            // ====== NẾU SLOT ĐANG CÓ NGƯỜI KHÁC ======
+            if (selectedBooking.bookedBy && selectedBooking.bookedBy != CURRENT_USER_ID) {
+
+                if (!confirm("Khung giờ này đã có người đặt. Bạn có muốn gửi yêu cầu đặt?")) {
+                    return;
+                }
+
+                const formData = new FormData();
+                for (let k in selectedBooking) {
+                    formData.append(k, selectedBooking[k]);
+                }
+
+                fetch('./override_booking.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Đặt lịch thành công');
+                            closePanel();
+                            reloadCurrentCourt();
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+
+                return;
+            }
             if (!selectedBooking.groundID) return alert('Lỗi: Chưa chọn sân');
             const formData = new FormData();
             for (let k in selectedBooking) formData.append(k, selectedBooking[k]);
@@ -687,31 +869,87 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 .then(data => {
                     if (data.status === 'success') {
                         alert('Đặt sân thành công');
+                        selectedBooking = {
+                            groundID: selectedBooking.groundID
+                        };
                         closePanel();
+                        reloadCurrentCourt();
                         const activeBtn = document.querySelector('.court-tab.active');
                         if (activeBtn) changeCourt(parseInt(activeBtn.innerText.replace('S', '')), activeBtn);
                     } else { alert(data.message); }
                 });
         });
-
         function markBookedSlots(bookings) {
+
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('cell-my-booking', 'cell-booked');
+                const thMap = {
+                    0: 'CN',
+                    1: 'Thứ 2',
+                    2: 'Thứ 3',
+                    3: 'Thứ 4',
+                    4: 'Thứ 5',
+                    5: 'Thứ 6',
+                    6: 'Thứ 7'
+                };
+
+                cell.onclick = () => {
+                    const [d, m] = cell.dataset.day.split('/');
+                    const year = new Date().getFullYear();
+                    const dateObj = new Date(year, m - 1, d);
+                    const label = thMap[dateObj.getDay()];
+                    openPanel(
+                        cell.dataset.time,
+                        `${label} - ${cell.dataset.day}`
+                    );
+                };
+                cell.innerHTML = '';
+            });
+
             bookings.forEach(b => {
+
                 document.querySelectorAll('.grid-cell').forEach(cell => {
-                    if (cell.dataset.day === b.booking_date && cell.dataset.time === `${b.start_time}-${b.end_time}`) {
-                        cell.classList.remove('cell-available');
+
+                    if (
+                        cell.dataset.day === b.booking_date &&
+                        cell.dataset.time === `${b.start_time}-${b.end_time}`
+                    ) {
+
+                        cell.classList.remove('cell-available'
+                        );
+
+
                         if (b.userID == CURRENT_USER_ID) {
-                            cell.classList.add('cell-my-booking');
+                            cell.dataset.bookingId = b.bookingID;
+                            cell.onclick = () => openCancelPanel(b);
+
+                            if (b.priority == 1) {
+                                // còn lượt ưu tiên
+                                cell.classList.add('cell-available-priority');
+                            } else {
+                                // hết lượt ưu tiên
+                                cell.classList.add('cell-no-priority');
+                            }
                         } else {
-                            cell.classList.add('cell-booked');
+
+                            cell.dataset.bookedBy = b.userID;
+                            cell.dataset.priority = b.priority;
+
+                            if (b.priority == 1) {
+                                // chưa vượt limit → xanh nhạt
+                                cell.classList.add('cell-blue-light');
+                            } else {
+                                // đã vượt limit → màu đậm
+                                cell.classList.add('cell-booked');
+                            }
                         }
+
                         cell.innerHTML = `
-<div class="cell-content">
-    <div class="font-semibold truncate">${b.full_name}</div>
-    <div class="opacity-60 truncate">${b.email}</div>
-</div>
-`;
-
-
+                <div class="cell-content">
+                    <div class="font-semibold truncate">${b.full_name}</div>
+                    <div class="opacity-60 truncate">${b.email}</div>
+                </div>
+            `;
                     }
                 });
             });
@@ -805,8 +1043,14 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     const badge = document.getElementById("weeklyUsageBadge");
 
                     // 1. Cập nhật nội dung (giữ lại icon nếu muốn)
-                    badge.innerHTML = `<div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300"><i class="bi bi-calendar-check"></i> <span>Còn ${data.remain}/${data.limit}</span></div>`;
-                    // Xóa các class màu cũ
+                    badge.innerHTML = `
+<div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wide">
+    <i class="bi bi-calendar-check"></i>
+    <span>Còn ${data.remain}/${data.limit}</span>
+    <span class="">• Hết hạn sau: </span>
+    <span id="countdown-text" class="text-indigo-600"></span>
+</div>
+`;
                     //  badge.classList.remove('bg-emerald-100', 'text-emerald-600', 'bg-red-100', 'text-red-600', 'bg-indigo-100', 'text-indigo-600');
                     if (data.remain <= 0) {
                         badge.className = "badge bg-danger ms-2";
@@ -832,6 +1076,80 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
             document.getElementById("weeklyUsageBadge").style.display = "none";
         }
+
+        function openCancelPanel(booking) {
+
+            selectedBooking.bookingID = booking.bookingID;
+
+            document.getElementById('info-time').innerText =
+                booking.start_time + "-" + booking.end_time;
+
+            document.getElementById('info-date').innerText =
+                booking.booking_date;
+
+            document.getElementById('info-court').innerText =
+                currentCourtName;
+
+            const btn = document.getElementById('btn-confirm');
+
+            btn.innerText = "Huỷ đặt sân";
+            btn.classList.remove('bg-indigo-600');
+            btn.classList.add('bg-red-600');
+
+            document.getElementById('right-panel').classList.add('active');
+        }
+        function reloadCurrentCourt() {
+
+            const activeBtn = document.querySelector('.court-tab.active');
+            if (!activeBtn) return;
+
+            const index = parseInt(activeBtn.innerText.replace('S', ''));
+            changeCourt(index, activeBtn);
+        }
+
+        function startCountdown() {
+
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            countdownInterval = setInterval(() => {
+
+                const badgeTime = document.getElementById("countdown-text");
+                if (!badgeTime) return;
+
+                const now = new Date();
+                const diff = window.expireDate - now;
+
+                if (diff <= 0) {
+                    clearInterval(countdownInterval);
+                    badgeTime.innerText = "Hết hạn";
+                    return;
+                }
+
+                const totalSeconds = Math.floor(diff / 1000);
+
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+
+                badgeTime.innerText =
+                    `${days} ngày ${hours} giờ`;
+
+            }, 1000);
+        }
+
+        const legendBtn = document.getElementById("legendToggle");
+        const legendBox = document.getElementById("colorLegend");
+
+        legendBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            legendBox.classList.toggle("hidden");
+        });
+
+        // click ra ngoài thì ẩn
+        document.addEventListener("click", () => {
+            legendBox.classList.add("hidden");
+        });
     </script>
 </body>
 

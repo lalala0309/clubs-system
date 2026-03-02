@@ -10,54 +10,52 @@ if (!isset($_SESSION['userID'])) {
 }
 
 $userID = $_SESSION['userID'];
-$groundID = $_GET['groundID'];
-$date = $_GET['date']; // yyyy-mm-dd (ngày bất kỳ trong tuần)
+$groundID = intval($_GET['groundID']);
+$date = $_GET['date'];
 
-/* ========= LẤY LIMIT ========= */
+// Lấy limit
 $sqlLimit = "
-SELECT COALESCE(gs.weekly_limit, 4) AS weekly_limit
+SELECT s.weekly_limit
 FROM grounds g
-LEFT JOIN ground_settings gs ON g.groundID = gs.groundID
+JOIN sports s ON g.sportID = s.sportID
 WHERE g.groundID = ?
 ";
+
 $stmt = $conn->prepare($sqlLimit);
 $stmt->bind_param("i", $groundID);
 $stmt->execute();
-
 $limit = $stmt->get_result()->fetch_assoc()['weekly_limit'];
 
-
-/* ========= TÍNH TUẦN ========= */
+// Tính tuần
 $weekDate = new DateTime($date);
-
 $monday = clone $weekDate;
 $monday->modify('monday this week');
-
 $startWeek = $monday->format('Y-m-d');
 
 $sunday = clone $monday;
-$sunday->modify('+6 days');
-
+$sunday->modify('+6 day');
 $endWeek = $sunday->format('Y-m-d');
 
-
-/* ========= ĐẾM ========= */
+// Đếm
 $sqlCount = "
 SELECT COUNT(*) AS total
-FROM bookings
-WHERE userID = ?
-AND groundID = ?
-AND booking_date BETWEEN ? AND ?
+FROM bookings b
+JOIN grounds g ON b.groundID = g.groundID
+WHERE b.userID = ?
+AND g.sportID = (
+    SELECT sportID FROM grounds WHERE groundID = ?
+)
+AND b.booking_date BETWEEN ? AND ?
+AND b.priority = 1
 ";
 
 $stmt = $conn->prepare($sqlCount);
 $stmt->bind_param("iiss", $userID, $groundID, $startWeek, $endWeek);
 $stmt->execute();
-
 $total = $stmt->get_result()->fetch_assoc()['total'];
 
 echo json_encode([
-    'limit' => $limit,
-    'used' => $total,
-    'remain' => $limit - $total
+    'limit' => (int) $limit,
+    'used' => (int) $total,
+    'remain' => max(0, $limit - $total)
 ]);

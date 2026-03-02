@@ -1150,7 +1150,6 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             setTimeout(() => panel.classList.add('show'), 10);
         }
 
-
         function openSettingModal() {
 
             if (!currentSportID) return alert("Chọn môn trước");
@@ -1160,10 +1159,14 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             panel.classList.remove('hidden');
             setTimeout(() => panel.classList.add('show'), 10);
 
-            fetch(`get_all_grounds_by_sport.php?sportID=${currentSportID}`)
+            // Lấy weekly_limit của sport hiện tại
+            fetch(`get_sport_limit.php?sportID=${currentSportID}`)
                 .then(r => r.json())
-                .then(renderSettingGrounds);
+                .then(data => {
+                    document.getElementById('weekly-limit-input').value = data.weekly_limit;
+                });
         }
+
         function closeSettingPanel() {
             const panel = document.getElementById('setting-panel');
             panel.classList.remove('show');
@@ -1189,46 +1192,38 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
             const limit = document.getElementById('weekly-limit-input').value;
 
-            const ids = [...document.querySelectorAll('#setting-ground-list input:checked')]
-                .map(cb => cb.value);
-
-            if (ids.length === 0)
-                return alert("Chọn ít nhất 1 sân");
+            if (!limit || limit <= 0)
+                return alert("Nhập số lần hợp lệ");
 
             fetch('save_ground_setting.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    groundIDs: ids,
+                    sportID: currentSportID,
                     weekly_limit: limit
                 })
             })
                 .then(r => r.json())
-                .then(() => {
+                .then(data => {
 
+                    if (data.success) {
 
-
-                    // cập nhật local data
-                    currentGrounds.forEach(g => {
-                        if (ids.includes(String(g.groundID))) {
+                        //Cập nhật toàn bộ ground trong mảng
+                        currentGrounds.forEach(g => {
                             g.weekly_limit = limit;
-                        }
-                    });
+                        });
 
-                    // nếu sân hiện tại nằm trong list vừa set → update badge
-                    const activeBtn = document.querySelector('.court-tab.active');
-                    const activeGroundID = activeBtn?.dataset.groundId;
-
-                    if (ids.includes(activeGroundID)) {
+                        // Cập nhật badge sân đang active
                         const badge = document.getElementById('court-limit-badge');
                         badge.innerText = `${limit}/tuần`;
                         badge.classList.remove('hidden');
+
+                        alert("Đã lưu");
+                        closeSettingPanel();
+
+                    } else {
+                        alert("Lưu thất bại");
                     }
-
-                    /* ========================= */
-
-                    alert("Đã lưu");
-                    closeSettingPanel();
                 });
         }
         function cancelBooking(bookingID) {
