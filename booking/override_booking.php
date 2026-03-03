@@ -157,7 +157,7 @@ $newPriority = ($newTotal < $limit) ? 1 : 0;
 if ($newPriority <= $oldPriority) {
     echo json_encode([
         'status' => 'error',
-        'message' => 'Không đủ quyền priority để override'
+        'message' => 'Bạn đã hết lượt ưu tiên'
     ]);
     exit;
 }

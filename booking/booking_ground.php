@@ -80,6 +80,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -90,6 +91,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             width: 0;
             opacity: 0;
             pointer-events: none;
+            z-index: 60;
         }
 
         #right-panel.active {
@@ -123,10 +125,33 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             border: 1px solid #e2e8f0;
         }
 
-        .grid-table th,
-        .grid-table td {
-            width: calc(100% / 8);
-            /* 1 cột giờ + 7 ngày */
+        /* ===== TABLE FULL 7 NGÀY ===== */
+        .grid-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .grid-table th:first-child,
+        .grid-table td:first-child {
+            width: 60px;
+            /* cột giờ */
+        }
+
+        .grid-table th:not(:first-child),
+        .grid-table td:not(:first-child) {
+            width: calc((100% - 60px) / 7);
+        }
+
+        .custom-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .week-range-text {
+            white-space: nowrap !important;
+        }
+
+        .grid-table thead th {
+            white-space: nowrap !important;
         }
 
         .grid-cell {
@@ -228,21 +253,29 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             #right-panel.active {
                 position: fixed;
                 right: 0;
-                top: 0;
-                height: 100vh;
-                z-index: 60;
+                bottom: 0;
+                top: 110px;
+
+                height: auto;
                 width: 100%;
+                border-radius: 20px 20px 0 0;
             }
 
-            body:has(#view-timetable:not(.view-hidden)) header,
+            #view-timetable>.px-5 {
+                position: relative;
+                z-index: 80;
+            }
+
+            /* body:has(#view-timetable:not(.view-hidden)) header,
             body:has(#view-timetable:not(.view-hidden)) button[onclick="toggleSidebar()"] {
                 display: none !important;
             }
 
             body:has(#view-timetable:not(.view-hidden)) #main-sidebar {
                 transform: translateX(-100%) !important;
-            }
+            } */
         }
+
 
         .cell-locked {
             background: #fef2f2 !important;
@@ -250,6 +283,12 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             cursor: not-allowed !important;
             pointer-events: none;
             position: relative;
+        }
+
+        #view-timetable h2 {
+            white-space: nowrap !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .cell-locked .lock-content {
@@ -275,40 +314,71 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             margin-bottom: 2px;
         }
 
+        .grid-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: #f8fafc;
+        }
 
 
+
+        /* Tối ưu cho màn hình nhỏ */
         @media (max-width: 768px) {
-            .grid-table {
+
+            /* Phóng to ô lịch để dễ chạm (Touch target) */
+            .grid-cell {
+                height: 50px !important;
+                /* Tăng chiều cao ô */
+                min-width: 50px !important;
+                /* Tăng chiều rộng ô */
+            }
+
+            /* Giữ cố định cột thời gian khi cuộn ngang */
+            .grid-table th:first-child,
+            .time-cell {
+                position: sticky;
+                left: 0;
+                z-index: 10;
+                background: #f8fafc;
+                width: 50px !important;
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            }
+
+            /* Ẩn bớt thông tin text rườm rà trong ô trên mobile */
+            .cell-content .truncate {
+                max-width: 45px;
                 font-size: 7px;
             }
 
-            .grid-table th:first-child,
-            .time-cell {
-                width: 32px !important;
-                min-width: 32px !important;
-                padding: 0 !important;
+            /* Panel xác nhận tràn toàn màn hình trên mobile */
+            #right-panel {
+                border-radius: 0 !important;
             }
 
-            .time-cell {
-                height: 28px !important;
-                line-height: 28px !important;
-                font-size: 6px !important;
+            #right-panel.active {
+                position: fixed !important;
+                right: 0;
+                top: 67px;
+                bottom: 0;
+                width: 100%;
+                height: auto;
+                z-index: 60;
             }
 
-            .grid-cell {
-                min-width: 34px !important;
-                height: 30px !important;
+            /* Header luôn nằm trên */
+            #view-timetable>.px-5 {
+                position: relative;
+                z-index: 80;
+                background: white;
             }
+        }
 
-            .grid-table th div:first-child {
-                font-size: 6px !important;
-            }
-
-            .grid-table th div:last-child {
-                font-size: 7px !important;
-            }
-
-
+        /* Hiệu ứng chọn ô */
+        .grid-cell.selected {
+            outline: 2px solid #4f46e5 !important;
+            background: #eef2ff !important;
+            z-index: 5;
         }
 
         .cell-my-booking {
@@ -319,8 +389,25 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
         .cell-blue-light {
             background: #dbeafe !important;
-            /* blue-100 */
             color: #1e3a8a;
+            cursor: not-allowed !important;
+            /* pointer-events: none !important; */
+            position: relative;
+        }
+
+        .cell-blue-light::after {
+            content: "\F62A";
+            /* bi-slash-circle */
+            font-family: "Bootstrap Icons";
+            font-size: 16px;
+            color: #2563eb;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.85;
+            pointer-events: none;
         }
 
         /* Còn lượt ưu tiên */
@@ -336,6 +423,320 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             /* red-100 */
             color: #7f1d1d !important;
         }
+
+        /* Ô còn trống */
+        .cell-available {
+            background: white;
+            cursor: pointer;
+        }
+
+        /* Hover cho ô trống */
+        .cell-available:hover {
+            background: #f5f8ff;
+            outline: 2px solid #6366f1;
+            outline-offset: -2px;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        /* Còn lượt ưu tiên của mình */
+        .cell-available-priority {
+            background-color: #dcfce7 !important;
+            color: #166534 !important;
+            cursor: pointer;
+        }
+
+        /* Hết lượt ưu tiên của mình */
+        .cell-no-priority {
+            background-color: #fee2e2 !important;
+            color: #7f1d1d !important;
+            cursor: pointer;
+        }
+
+        /* Người khác đã hết lượt ưu tiên (có thể đè) */
+        .cell-booked {
+            background-color: #f1f5f9;
+            cursor: pointer;
+        }
+
+        /* Người khác còn lượt ưu tiên (không đè được) */
+        .cell-blue-light {
+            background: #dbeafe !important;
+            color: #1e3a8a;
+            cursor: not-allowed !important;
+            position: relative;
+        }
+
+        /* Ô bị khóa */
+        .cell-locked {
+            background: #fef2f2 !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        /* Ô quá khứ */
+        .cell-past {
+            background: #f1f5f9 !important;
+            cursor: not-allowed !important;
+        }
+
+        /* ===== TỐI ƯU HEADER CHO MOBILE ===== */
+        @media (max-width: 768px) {
+
+            /* HEADER WRAPPER - Flex hàng ngang, gap nhỏ, tất cả gọn gàng */
+            #view-timetable .px-5.py-3.border-b {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+                gap: 14px !important;
+                /* Tăng khoảng cách giữa các khối */
+                padding: 14px 16px !important;
+                /* Tăng padding trên dưới */
+                min-height: 40px;
+            }
+
+            /* KHỐI 1: Back button + Tiêu đề (cột dọc) */
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(1) {
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 4px !important;
+                flex: 0 1 auto;
+                min-width: 0;
+            }
+
+            /* Nút back nhỏ gọn */
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(1) .w-7.h-7 {
+                min-width: 24px !important;
+                width: 24px !important;
+                height: 24px !important;
+                flex-shrink: 0;
+            }
+
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(1) .w-7.h-7 i {
+                font-size: 10px !important;
+            }
+
+            /* Nhóm tiêu đề nằm vertical */
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(1)>div {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 2px !important;
+                min-width: 0;
+            }
+
+            #current-club-title {
+                font-size: 9px !important;
+                font-weight: 900 !important;
+                /* line-height: 1.2 !important; */
+                /* white-space: nowrap !important; */
+                overflow: hidden;
+                /* text-overflow: ellipsis; */
+                line-height: 1.4 !important;
+                overflow: visible !important;
+
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            #selected-court-label {
+                font-size: 7px !important;
+                font-weight: 700 !important;
+                /* line-height: 1.2 !important; */
+                white-space: nowrap !important;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* KHỐI 2: Badge (cột dọc, gọn) */
+            #weeklyUsageBadge {
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+                align-items: flex-start !important;
+                gap: 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+                border: none !important;
+                flex: 0 1 auto;
+                min-width: 0;
+                font-size: 7px !important;
+                /* line-height: 1.1 !important; */
+                font-weight: 700 !important;
+            }
+
+            /* Ẩn icon badge */
+            #weeklyUsageBadge i {
+                display: none !important;
+            }
+
+            /* Mỗi dòng trong badge */
+            #weeklyUsageBadge span {
+                font-size: 7px !important;
+                white-space: nowrap !important;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: block !important;
+                /* line-height: 1 !important; */
+                margin: 0 !important;
+            }
+
+            #weeklyUsageBadge>div {
+                display: contents !important;
+            }
+
+            /* KHỐI 3: Control buttons (tuần + dấu hỏi, nằm hàng) */
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(2) {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 3px !important;
+                flex: 0 1 auto;
+                margin-left: 5px;
+            }
+
+            /* Thanh chuyển tuần - compact */
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(2) .flex.items-center.gap-2 {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 2px !important;
+                padding: 2px 4px !important;
+                background: white !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 6px !important;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            /* Nút chuyển tuần */
+            #view-timetable .px-5.py-3.border-b>.flex.items-center.gap-3:nth-of-type(2) .flex.items-center.gap-2 button {
+                padding: 0 2px !important;
+                margin: 0 !important;
+                font-size: 8px !important;
+                min-width: auto !important;
+                background: transparent !important;
+                border: none !important;
+                cursor: pointer !important;
+            }
+
+            /* Text khoảng ngày */
+            .week-range-text {
+                font-size: 7px !important;
+                letter-spacing: -0.5px;
+                white-space: nowrap !important;
+                margin: 0 2px !important;
+            }
+
+            /* Nút dấu hỏi */
+            #legendToggle {
+                width: 22px !important;
+                height: 22px !important;
+                min-width: 22px !important;
+                flex-shrink: 0;
+                padding: 0 !important;
+                font-size: 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin-left: 4px !important;
+            }
+
+
+
+            /* Chỉ tác động vào container 2 cột (tabs + bảng) */
+            #view-timetable>div.flex.flex-1 {
+                flex-direction: column !important;
+                min-height: 0 !important;
+            }
+
+            /* Tabs nằm ngang */
+            #court-tabs-container {
+                width: 100% !important;
+                height: auto !important;
+
+                /* display: flex !important; */
+                flex-direction: row !important;
+                /* justify-content: cente !important; */
+                gap: 10px !important;
+
+                border-right: none !important;
+                border-bottom: 1px solid #e5e7eb !important;
+                padding: 6px 0 !important;
+                padding-left: 8px;
+                background: #f8fafc;
+            }
+
+            /* Bảng booking full width */
+            #view-timetable>div.flex.flex-1>div.flex-1 {
+                width: 100% !important;
+            }
+
+
+
+
+
+            /* Nút S nhỏ gọn */
+            #court-tabs-container .court-tab {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 10px !important;
+                border-radius: 4px !important;
+            }
+
+            td.time-cell .time-text {
+                font-size: 7px !important;
+
+            }
+
+            td.time-cell .time-text {
+                display: block;
+                white-space: normal !important;
+                line-height: 1.1 !important;
+            }
+
+            td.time-cell .time-text::after {
+                content: attr(data-end);
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #colorLegend {
+                position: fixed !important;
+                top: 0 !important;
+                right: -320px !important;
+                width: 100% !important;
+                /* FULL WIDTH */
+                max-width: 100% !important;
+                /* BỎ GIỚI HẠN */
+                height: 100vh !important;
+                background: white !important;
+                z-index: 999 !important;
+                padding: 24px !important;
+                border-radius: 20px 0 0 20px !important;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                overflow-y: auto !important;
+                box-sizing: border-box !important;
+            }
+
+            #colorLegend.active {
+                right: 0 !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #colorLegend {
+                box-sizing: border-box !important;
+                overflow-y: auto !important;
+            }
+
+            #colorLegend span {
+                white-space: normal !important;
+                word-break: break-word !important;
+            }
+        }
     </style>
 </head>
 
@@ -346,7 +747,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
     <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
         <?php include '../includes/sidebar_member.php'; ?>
 
-        <main class="flex-1 flex flex-col overflow-hidden min-w-0">
+        <main class="flex-1 flex flex-col min-h-0 min-w-0">
             <div class="flex-shrink-0 flex items-center gap-3 mb-2">
                 <button onclick="toggleSidebar()"
                     class="lg:hidden p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-indigo-600">
@@ -356,15 +757,13 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     <?php include '../includes/header.php'; ?>
                 </div>
             </div>
-
-            <div class="flex-1 relative overflow-hidden">
+            <div class="flex-1 relative min-h-0 flex flex-col overflow-hidden">
                 <div id="view-clubs"
-                    class="absolute inset-0 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
+                    class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[35px] md:rounded-[45px] p-4 md:p-8 border border-white">
                     <div class="mb-5 md:mb-6">
                         <div class="flex items-end justify-between">
                             <div>
-                                <h2
-                                    class="text-base text-lg md:text-2xl font-black text-slate-800 tracking-tight uppercase">
+                                <h2 class=" text-xs md:text-2xl font-black text-slate-800 tracking-tight uppercase">
                                     Đặt sân</h2>
                                 <p class="text-[11px] md:text-[13px] text-slate-400 mt-0.5 font-medium">Vui lòng chọn
                                     loại sân bạn muốn sử dụng</p>
@@ -402,7 +801,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 </div>
 
                 <div id="view-timetable"
-                    class="view-hidden absolute inset-0 flex flex-col overflow-hidden bg-white/70 backdrop-blur-sm rounded-[30px] border border-white">
+                    class="view-hidden flex flex-col flex-1 min-h-0 bg-white/70 backdrop-blur-sm rounded-[30px] border border-white">
                     <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white/50">
                         <div class="flex items-center gap-3">
                             <button onclick="backToClubs()"
@@ -411,9 +810,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                             </button>
                             <div>
                                 <h2 id="current-club-title"
-                                    class="text-xs font-black text-indigo-700 uppercase leading-none">ĐẶT SÂN</h2>
+                                    class="text-[10px] md:text-xs font-black text-indigo-700 uppercase leading-none">
+                                    ĐẶT SÂN</h2>
                                 <p id="selected-court-label"
-                                    class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">SÂN SỐ 01
+                                    class="text-[px] md:text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                                    SÂN SỐ 01
                                 </p>
                             </div>
                             <div id="weeklyUsageBadge"
@@ -447,18 +848,24 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                             <!-- Dấu hỏi -->
                             <div class="relative">
                                 <button id="legendToggle"
-                                    class="w-6 h-6 rounded-full bg-slate-200 hover:bg-indigo-100 text-slate-600 flex items-center justify-center text-[11px] shadow-sm">
+                                    class="w-5 h-5 rounded-full bg-slate-200 hover:bg-indigo-100 text-slate-600 flex items-center justify-center text-[11px] shadow-sm">
                                     <i class="bi bi-question-lg"></i>
                                 </button>
 
                                 <div id="colorLegend"
                                     class="hidden absolute top-8 right-0 bg-white shadow-xl border border-slate-200 rounded-xl p-4 w-64 text-[11px] space-y-3 z-50">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="font-bold text-slate-700 uppercase text-[10px]">
+                                            Chú thích
+                                        </div>
 
-                                    <div class="font-bold text-slate-700 uppercase text-[10px] mb-2">
-                                        Chú thích
+                                        <button onclick="closeLegend()"
+                                            class="w-6 h-6 flex items-center justify-center rounded-full bg-slate-100 md:hidden">
+                                            <i class="bi bi-x-lg text-[10px]"></i>
+                                        </button>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-start gap-2 min-w-0">
                                         <div
                                             class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 bg-green-100">
                                         </div>
@@ -466,25 +873,27 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                                             tiên</span>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-start gap-2 min-w-0">
                                         <div
                                             class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 bg-blue-100">
                                         </div>
-                                        <span>Người khác còn lượt ưu tiên, bạn không thể đè lịch</span>
+                                        <span>Người khác còn lượt ưu tiên, bạn không thể đè lịch của người này</span>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-start gap-2 min-w-0">
                                         <div
                                             class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 bg-red-100">
                                         </div>
-                                        <span>Bạn đã hết lượt ưu tiên, có thể bị đè</span>
+                                        <span>Bạn đã hết lượt ưu tiên, có thể bị đè lịch nếu đặt tiếp</span>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-start gap-2 min-w-0">
+
                                         <div
                                             class="w-4 h-4 min-w-[16px] min-h-[16px] rounded border flex-shrink-0 border">
                                         </div>
-                                        <span>Người khác hết lượt ưu tiên, bạn có thể dùng lượt ưu tiên để đặt</span>
+                                        <span class="break-words leading-tight">Người khác hết lượt ưu tiên, bạn có thể
+                                            dùng lượt ưu tiên để đặt</span>
                                     </div>
 
                                 </div>
@@ -492,12 +901,12 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         </div>
                     </div>
 
-                    <div class="flex flex-1 overflow-hidden">
-                        <div class="w-12 border-r border-slate-100 flex flex-col items-center py-4 gap-2 bg-slate-50/30 overflow-y-auto custom-scroll"
+                    <div class="flex flex-1 min-h-0">
+                        <div class="w-12 border-r border-slate-100 flex flex-col items-center py-4 gap-2 bg-slate-50/30 overflow-y-auto custom-scroll flex-shrink-0"
                             id="court-tabs-container">
                         </div>
 
-                        <div class="flex-1 overflow-auto custom-scroll">
+                        <div class="flex-1 overflow-auto custom-scroll min-h-0">
                             <table class="grid-table">
                                 <thead class="sticky top-0 z-20 bg-slate-50">
                                     <tr>
@@ -522,7 +931,9 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                                         <tr>
                                             <td class="time-cell text-center bg-[#FDFDFF] px-1">
                                                 <span
-                                                    class="text-[9px] font-bold text-slate-500 tracking-tighter"><?php echo $range; ?></span>
+                                                    class="time-text text-[9px] font-bold text-slate-500 tracking-tighter">
+                                                    <?php echo $range; ?>
+                                                </span>
                                             </td>
                                             <?php for ($i = 0; $i < 7; $i++): ?>
                                                 <td class="grid-cell cell-available" data-day="<?php echo $days[$i][1]; ?>"
@@ -765,6 +1176,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             document.getElementById('info-time').innerText = time;
             document.getElementById('info-date').innerText = date;
             document.getElementById('info-court').innerText = currentCourtName;
+
             document.getElementById('right-panel').classList.add('active');
 
             const cell = document.querySelector(
@@ -777,7 +1189,10 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             }
         }
 
-        function closePanel() { document.getElementById('right-panel').classList.remove('active'); }
+        function closePanel() {
+            document.getElementById('right-panel').classList.remove('active');
+
+        }
 
         function backToClubs() {
             document.getElementById('view-timetable').classList.add('view-hidden');
@@ -894,6 +1309,13 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 };
 
                 cell.onclick = () => {
+                    if (cell.classList.contains('cell-blue-light')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+
+
                     const [d, m] = cell.dataset.day.split('/');
                     const year = new Date().getFullYear();
                     const dateObj = new Date(year, m - 1, d);
@@ -914,8 +1336,10 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         cell.dataset.day === b.booking_date &&
                         cell.dataset.time === `${b.start_time}-${b.end_time}`
                     ) {
-
-                        cell.classList.remove('cell-available'
+                        cell.classList.remove(
+                            'cell-available',
+                            'cell-available-priority',
+                            'cell-no-priority'
                         );
 
 
@@ -1047,7 +1471,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wide">
     <i class="bi bi-calendar-check"></i>
     <span>Còn ${data.remain}/${data.limit}</span>
-    <span class="">• Hết hạn sau: </span>
+
     <span id="countdown-text" class="text-indigo-600"></span>
 </div>
 `;
@@ -1143,14 +1567,38 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
         legendBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            legendBox.classList.toggle("hidden");
+
+            if (window.innerWidth <= 768) {
+                legendBox.classList.remove("hidden"); // 🔥 BẮT BUỘC
+                legendBox.classList.toggle("active");
+            } else {
+                legendBox.classList.toggle("hidden");
+            }
+        });
+        document.addEventListener("click", (e) => {
+            if (!legendBox.contains(e.target) && e.target !== legendBtn) {
+                if (window.innerWidth <= 768) {
+                    legendBox.classList.remove("active");
+                } else {
+                    legendBox.classList.add("hidden");
+                }
+            }
         });
 
-        // click ra ngoài thì ẩn
-        document.addEventListener("click", () => {
-            legendBox.classList.add("hidden");
-        });
+        function closeLegend() {
+            const legend = document.getElementById("colorLegend");
+
+            if (window.innerWidth <= 768) {
+                legend.classList.remove("active");
+                setTimeout(() => {
+                    legend.classList.add("hidden");
+                }, 400); // khớp với transition 0.4s
+            } else {
+                legend.classList.add("hidden");
+            }
+        }
     </script>
+
 </body>
 
 </html>
