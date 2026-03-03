@@ -7,9 +7,10 @@ function getClubMembers($pdo, $clubID)
 {
     $sql = "
             SELECT 
-            u.userID,
+                u.userID,
                 u.full_name,
                 u.email,
+                u.student_code,
                 cm.join_date,
                 cm.fee_paid_date,
                 cm.fee_expire_date

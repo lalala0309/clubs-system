@@ -5,14 +5,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/database.php';
 
-/*
-|--------------------------------------------------------------------------
-| MANAGER VIEW: LẤY TẤT CẢ CÂU LẠC BỘ
-|--------------------------------------------------------------------------
-| Không lọc theo userID
-| Thêm CLB mới là hiển thị ngay
-*/
-
 $sql = "
     SELECT 
         c.clubID AS id,
@@ -40,10 +32,10 @@ $bgList = [
 $i = 0;
 while ($row = $result->fetch_assoc()) {
     $clubs[] = [
-        'id'   => $row['id'],
+        'id' => $row['id'],
         'name' => $row['name'],
         'desc' => $row['sport_name'] ?: 'Chưa có môn',
-        'bg'   => $bgList[$i % count($bgList)]
+        'bg' => $bgList[$i % count($bgList)]
     ];
     $i++;
 }

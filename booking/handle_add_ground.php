@@ -1,6 +1,5 @@
 <?php
 require_once '../config/database.php';
-
 header('Content-Type: application/json');
 
 $name = trim($_POST['name']);
@@ -16,7 +15,6 @@ $stmt = $conn->prepare("
     INSERT INTO grounds (name, location, status, sportID)
     VALUES (?, ?, 1, ?)
 ");
-
 $stmt->bind_param("ssi", $name, $location, $sportID);
 
 if ($stmt->execute()) {

@@ -119,7 +119,7 @@ $sports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <i class="bi bi-calendar3 text-blue-600 dark:text-white"></i>
                 </div>
                 <h2 id="currentSportTitle"
-                    class="font-bold uppercase tracking-wide text-sm text-white dark:text-white leading-none truncate">
+                    class="font-bold uppercase tracking-wide text-sm text-white dark:text-white leading-normal truncate">
                     Lịch Sân
                 </h2>
             </div>

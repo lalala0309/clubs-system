@@ -2,7 +2,6 @@
 require_once '../config/database.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
-
 $sportID = (int) $data['sportID'];
 $limit = (int) $data['weekly_limit'];
 
@@ -12,10 +11,10 @@ if ($sportID <= 0 || $limit <= 0) {
 }
 
 $stmt = $conn->prepare("
-    UPDATE sports
-    SET weekly_limit = ?
-    WHERE sportID = ?
-");
+            UPDATE sports
+            SET weekly_limit = ?
+            WHERE sportID = ?
+        ");
 
 $stmt->bind_param("ii", $limit, $sportID);
 $stmt->execute();

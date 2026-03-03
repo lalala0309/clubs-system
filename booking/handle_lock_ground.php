@@ -1,27 +1,15 @@
 <?php
 session_start();
 require_once '../config/database.php';
-
 header('Content-Type: application/json');
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
 try {
-
-    error_log("POST DATA: " . json_encode($_POST));
-
-    /* =====================
-       GET INPUT (MATCH JS)
-    ===================== */
+    // Lấy dữ liệu từ JS
     $grounds = $_POST['grounds'] ?? [];
     $from = $_POST['from'] ?? null;
     $to = $_POST['to'] ?? null;
 
-    /* =====================
-       VALIDATE
-    ===================== */
+    // Thiếu tham số báo lỗi
     if (empty($grounds) || !$from || !$to) {
         echo json_encode([
             'status' => 'error',
@@ -31,33 +19,32 @@ try {
         exit;
     }
 
-    /* =====================
-       PARSE DATETIME
-    ===================== */
+    // Chuyển string thành object DateTime
     $startDate = new DateTime($from);
     $endDate = new DateTime($to);
-
     $startDay = $startDate->format('Y-m-d');
     $endDay = $endDate->format('Y-m-d');
 
+    // Tạo khoảng ngày từ start -> end
     $period = new DatePeriod(
         new DateTime($startDay),
         new DateInterval('P1D'),
         (new DateTime($endDay))->modify('+1 day')
     );
 
+    // insert từng ngày vào bảng
     $stmt = $conn->prepare("
-    INSERT INTO ground_locks (groundID, lock_date, start_time, end_time)
-    VALUES (?, ?, ?, ?)
-");
+                INSERT INTO ground_locks (groundID, lock_date, start_time, end_time)
+                VALUES (?, ?, ?, ?)
+            ");
 
+    // Lặp khoá nhiều sân cùng lúc
     foreach ($grounds as $groundID) {
 
+        // Lặp khoá từng ngày trong bảng
         foreach ($period as $dayObj) {
 
             $currentDay = $dayObj->format('Y-m-d');
-
-            // LOGIC QUAN TRỌNG
             if ($currentDay === $startDay && $currentDay === $endDay) {
                 // cùng ngày
                 $start = $startDate->format('H:i:s');
@@ -84,7 +71,6 @@ try {
         }
     }
 
-
     echo json_encode([
         'status' => 'success'
     ]);
@@ -95,7 +81,6 @@ try {
 
     echo json_encode([
         'status' => 'error',
-        'message' => $e->getMessage(),
-        'POST' => $_POST
+        'message' => 'Có lỗi xảy ra'
     ]);
 }

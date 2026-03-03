@@ -4,8 +4,6 @@ if (!isset($conn)) {
     require_once __DIR__ . '/../config/database.php';
 }
 
-
-
 $sql = "
     SELECT DISTINCT
         g.groundID,
@@ -20,7 +18,6 @@ $sql = "
       AND cm.status = 1
       AND g.status = 1
 ";
-
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userID);

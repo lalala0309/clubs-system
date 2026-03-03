@@ -18,7 +18,7 @@ $userID = (int) $_POST['userID'];
 $roleID = (int) $_POST['roleID'];
 
 /* KHÔNG CHO ADMIN TỰ ĐỔI QUYỀN CHÍNH MÌNH */
-if ($userID === (int)$_SESSION['userID']) {
+if ($userID === (int) $_SESSION['userID']) {
     header("Location: roles.php?error=self");
     exit;
 }

@@ -5,15 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/database.php';
 
-/* KIỂM TRA ĐĂNG NHẬP */
+// Kiểm tra đăng nhập
 if (!isset($_SESSION['userID'])) {
     header("Location: /clubs-system/public/login.php");
     exit;
 }
-
 $userID = $_SESSION['userID'];
 
-/* LẤY THÔNG TIN USER + ROLE */
+// Lấy thông tin user và role
 $sql = "
     SELECT 
         u.full_name,
@@ -41,7 +40,7 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
-/* BIẾN DÙNG CHUNG */
+// Biến dùng chung
 $fullName = $user['full_name'];
 $userEmail = $user['email'];
 $roleName = $user['role_name']; // ADMIN | MANAGER | MEMBER

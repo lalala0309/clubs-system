@@ -3,20 +3,23 @@ session_start();
 require_once '../includes/get_user.php';
 require_once './get_my_grounds.php';
 require_once './get_sports.php';
-
+require_once '../includes/auth_member.php';
+// === Lấy tuần ===
 $week_offset = isset($_GET['week_offset']) ? (int) $_GET['week_offset'] : 0;
-// Lấy sportID từ URL để giữ trạng thái sau khi load lại trang
+
+// === Giữ trạng thái sport khi reload
 $active_sport_id = isset($_GET['sportID']) ? (int) $_GET['sportID'] : null;
 
 // Lấy thứ 2 của tuần hiện tại
 $monday = new DateTime();
 $monday->modify('monday this week');
 
-// Cộng / trừ tuần
+// Cộng trừ tuần
 if ($week_offset !== 0) {
     $monday->modify(($week_offset > 0 ? '+' : '') . $week_offset . ' week');
 }
 
+// Tạo mảng 7 ngày
 $days = [];
 $dayLabels = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'];
 
@@ -24,8 +27,8 @@ for ($i = 0; $i < 7; $i++) {
     $days[] = [$dayLabels[$i], $monday->format('d/m')];
     $monday->modify('+1 day');
 }
-
 $week_range = $days[0][1] . ' - ' . $days[6][1];
+
 
 // ===== LẤY KHOÁ THEO CẢ TUẦN =====
 $monday = new DateTime();
@@ -41,6 +44,7 @@ $endDate = clone $monday;
 $endDate->modify('+6 day');
 $end = $endDate->format('Y-m-d');
 
+// Lấy lock tuần 
 $sql = "
 SELECT lock_date, start_time, end_time
 FROM ground_locks
@@ -51,17 +55,8 @@ AND lock_date BETWEEN ? AND ?
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("iss", $groundID, $start, $end);
 $stmt->execute();
-
 $result = $stmt->get_result();
-
 $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
-
-
-
-
-// while ($row = $result->fetch_assoc()) {
-//     $lockedSlots[] = $row;
-// }
 
 ?>
 
@@ -71,9 +66,9 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Đặt sân - CTUMP</title>
+    <title>Đặt sân</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
@@ -82,10 +77,12 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
 
     <style>
+        /* Global & Animation Layer */
         body {
             font-family: 'Inter', sans-serif;
         }
 
+        /* Right Panel Animation */
         #right-panel {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             width: 0;
@@ -114,6 +111,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             border-radius: 10px;
         }
 
+        /* Table Booking Core Layout */
         .grid-table {
             border-collapse: collapse;
             min-width: 100%;
@@ -154,6 +152,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             white-space: nowrap !important;
         }
 
+        /* Grid Cell System */
         .grid-cell {
 
             height: 38px;
@@ -166,7 +165,6 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             transition: background 0.15s;
         }
 
-
         .cell-available {
             background: white;
             cursor: pointer;
@@ -178,13 +176,6 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             outline-offset: -2px;
             z-index: 10;
         }
-
-        /* 
-        .cell-booked {
-            font-size: 8px;
-            line-height: 1.1;
-            padding: 2px;
-        } */
 
         .cell-content {
             width: 100%;
@@ -202,8 +193,6 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             text-align: center;
             overflow: hidden;
         }
-
-
 
         .court-tab.active {
             background: #6366f1 !important;
@@ -248,7 +237,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             justify-content: center;
         }
 
-
+        /* Mobile Optimization Layer */
         @media (max-width: 1024px) {
             #right-panel.active {
                 position: fixed;
@@ -265,18 +254,9 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 position: relative;
                 z-index: 80;
             }
-
-            /* body:has(#view-timetable:not(.view-hidden)) header,
-            body:has(#view-timetable:not(.view-hidden)) button[onclick="toggleSidebar()"] {
-                display: none !important;
-            }
-
-            body:has(#view-timetable:not(.view-hidden)) #main-sidebar {
-                transform: translateX(-100%) !important;
-            } */
         }
 
-
+        /* Bị khóa */
         .cell-locked {
             background: #fef2f2 !important;
             /* đỏ pastel */
@@ -467,12 +447,12 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             position: relative;
         }
 
-        /* Ô bị khóa */
+        /* Ô bị khóa
         .cell-locked {
             background: #fef2f2 !important;
             cursor: not-allowed !important;
             pointer-events: none;
-        }
+        } */
 
         /* Ô quá khứ */
         .cell-past {
@@ -701,6 +681,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             }
         }
 
+        /* Legend Mobile Slide Panel */
         @media (max-width: 768px) {
             #colorLegend {
                 position: fixed !important;
@@ -760,7 +741,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             <div class="flex-1 relative min-h-0 flex flex-col overflow-hidden">
                 <div id="view-clubs"
                     class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[35px] md:rounded-[45px] p-4 md:p-8 border border-white">
-                    <div class="mb-5 md:mb-6">
+                    <div class="mb-2 md:mb-3">
                         <div class="flex items-end justify-between">
                             <div>
                                 <h2 class=" text-xs md:text-2xl font-black text-slate-800 tracking-tight uppercase">
@@ -774,11 +755,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-2 md:gap-3">
                         <?php foreach ($sports as $sport): ?>
                             <div onclick="openTimetable(<?php echo $sport['sportID']; ?>, '<?php echo $sport['sport_name']; ?>')"
                                 data-sport-id="<?php echo $sport['sportID']; ?>"
-                                class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
+                                class="club-card p-2 md:p-4 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl transition-transform group-hover:scale-110">
@@ -801,7 +782,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 </div>
 
                 <div id="view-timetable"
-                    class="view-hidden flex flex-col flex-1 min-h-0 bg-white/70 backdrop-blur-sm rounded-[30px] border border-white">
+                    class="view-hidden flex flex-col flex-1 min-h-0 bg-white/70 backdrop-blur-sm rounded-[30px] border border-slate-200">
                     <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white/50">
                         <div class="flex items-center gap-3">
                             <button onclick="backToClubs()"
@@ -835,7 +816,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                                     <i class="bi bi-caret-left-fill text-[10px]"></i>
                                 </button>
 
-                                <span class="text-[9px] font-bold text-slate-500 uppercase">
+                                <span class="whitespace-nowrap text-[9px] font-bold text-slate-500 uppercase">
                                     <?php echo $week_range; ?>
                                 </span>
 
@@ -985,17 +966,29 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <script>
+        // Xác định user hiện tại để phân biệt lịch của mình / người khác
         const CURRENT_USER_ID = <?php echo $userID; ?>;
+
+        //Tên sân đang chọn (Sân số 01...)
         let currentCourtName = "Sân số 01";
+
+        // Object giữ trạng thái booking đang thao tác
         let selectedBooking = { groundID: null, booking_date: null, start_time: null, end_time: null };
+
+        //Môn đang mở (để giữ trạng thái khi reload)
         let currentSportID = <?php echo $active_sport_id ?? 'null'; ?>;
+
+        // Backup bảng lịch khi bị thay bằng cảnh báo phí
         let originalTableHTML = '';
+
+        // Lưu interval đếm ngược hạn phí
         let countdownInterval = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             originalTableHTML = document.querySelector('#view-timetable .flex-1').innerHTML;
         });
 
+        // Mở giao diện lịch khi chọn môn 
         function openTimetable(sportID, sportName) {
             currentSportID = sportID;
             document.getElementById('current-club-title').innerText = 'Đặt sân ' + sportName;
@@ -1024,7 +1017,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     // nếu DB chỉ lưu yyyy-mm-dd thì set hết ngày 23:59:59
                     expireDate.setHours(23, 59, 59, 999);
 
-                    // TÍNH SỐ NGÀY CÒN LẠI
+                    // Tính số ngày còn lại
                     const diffTime = expireDate - now;
                     const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -1033,7 +1026,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         return;
                     }
 
-                    // FORMAT NGÀY GIỜ VIỆT NAM
+                    // format ngày thành giờ việt nam
                     function formatDateTimeVN(date) {
                         const d = String(date.getDate()).padStart(2, '0');
                         const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1042,24 +1035,19 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         const min = String(date.getMinutes()).padStart(2, '0');
                         return `${d}/${m}/${y} - ${h}:${min}`;
                     }
-
-                    // window.remainingDays = remainingDays;
-                    // window.expireDateFormatted = formatDateTimeVN(expireDate);
                     window.expireDate = expireDate;
                     startCountdown();
-                    // còn hạn → khôi phục lại bảng nếu đã bị thay thế
                     const tableContainer = document.querySelector('#view-timetable .flex-1');
 
                     if (originalTableHTML && tableContainer.innerHTML !== originalTableHTML) {
                         tableContainer.innerHTML = originalTableHTML;
                     }
-
                     document.getElementById("weeklyUsageBadge").style.display = "flex";
-
                     renderCourts(data);
                 });
         }
 
+        // render các tab chọn sân
         function renderCourts(grounds) {
             const container = document.getElementById('court-tabs-container');
             container.innerHTML = '';
@@ -1086,6 +1074,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             sessionStorage.removeItem('reopen_ground_id');
         }
 
+        // reload toàn bộ bảng sân
         function changeCourt(index, btn) {
             const label = index < 10 ? '0' + index : index;
             currentCourtName = 'Sân số ' + label;
@@ -1102,35 +1091,31 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
 
             document.querySelectorAll('.grid-cell').forEach(cell => {
                 cell.className = 'grid-cell cell-available';
-                // reset sạch toàn bộ class về mặc định
-
                 cell.innerHTML = '';
-
                 delete cell.dataset.bookingId;
                 delete cell.dataset.bookedBy;
                 delete cell.dataset.priority;
 
             });
-            fetch(`get_locked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
-                .then(res => res.json())
-                .then(data => markLockedSlots(data));
+            Promise.all([
+                fetch(`get_locked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
+                    .then(r => r.json()),
+                fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
+                    .then(r => r.json())
+            ]).then(([locks, bookings]) => {
 
-            fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
-                .then(res => res.json())
+                markBookedSlots(bookings);   // tô booking trước
+                markLockedSlots(locks);      // khoá đè lên sau
+                disablePastSlots();          // xử lý quá khứ cuối cùng
 
-                .then(data => {
-                    console.log("BOOKINGS:", data);
-                    markBookedSlots(data);
-                    disablePastSlots();
-                });
+            });
 
             const mondayDate = "<?= $jsMonday ?>";
-
             loadWeeklyUsage(groundID, mondayDate);
-
-
         }
 
+
+        // Chuyển tuần
         function changeWeek(offset) {
             const url = new URL(window.location.href);
             url.searchParams.set('week_offset', offset);
@@ -1158,6 +1143,8 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 }
             }
         });
+
+        // Mỏ panel xác nhận
         function openPanel(time, date) {
 
             // RESET bookingID để đảm bảo đây là đặt mới
@@ -1189,6 +1176,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             }
         }
 
+        // Đóng panel xác nhận
         function closePanel() {
             document.getElementById('right-panel').classList.remove('active');
 
@@ -1206,10 +1194,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             closePanel();
         }
 
+
+        //Đây là booking decision engine.
         document.getElementById('btn-confirm').addEventListener('click', () => {
             // ====== NẾU LÀ HUỶ ======
             if (selectedBooking.bookingID) {
-
                 if (!confirm("Bạn chắc chắn muốn huỷ lịch này?")) return;
 
                 fetch('./cancel_booking.php', {
@@ -1294,6 +1283,8 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     } else { alert(data.message); }
                 });
         });
+
+        // Tô màu các slot đã đặt
         function markBookedSlots(bookings) {
 
             document.querySelectorAll('.grid-cell').forEach(cell => {
@@ -1314,8 +1305,6 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         e.stopPropagation();
                         return false;
                     }
-
-
                     const [d, m] = cell.dataset.day.split('/');
                     const year = new Date().getFullYear();
                     const dateObj = new Date(year, m - 1, d);
@@ -1341,7 +1330,6 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                             'cell-available-priority',
                             'cell-no-priority'
                         );
-
 
                         if (b.userID == CURRENT_USER_ID) {
                             cell.dataset.bookingId = b.bookingID;
@@ -1369,23 +1357,22 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         }
 
                         cell.innerHTML = `
-                <div class="cell-content">
-                    <div class="font-semibold truncate">${b.full_name}</div>
-                    <div class="opacity-60 truncate">${b.email}</div>
-                </div>
-            `;
+                            <div class="cell-content">
+                                <div class="font-semibold truncate">${b.full_name}</div>
+                                <div class="opacity-60 truncate">${b.email}</div>
+                            </div>
+                        `;
                     }
                 });
             });
         }
 
+
+        // Disable quá khứ và quá 14 ngày kể từ ngày hiện tại 
         function disablePastSlots() {
             const now = new Date();
-
-            // Giới hạn đặt trước tối đa 14 ngày
             const maxBookingDate = new Date();
             maxBookingDate.setDate(now.getDate() + 14);
-
             document.querySelectorAll('.grid-cell').forEach(cell => {
                 const day = cell.dataset.day;
                 const time = cell.dataset.time;
@@ -1412,17 +1399,15 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
 
-        // const lockedSlots = <?= json_encode($lockedSlots) ?>;
-
         function toMin(t) {
             const [h, m] = t.split(':');
             return (+h) * 60 + (+m);
         }
 
+
+        // Đánh dấu sân bị admin khoá
         function markLockedSlots(locks) {
-
             locks.forEach(lock => {
-
                 const lockDate = formatVNDate(lock.lock_date); // 2026-02-09 → 09/02
                 const lockStart = lock.start_time.slice(0, 5);
                 const lockEnd = lock.end_time.slice(0, 5);
@@ -1430,10 +1415,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 document.querySelectorAll('.grid-cell').forEach(cell => {
 
                     if (cell.dataset.day !== lockDate) return;
-
                     const [s, e] = cell.dataset.time.split('-');
-
-                    // ⭐ OVERLAP CHUẨN (giống SQL)
                     if (
                         toMin(s) < toMin(lockEnd) &&
                         toMin(e) > toMin(lockStart)
@@ -1441,17 +1423,16 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                         cell.classList.remove('cell-available');
                         cell.classList.add('cell-locked');
                         cell.onclick = null;
-
                         cell.innerHTML = `
-    <div class="lock-content">
-        <i class="bi bi-lock-fill lock-icon"></i>
-    </div>
-`;
-
+                            <div class="lock-content">
+                                <i class="bi bi-lock-fill lock-icon"></i>
+                            </div>
+                        `;
                     }
                 });
             });
         }
+
 
         function formatVNDate(mysqlDate) {
             const d = new Date(mysqlDate);
@@ -1460,22 +1441,23 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             return `${day}/${month}`;
         }
 
+
+        // Hiển thị số lượt còn lại
         function loadWeeklyUsage(groundID, date) {
             fetch(`get_weekly_usage.php?groundID=${groundID}&date=${date}`)
                 .then(r => r.json())
                 .then(data => {
                     const badge = document.getElementById("weeklyUsageBadge");
 
-                    // 1. Cập nhật nội dung (giữ lại icon nếu muốn)
+                    // Cập nhật nội dung (giữ lại icon nếu muốn)
                     badge.innerHTML = `
-<div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wide">
-    <i class="bi bi-calendar-check"></i>
-    <span>Còn ${data.remain}/${data.limit}</span>
+                    <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wide">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Còn ${data.remain}/${data.limit}</span>
+                        <span id="countdown-text" class="text-indigo-600"></span>
+                    </div>
+                    `;
 
-    <span id="countdown-text" class="text-indigo-600"></span>
-</div>
-`;
-                    //  badge.classList.remove('bg-emerald-100', 'text-emerald-600', 'bg-red-100', 'text-red-600', 'bg-indigo-100', 'text-indigo-600');
                     if (data.remain <= 0) {
                         badge.className = "badge bg-danger ms-2";
                     } else {
@@ -1483,26 +1465,25 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                     }
                 });
         }
+
+        // Nếu chưa đóng phí sẽ khoá và cảnh báo
         function showFeeWarning() {
-
             const tableContainer = document.querySelector('#view-timetable .flex-1');
-
             tableContainer.innerHTML = `
-    <div class="w-full h-full flex items-center justify-center">
-        <div class="text-center">
-            <i class="bi bi-exclamation-circle text-4xl text-slate-400 mb-4"></i>
-            <p class="text-slate-500 font-bold text-lg">
-                Vui lòng đóng phí để sử dụng tiện ích câu lạc bộ
-            </p>
-        </div>
-    </div>
-`;
-
+                <div class="w-full h-full flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="bi bi-exclamation-circle text-4xl text-slate-400 mb-4"></i>
+                        <p class="text-slate-500 font-bold text-lg">
+                            Vui lòng đóng phí để sử dụng tiện ích câu lạc bộ
+                        </p>
+                    </div>
+                </div>
+            `;
             document.getElementById("weeklyUsageBadge").style.display = "none";
         }
 
+        // Mở panel ơ chế độ huỷ
         function openCancelPanel(booking) {
-
             selectedBooking.bookingID = booking.bookingID;
 
             document.getElementById('info-time').innerText =
@@ -1519,29 +1500,27 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             btn.innerText = "Huỷ đặt sân";
             btn.classList.remove('bg-indigo-600');
             btn.classList.add('bg-red-600');
-
             document.getElementById('right-panel').classList.add('active');
         }
-        function reloadCurrentCourt() {
 
+        // Láy tab active
+        function reloadCurrentCourt() {
             const activeBtn = document.querySelector('.court-tab.active');
             if (!activeBtn) return;
-
             const index = parseInt(activeBtn.innerText.replace('S', ''));
             changeCourt(index, activeBtn);
         }
 
-        function startCountdown() {
 
+        // Đếm ngược hạn phí còn lại
+        function startCountdown() {
             if (countdownInterval) {
                 clearInterval(countdownInterval);
             }
 
             countdownInterval = setInterval(() => {
-
                 const badgeTime = document.getElementById("countdown-text");
                 if (!badgeTime) return;
-
                 const now = new Date();
                 const diff = window.expireDate - now;
 
@@ -1552,7 +1531,6 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 }
 
                 const totalSeconds = Math.floor(diff / 1000);
-
                 const days = Math.floor(totalSeconds / 86400);
                 const hours = Math.floor((totalSeconds % 86400) / 3600);
 
@@ -1569,12 +1547,13 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             e.stopPropagation();
 
             if (window.innerWidth <= 768) {
-                legendBox.classList.remove("hidden"); // 🔥 BẮT BUỘC
+                legendBox.classList.remove("hidden");
                 legendBox.classList.toggle("active");
             } else {
                 legendBox.classList.toggle("hidden");
             }
         });
+
         document.addEventListener("click", (e) => {
             if (!legendBox.contains(e.target) && e.target !== legendBtn) {
                 if (window.innerWidth <= 768) {
@@ -1585,6 +1564,8 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
             }
         });
 
+
+        // Đóng tab chú thích
         function closeLegend() {
             const legend = document.getElementById("colorLegend");
 
@@ -1592,7 +1573,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 legend.classList.remove("active");
                 setTimeout(() => {
                     legend.classList.add("hidden");
-                }, 400); // khớp với transition 0.4s
+                }, 400);
             } else {
                 legend.classList.add("hidden");
             }

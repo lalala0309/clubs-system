@@ -5,112 +5,63 @@ require_once '../vendor/autoload.php';
 require_once '../config/database.php';
 $config = require '../config/google.php';
 
+
+// === Cấu hình Google Client ===
 $client = new Google_Client();
 $client->setClientId($config['client_id']);
 $client->setClientSecret($config['client_secret']);
 $client->setRedirectUri($config['redirect_uri']);
-
 $client->addScope('email');
 $client->addScope('profile');
-
 $client->setPrompt('select_account');
+$authUrl = $client->createAuthUrl(); // Tránh tự đăng nhập tài khoản cũ
 
 
-$authUrl = $client->createAuthUrl();
-
+// === Kiểm tra Google có trả code về không ===
 if (!isset($_GET['code'])) {
     header("Location: ../public/login.php");
     exit;
 }
 
-/* TOKEN */
+// === Lấy Access Token ===
 $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
-
 if (isset($token['error'])) {
     echo "<pre>";
     print_r($_GET);
-    exit;
-    die("Google authentication failed: " . $token['error'] .
-        " | Description: " . ($token['error_description'] ?? 'No description'));
-
+    die("Google authentication failed...");
 }
-
 $client->setAccessToken($token);
 
 
-/* USER INFO */
+// === Lấy thông tin user từ Google ===
 $oauth = new Google_Service_Oauth2($client);
 $userInfo = $oauth->userinfo->get();
 $_SESSION['google_json'] = $userInfo->toSimpleObject();
-
 $email = $userInfo->email;
 $full_name = $userInfo->name;
 $google_id = $userInfo->id;
-
 $avatar = null;
 
+// Lấy avt kích thước 200px
 if (!empty($userInfo->picture)) {
     $avatar = $userInfo->picture . '?sz=200';
 }
 
-// $avatar = null;
 
-// if (!empty($userInfo->picture)) {
-
-//     $googleAvatar = $userInfo->picture . '?sz=200';
-
-//     // Tạo thư mục nếu chưa tồn tại
-//     $uploadDir = '../uploads/avatars/';
-//     if (!is_dir($uploadDir)) {
-//         mkdir($uploadDir, 0777, true);
-//     }
-
-//     // Tạo tên file duy nhất
-//     $fileName = uniqid('avatar_') . '.jpg';
-//     $filePath = $uploadDir . $fileName;
-
-//     // Tải ảnh từ Google
-//     $imageContent = file_get_contents($googleAvatar);
-
-//     if ($imageContent !== false) {
-//         file_put_contents($filePath, $imageContent);
-
-//         // Lưu đường dẫn tương đối vào DB
-//         $avatar = 'uploads/avatars/' . $fileName;
-//     }
-// }
-// Set session
-// $_SESSION['user'] = [
-//     'id'    => md5($email), // hoặc id trong DB
-//     'email' => $email,
-//     'name'  => $name,
-//     'role'  => 'member'
-// ];
-
-// Xem thông tin json trả về
-// header('Content-Type: application/json; charset=utf-8');
-// echo json_encode(
-//     $userInfo->toSimpleObject(),
-//     JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
-// );
-
-// Kiểm tra domain
+// === Kiểm tra domain email ===
 $allowedDomains = [
     'gmail.com',
     'student.ctu.edu.vn',
     'ctump.edu.vn'
 ];
-
 $emailDomain = substr(strrchr($email, "@"), 1);
-
 if (!in_array($emailDomain, $allowedDomains)) {
     die("Email không được phép đăng nhập hệ thống");
 }
-/* ================================================= */
+
 
 /* ================================================= */
-/* CHECK USER CHỈ ĐỂ LƯU AVATAR */
-
+// == Kiểm tra user trong Database
 $stmt = $conn->prepare("
     SELECT u.userID, u.status, r.role_name
     FROM users u
@@ -125,13 +76,10 @@ $result = $stmt->get_result();
 if ($result->num_rows === 0) {
 
     $roleID = 3; // MEMBER mặc định
-    $role = 'MEMBER'; // thêm dòng này để tránh undefined
+    $role = 'MEMBER';
 
-    //Nếu là email sinh viên thì cắt MSSV
-
+    // Nếu là email sinh viên thì cắt MSSV
     $student_code = strstr($email, '@', true);
-
-
     $stmt = $conn->prepare("
         INSERT INTO users (email, full_name, google_id, roleID, avatar_url, student_code)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -142,6 +90,7 @@ if ($result->num_rows === 0) {
     $userID = $conn->insert_id;
 } else {
 
+    // User đã tồn tại
     $user = $result->fetch_assoc();
 
     if ($user['status'] == 0) {
@@ -149,7 +98,7 @@ if ($result->num_rows === 0) {
     }
 
     $userID = $user['userID'];
-    $role = $user['role_name'];   // QUAN TRỌNG
+    $role = $user['role_name'];
     $student_code = null;
 
     if ($role === 'MEMBER') {
@@ -162,7 +111,7 @@ if ($result->num_rows === 0) {
         $updateCode->bind_param("si", $student_code, $userID);
         $updateCode->execute();
     }
-    // CẬP NHẬT AVATAR (luôn update cho chắc)
+    // Cập nhật avata
     $update = $conn->prepare("
         UPDATE users 
         SET avatar_url = ?, full_name = ?, google_id = ?
@@ -171,18 +120,22 @@ if ($result->num_rows === 0) {
     $update->bind_param("sssi", $avatar, $full_name, $google_id, $userID);
     $update->execute();
 }
-/* SESSION */
+
+
+// === Tạo SESSION ===
 $_SESSION['userID'] = $userID;
 $_SESSION['email'] = $email;
 $_SESSION['role'] = $role;
 $_SESSION['avatar'] = $avatar;
 $_SESSION['full_name'] = $full_name;
 
-/* REDIRECT THEO QUYỀN */
+
+
+// === REDIRECT theo quyền của người dùng ===
 if ($role === 'ADMIN') {
-    header("Location: ../admin/index.php");
+    header("Location: ../manager/home.php");
 } elseif ($role === 'MANAGER') {
-    header("Location: ../manager/dashboard.php");
+    header("Location: ../manager/home.php");
 } else {
     header("Location: ../member/home.php");
 }

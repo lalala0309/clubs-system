@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once '../config/database.php';
-
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['userID'])) {
@@ -12,8 +11,9 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
-$userID = $_SESSION['userID'];
 
+// Lấy dữ liệu từ POST
+$userID = $_SESSION['userID'];
 $groundID = $_POST['groundID'] ?? null;
 $booking_date = $_POST['booking_date'] ?? null;
 $start_time = $_POST['start_time'] ?? null;
@@ -27,10 +27,7 @@ if (!$groundID || !$booking_date || !$start_time || !$end_time) {
     exit;
 }
 
-
-/* ==============================
-   FORMAT DATE
-============================== */
+// Format date
 $booking_date_obj = DateTime::createFromFormat('d/m', $booking_date);
 
 if (!$booking_date_obj) {
@@ -41,6 +38,7 @@ if (!$booking_date_obj) {
     exit;
 }
 
+// Gán năm hiện tại
 $booking_date_obj->setDate(
     date('Y'),
     $booking_date_obj->format('m'),
@@ -50,9 +48,7 @@ $booking_date_obj->setDate(
 $booking_date = $booking_date_obj->format('Y-m-d');
 
 
-/* ==============================
-    LẤY LIMIT THEO GROUND 
-============================== */
+// Lấy weekly limit theo ground
 $sqlLimit = "
 SELECT s.weekly_limit
 FROM grounds g
@@ -67,9 +63,8 @@ $stmt->bind_result($limit);
 $stmt->fetch();
 $stmt->close();
 
-/* ==============================
-    TÍNH TUẦN
-============================== */
+
+// tính tuần của ngày đặt
 $weekDate = new DateTime($booking_date);
 
 $monday = clone $weekDate;
@@ -82,30 +77,9 @@ $sunday->modify('+6 days');
 
 $endWeek = $sunday->format('Y-m-d');
 
-/* ==============================
-   0CHECK LOCK
-============================== */
-// $sqlLock = "
-// SELECT id FROM ground_locks
-// WHERE groundID = ?
-// AND lock_date = ?
-// AND start_time < ?
-// AND end_time > ?
-// ";
-
-// $stmt = $conn->prepare($sqlLock);
-// $stmt->bind_param("isss", $groundID, $booking_date, $end_time, $start_time);
-// $stmt->execute();
-
-// if ($stmt->get_result()->num_rows > 0) {
-//     echo json_encode(['status' => 'error', 'message' => 'Khung giờ này đang bị khóa']);
-//     exit;
-// }
 
 
-/* ==============================
-   CHECK TRÙNG GIỜ
-============================== */
+// Check trùng giờ
 $sqlCheck = "
 SELECT id, userID FROM bookings
 WHERE groundID = ?
@@ -119,8 +93,9 @@ $stmt = $conn->prepare($sqlCheck);
 $stmt->bind_param("isss", $groundID, $booking_date, $end_time, $start_time);
 $stmt->execute();
 $result = $stmt->get_result();
-if ($result->num_rows > 0) {
 
+// Nếu trùng giờ => kiểm ra override
+if ($result->num_rows > 0) {
     $existing = $result->fetch_assoc();
     $oldUserID = $existing['userID'];
     $oldBookingID = $existing['id'];
@@ -144,16 +119,14 @@ if ($result->num_rows > 0) {
     if ($oldTotal >= $limit) {
 
         $conn->begin_transaction();
-
         try {
-
-            // 1️⃣ Huỷ booking cũ
+            // Huỷ booking cũ
             $sqlCancel = "UPDATE bookings SET status='cancelled' WHERE id=?";
             $stmtCancel = $conn->prepare($sqlCancel);
             $stmtCancel->bind_param("i", $oldBookingID);
             $stmtCancel->execute();
 
-            // 2️⃣ Insert booking mới
+            // Insert booking mới
             $sqlInsert = "
             INSERT INTO bookings (userID, groundID, booking_date, start_time, end_time)
             VALUES (?, ?, ?, ?, ?)
@@ -163,9 +136,8 @@ if ($result->num_rows > 0) {
             $stmtInsert->bind_param("iisss", $userID, $groundID, $booking_date, $start_time, $end_time);
             $stmtInsert->execute();
 
-            // 3️⃣ Commit
+            // Commit
             $conn->commit();
-
             echo json_encode(['status' => 'success']);
             exit;
 
@@ -174,7 +146,7 @@ if ($result->num_rows > 0) {
 
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Lỗi khi override: ' . $e->getMessage()
+                'message' => 'Lỗi khi huỷ'
             ]);
             exit;
         }
@@ -186,10 +158,9 @@ if ($result->num_rows > 0) {
         exit;
     }
 }
-/* ==============================
-   ĐẾM LƯỢT TUẦN
-============================== */
 
+
+// Đếm số lượt tính vào limit của người cũ
 $sqlCount = "
 SELECT COUNT(*) AS total
 FROM bookings b
@@ -207,16 +178,12 @@ $stmt->bind_param("iiss", $userID, $groundID, $startWeek, $endWeek);
 $stmt->execute();
 $total = $stmt->get_result()->fetch_assoc()['total'];
 
-/* ==============================
-   TÍNH PRIORITY
-============================== */
 
+// Tính độ ưu tiên
 $priority = ($total < $limit) ? 1 : 0;
 
-/* ==============================
-   INSERT
-============================== */
 
+// Inser booking
 $sqlInsert = "
 INSERT INTO bookings 
 (userID, groundID, booking_date, start_time, end_time, status, priority)

@@ -1,7 +1,13 @@
 <?php
 session_start();
 require_once '../includes/get_user.php';
-require_once '../config/database.php'; // file connect DB của bạn
+require_once '../config/database.php';
+
+// === Admin và manager mới được vào
+if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['roleID'], [1, 2])) {
+    header("Location: ../public/login.php");
+    exit;
+}
 
 if (!isset($_GET['sportID'])) {
     header("Location: manage_grounds.php");

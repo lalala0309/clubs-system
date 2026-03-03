@@ -9,9 +9,10 @@ require_once '../includes/get_user.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống đăng ký Câu lạc bộ thể thao - CTUMP</title>
+    <title>Đăng ký Câu lạc bộ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <style>
@@ -90,7 +91,7 @@ require_once '../includes/get_user.php';
 
             <div
                 class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-5 md:p-10 border border-white">
-                <div class="mb-6">
+                <div class="mb-4">
                     <div class="flex items-end justify-between">
                         <div>
                             <h2
@@ -108,7 +109,7 @@ require_once '../includes/get_user.php';
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-2 md:gap-3">
                     <?php
                     $clubs = require '../clubs/get_all_clubs.php';
                     foreach ($clubs as $clb):
@@ -117,10 +118,10 @@ require_once '../includes/get_user.php';
                             <input type="radio" name="court_select" id="c-<?php echo $clb['id']; ?>"
                                 class="hidden court-input" onchange="loadClubDetail(<?php echo $clb['id']; ?>)">
                             <label for="c-<?php echo $clb['id']; ?>"
-                                class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
-                                <div class="flex items-center gap-4 md:gap-5">
+                                class="club-card p-2 md:p-4 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
+                                <div class="flex items-center gap-2 md:gap-3">
                                     <div
-                                        class="w-12 h-12 md:w-14 md:h-14 <?php echo $clb['bg']; ?> rounded-xl md:rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                                        class="w-10 h-10 md:w-14 md:h-14 <?php echo $clb['bg']; ?> rounded-xl md:rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
                                             class="w-7 h-7 md:w-9 md:h-9 text-slate-700 block">
                                             <path

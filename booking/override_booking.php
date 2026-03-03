@@ -14,7 +14,6 @@ if (!isset($_SESSION['userID'])) {
 }
 
 $userID = $_SESSION['userID'];
-
 $groundID = $_POST['groundID'] ?? null;
 $booking_date = $_POST['booking_date'] ?? null;
 $start_time = $_POST['start_time'] ?? null;
@@ -31,7 +30,6 @@ if (!$groundID || !$booking_date || !$start_time || !$end_time) {
 
 $start_time = date('H:i:s', strtotime($start_time));
 $end_time = date('H:i:s', strtotime($end_time));
-
 $dateObj = DateTime::createFromFormat('d/m', $booking_date);
 
 if (!$dateObj) {
@@ -46,7 +44,6 @@ $booking_date = $dateObj->format('Y-m-d');
 /* ==============================
    TÌM BOOKING ĐANG GIỮ SLOT
 ============================== */
-
 $sqlFind = "
 SELECT b.id, b.userID, b.priority, g.sportID
 FROM bookings b
@@ -70,7 +67,6 @@ if ($result->num_rows == 0) {
 }
 
 $row = $result->fetch_assoc();
-
 $oldBookingID = $row['id'];
 $oldUserID = $row['userID'];
 $oldPriority = (int) $row['priority'];
@@ -80,7 +76,6 @@ $sportID = $row['sportID'];
 /* ==============================
    LẤY THÔNG TIN USER BỊ ĐÈ
 ============================== */
-
 $sqlOldUser = "
 SELECT u.full_name, u.email, g.name AS ground_name
 FROM bookings b
@@ -102,7 +97,6 @@ $groundName = $oldUserInfo['ground_name'];
 /* ==============================
    LẤY WEEKLY LIMIT
 ============================== */
-
 $sqlLimit = "SELECT weekly_limit FROM sports WHERE sportID = ?";
 $stmt = $conn->prepare($sqlLimit);
 $stmt->bind_param("i", $sportID);
@@ -113,11 +107,9 @@ $limit = (int) $stmt->get_result()->fetch_assoc()['weekly_limit'];
 /* ==============================
    TÍNH TUẦN
 ============================== */
-
 $weekDate = new DateTime($booking_date);
 $monday = clone $weekDate;
 $monday->modify('monday this week');
-
 $startWeek = $monday->format('Y-m-d');
 $sunday = clone $monday;
 $sunday->modify('+6 days');
@@ -152,7 +144,6 @@ $newPriority = ($newTotal < $limit) ? 1 : 0;
 /* ==============================
    SO SÁNH PRIORITY
 ============================== */
-
 // không được đè nếu priority mới <= priority cũ
 if ($newPriority <= $oldPriority) {
     echo json_encode([
@@ -166,7 +157,6 @@ if ($newPriority <= $oldPriority) {
 /* ==============================
    TRANSACTION
 ============================== */
-
 $conn->begin_transaction();
 
 try {
@@ -198,49 +188,49 @@ try {
 
     $conn->commit();
 
-    /* ==============================
-       GỬI MAIL CHO USER BỊ ĐÈ
-    ============================== */
+    // /* ==============================
+    //    GỬI MAIL CHO USER BỊ ĐÈ
+    // ============================== */
 
 
 
-    $mail = new PHPMailer(true);
-    $mail->CharSet = 'UTF-8';
-    $mail->Encoding = 'base64';
+    // $mail = new PHPMailer(true);
+    // $mail->CharSet = 'UTF-8';
+    // $mail->Encoding = 'base64';
 
-    try {
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'kietb2204944@student.ctu.edu.vn';
-        $mail->Password = 'vpwmbjcwjezwvxyb';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+    // try {
+    //     $mail->isSMTP();
+    //     $mail->Host = 'smtp.gmail.com';
+    //     $mail->SMTPAuth = true;
+    //     $mail->Username = 'kietb2204944@student.ctu.edu.vn';
+    //     $mail->Password = 'vpwmbjcwjezwvxyb';
+    //     $mail->SMTPSecure = 'tls';
+    //     $mail->Port = 587;
 
-        $mail->setFrom('yourgmail@gmail.com', 'CTUMP Booking');
-        $mail->addAddress($oldUserEmail, $oldUserName);
+    //     $mail->setFrom('yourgmail@gmail.com', 'CTUMP Booking');
+    //     $mail->addAddress($oldUserEmail, $oldUserName);
 
-        $mail->isHTML(true);
-        $mail->Subject = 'Thông báo lịch đặt sân bị huỷ';
+    //     $mail->isHTML(true);
+    //     $mail->Subject = 'Thông báo lịch đặt sân bị huỷ';
 
-        $mail->Body = "
-        <h3>Xin chào {$oldUserName},</h3>
-        <p>Lịch đặt sân của bạn đã bị huỷ bởi người có lượt ưu tiên cao hơn.</p>
-        <ul>
-            <li><strong>Sân:</strong> {$groundName}</li>
-            <li><strong>Ngày:</strong> {$booking_date}</li>
-            <li><strong>Thời gian:</strong> {$start_time} - {$end_time}</li>
-        </ul>
-        <p>Nếu có thắc mắc vui lòng liên hệ quản lý.</p>
-        <br>
-        <small>Hệ thống quản lý sân CTUMP</small>
-    ";
+    //     $mail->Body = "
+    //     <h3>Xin chào {$oldUserName},</h3>
+    //     <p>Lịch đặt sân của bạn đã bị huỷ bởi người có lượt ưu tiên cao hơn.</p>
+    //     <ul>
+    //         <li><strong>Sân:</strong> {$groundName}</li>
+    //         <li><strong>Ngày:</strong> {$booking_date}</li>
+    //         <li><strong>Thời gian:</strong> {$start_time} - {$end_time}</li>
+    //     </ul>
+    //     <p>Nếu có thắc mắc vui lòng liên hệ quản lý.</p>
+    //     <br>
+    //     <small>Hệ thống quản lý sân CTUMP</small>
+    // ";
 
-        $mail->send();
+    //     $mail->send();
 
-    } catch (Exception $e) {
-        // Không làm fail nếu mail lỗi
-    }
+    // } catch (Exception $e) {
+    //     // Không làm fail nếu mail lỗi
+    // }
 
     echo json_encode(['status' => 'success']);
 

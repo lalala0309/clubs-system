@@ -59,8 +59,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <div class="bg-indigo-50 p-4 md:p-6 rounded-[25px] md:rounded-[35px]">
             <p class="text-[9px] md:text-[10px] text-indigo-400 font-bold uppercase tracking-widest mb-1 md:mb-2">Hỗ trợ
             </p>
-            <p class="text-xs md:text-sm text-indigo-900 font-bold leading-tight">Liên hệ phòng công tác sinh viên để
-                được hỗ trợ.</p>
+            <p class="text-xs md:text-sm text-indigo-900 font-bold leading-tight">Liên hệ phòng quản lý để
+                được hỗ trợ</p>
         </div>
 
         <a href="../auth/logout.php"

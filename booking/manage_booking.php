@@ -1,9 +1,8 @@
 <?php
 session_start();
 require_once '../includes/get_user.php';
-// require_once './get_my_grounds.php';
 require_once './get_all_sports.php';
-
+require_once '../includes/auth_manager.php';
 
 $week_offset = isset($_GET['week_offset']) ? (int) $_GET['week_offset'] : 0;
 // Lấy sportID từ URL để giữ trạng thái sau khi load lại trang
@@ -36,9 +35,9 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sân - CTUMP</title>
+    <title>Quản lý sân</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
@@ -118,13 +117,6 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             outline-offset: -2px;
             z-index: 10;
         }
-
-        /* 
-        .cell-booked {
-            font-size: 8px;
-            line-height: 1.1;
-            padding: 2px;
-        } */
 
         .cell-content {
             width: 100%;
@@ -621,46 +613,23 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             </div>
         </aside>
 
-        <!-- <aside id="right-panel"
-            class="bg-white flex flex-col shrink-0 shadow-2xl rounded-l-[30px] border-l border-indigo-50">
-            <div class="p-6 h-full flex flex-col">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xs font-black text-indigo-600 uppercase tracking-widest">Xác nhận đặt sân</h2>
-                    <button onclick="closePanel()"
-                        class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400">
-                        <i class="bi bi-x-lg text-xs"></i>
-                    </button>
-                </div>
-                <div class="flex-1 space-y-4">
-                    <div class="p-6 bg-indigo-50 rounded-[25px] border border-indigo-100 text-center">
-                        <div class="text-indigo-600 font-black text-xl" id="info-time">00:00-00:00</div>
-                        <div class="text-slate-500 font-bold text-[10px] uppercase mt-1 tracking-widest" id="info-date">
-                            Thứ ...</div>
-                    </div>
-                    <div class="p-4 bg-slate-50 rounded-2xl flex items-center gap-4">
-                        <div
-                            class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-indigo-500">
-                            <i class="bi bi-geo-alt-fill text-lg"></i>
-                        </div>
-                        <span class="text-xs font-bold text-slate-700 tracking-tight uppercase italic"
-                            id="info-court">Sân số 01</span>
-                    </div>
-                </div>
-                <button id="btn-confirm"
-                    class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase">
-                    Xác nhận gửi yêu cầu
-                </button>
-            </div>
-        </aside> -->
     </div>
 
     <script>
+
+        // Danh sách các sân của môn hiện tại
         let currentGrounds = [];
 
+        // Tên sân đang chọn
         let currentCourtName = "Sân số 01";
+
+        // Thông tin slot đang thao tác
         let selectedBooking = { groundID: null, booking_date: null, start_time: null, end_time: null };
+
+        // Môn thể thao đang mở
         let currentSportID = <?php echo $active_sport_id ?? 'null'; ?>;
 
+        // Mở timtable theo môn
         function openTimetable(sportID, sportName) {
             currentSportID = sportID;
             document.getElementById('current-club-title').innerText = 'Sân ' + sportName;
@@ -672,14 +641,13 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 .then(data => renderCourts(data));
         }
 
+        // Render danh sách sân
         function renderCourts(grounds) {
             const container = document.getElementById('court-tabs-container');
             const timetableContent = document.getElementById('timetable-content');
             container.innerHTML = '';
 
-            // ==============================
-            // KHÔNG CÓ SÂN
-            // ==============================
+            // Nếu ko có sân
             if (!grounds || grounds.length === 0) {
 
                 // Reset label
@@ -693,17 +661,17 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                 // Thay toàn bộ table bằng thông báo
                 timetableContent.innerHTML = `
-    <div class="w-full h-full flex flex-col items-center justify-center text-center">
-        <i class="bi bi-exclamation-circle text-4xl text-slate-300 mb-4"></i>
-        <div class="text-lg font-bold text-slate-400 uppercase">
-            Không có sân
-        </div>
-        <div class="text-sm text-slate-400 mt-2">
-            Vui lòng thêm sân để sử dụng
-        </div>
+                        <div class="w-full h-full flex flex-col items-center justify-center text-center">
+                            <i class="bi bi-exclamation-circle text-4xl text-slate-300 mb-4"></i>
+                            <div class="text-lg font-bold text-slate-400 uppercase">
+                                Không có sân
+                            </div>
+                            <div class="text-sm text-slate-400 mt-2">
+                                Vui lòng thêm sân để sử dụng
+                            </div>
 
-    </div>
-`;
+                        </div>
+                    `;
 
                 return;
             }
@@ -738,6 +706,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             sessionStorage.removeItem('reopen_ground_id');
         }
 
+        // Đổi sân
         function changeCourt(index, btn) {
             const label = index < 10 ? '0' + index : index;
             currentCourtName = 'Sân số ' + label;
@@ -753,7 +722,6 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             selectedBooking.groundID = groundID;
             // lấy limit của sân hiện tại
             const ground = currentGrounds.find(g => g.groundID == groundID);
-
             const badge = document.getElementById('court-limit-badge');
 
             if (ground) {
@@ -766,9 +734,6 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                 cell.innerHTML = '';
             });
-            // document.querySelectorAll('.cell-available').forEach(cell => {
-            //     cell.onclick = () => openLockPanel(cell);
-            // });
 
             fetch(`get_booked_slots.php?groundID=${groundID}&week_offset=<?php echo $week_offset; ?>`)
                 .then(res => res.json())
@@ -784,6 +749,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
         }
 
+        // Đổi tuần
         function changeWeek(offset) {
             const url = new URL(window.location.href);
             url.searchParams.set('week_offset', offset);
@@ -866,7 +832,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             });
         }
 
-
+        // Đánh dấu slot đã đặt
         function markBookedSlots(bookings) {
             bookings.forEach(b => {
                 document.querySelectorAll('.grid-cell').forEach(cell => {
@@ -874,25 +840,23 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         cell.classList.remove('cell-available');
                         cell.classList.add('cell-booked');
                         cell.innerHTML = `
-<div class="cell-content relative">
-    <div class="font-semibold truncate">${b.full_name}</div>
-    <div class="opacity-60 truncate">${b.email}</div>
+                            <div class="cell-content relative">
+                                <div class="font-semibold truncate">${b.full_name}</div>
+                                <div class="opacity-60 truncate">${b.email}</div>
 
-    <button 
-        onclick="cancelBooking(${b.id})"
-        class="absolute top-0 right-0 text-red-500 hover:text-red-700 text-[10px]">
-        <i class="bi bi-x-circle-fill"></i>
-    </button>
-</div>
-`;
-
-
-
+                                <button 
+                                    onclick="cancelBooking(${b.id})"
+                                    class="absolute top-0 right-0 text-red-500 hover:text-red-700 text-[10px]">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            </div>
+                            `;
                     }
                 });
             });
         }
 
+        // disable slot trong quá khứ
         function disablePastSlots() {
             const now = new Date();
 
@@ -926,21 +890,21 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
 
-        /* ===============================
-   ADD GROUND
-================================ */
 
+        // Mở bảng thêm sân
         function openAddGroundModal() {
             if (!currentSportID) return alert("Chọn môn trước");
             document.getElementById('add-ground-modal').classList.remove('hidden');
         }
 
+        // ĐÓng bảng thêm sân
         function closeAddGroundModal() {
             document.getElementById('add-ground-modal').classList.add('hidden');
         }
 
-        function submitAddGround() {
 
+        // Submit thêm sân
+        function submitAddGround() {
             const name = document.getElementById('ground-name').value.trim();
             const location = document.getElementById('ground-location').value.trim();
 
@@ -958,39 +922,35 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-
                         closeAddGroundModal();
-
                         // reload lại danh sách sân
                         fetch(`get_all_grounds_by_sport.php?sportID=${currentSportID}`)
-
                             .then(res => res.json())
                             .then(data => renderCourts(data));
 
                     } else {
-                        alert(data.message);
+                        alert("Đã xảy ra lỗi hệ thống");
                     }
                 });
         }
 
+        // Đóng panel khoá
         function closeLockPanel() {
             const panel = document.getElementById('lock-panel');
             panel.classList.remove('show');
             setTimeout(() => panel.classList.add('hidden'), 300);
         }
 
+        // submit khoá
         function submitLock() {
 
             const fromDate = document.getElementById('lock-from-date').value;
             const fromHour = document.getElementById('lock-from-hour').value;
-
             const toDate = document.getElementById('lock-to-date').value;
             const toHour = document.getElementById('lock-to-hour').value;
 
             if (!fromDate || !toDate) return alert("Chọn ngày");
-
             if (fromDate > toDate) return alert("Ngày không hợp lệ");
-
             if (fromDate === toDate && fromHour >= toHour)
                 return alert("Giờ không hợp lệ");
 
@@ -1017,7 +977,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         closeLockPanel();
                         reloadCurrentGround();
                     } else {
-                        alert(data.message);
+                        alert("Đã có lỗi xảy ra trong hệ thống");
                     }
                 });
         }
@@ -1032,17 +992,13 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             return +h * 60 + +m;
         }
 
-
+        // Đánh dấu ô đã khoá
         function markLockedSlots(locks) {
-
             locks.forEach(l => {
-
                 document.querySelectorAll('.grid-cell').forEach(cell => {
-
                     if (cell.dataset.day !== formatVNDate(l.lock_date)) return;
 
                     const [slotStart, slotEnd] = cell.dataset.time.split('-');
-
                     const lockStart = l.start_time.slice(0, 5);
                     const lockEnd = l.end_time.slice(0, 5);
 
@@ -1076,14 +1032,14 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                         // Chèn thêm nút Unlock Tag vào HTML
                         cell.innerHTML = `
-                    <div class="cell-content text-red-500 text-[11px]">
-                        <i class="bi bi-lock-fill text-[12px]"></i>
-                        <span class="unlock-tag"
-    onclick="handleUnlockClick(event, '${l.lock_date}', '${selectedBooking.groundID}')">
-    Huỷ khoá
-</span>
-                    </div>
-                `;
+                            <div class="cell-content text-red-500 text-[11px]">
+                                <i class="bi bi-lock-fill text-[12px]"></i>
+                                <span class="unlock-tag"
+                                    onclick="handleUnlockClick(event, '${l.lock_date}', '${selectedBooking.groundID}')">
+                                    Huỷ khoá
+                                </span>
+                            </div>
+                        `;
 
                         // Bổ sung sự kiện Hover để sáng cả khối
                         cell.onmouseenter = () => highlightGroup(l.lock_date, true);
@@ -1115,25 +1071,23 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             return `${d.padStart(2, '0')}/${m.padStart(2, '0')}`;
         }
 
-
-
         function renderLockGroundList(grounds) {
             const list = document.getElementById('lock-ground-list');
             list.innerHTML = '';
 
             grounds.forEach(g => {
                 list.innerHTML += `
-            <label class="flex items-center gap-2">
-                <input type="checkbox" value="${g.groundID}" class="lock-ground-checkbox">
-                <span>${g.name}</span>
-            </label>
-        `;
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" value="${g.groundID}" class="lock-ground-checkbox">
+                        <span>${g.name}</span>
+                    </label>
+                `;
             });
         }
 
 
+        // Khoá sân nhiều ngày
         function openLockPanelManual() {
-
             const today = new Date().toISOString().split('T')[0];
 
             document.getElementById('lock-from-date').value = today;
@@ -1150,12 +1104,10 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             setTimeout(() => panel.classList.add('show'), 10);
         }
 
+        // Cài đặt giới hạn sân
         function openSettingModal() {
-
             if (!currentSportID) return alert("Chọn môn trước");
-
             const panel = document.getElementById('setting-panel');
-
             panel.classList.remove('hidden');
             setTimeout(() => panel.classList.add('show'), 10);
 
@@ -1180,16 +1132,17 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
             grounds.forEach(g => {
                 box.innerHTML += `
-        <label class="flex items-center gap-2">
-            <input type="checkbox" value="${g.groundID}">
-            <span>${g.name}</span>
-        </label>
-    `;
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" value="${g.groundID}">
+                        <span>${g.name}</span>
+                    </label>
+                `;
             });
         }
 
-        function saveGroundSetting() {
 
+        // Lưu cài đặt sân
+        function saveGroundSetting() {
             const limit = document.getElementById('weekly-limit-input').value;
 
             if (!limit || limit <= 0)
@@ -1207,7 +1160,6 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 .then(data => {
 
                     if (data.success) {
-
                         //Cập nhật toàn bộ ground trong mảng
                         currentGrounds.forEach(g => {
                             g.weekly_limit = limit;
@@ -1226,10 +1178,11 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                     }
                 });
         }
+
+        // Huỷ sân của người dùng
         function cancelBooking(bookingID) {
 
             if (!confirm("Bạn có chắc muốn huỷ lịch này?")) return;
-
             fetch('handle_cancel_booking.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1246,6 +1199,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 });
         }
 
+        // Mở khoá sân
         function unlockSlot(lockDate, startTime, endTime, groundID) {
 
             if (!confirm("Huỷ toàn bộ khoá trong ngày này?")) return;
@@ -1269,6 +1223,9 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                     }
                 });
         }
+
+
+        // Tạo danh sách giờ
         function renderHourOptions() {
 
             const fromSelect = document.getElementById('lock-from-hour');
@@ -1278,14 +1235,14 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
             toSelect.innerHTML = '';
 
             for (let h = 6; h <= 21; h++) {
-
                 const hour = String(h).padStart(2, '0') + ':00';
-
                 fromSelect.innerHTML += `<option value="${hour}">${hour}</option>`;
                 toSelect.innerHTML += `<option value="${hour}">${hour}</option>`;
             }
         }
 
+
+        // Huỷ toàn bộ các giờ bị khoá ủa một sân trong 1 ngày cụ thể
         function handleUnlockClick(event, lockDate, groundID) {
             // Ngăn chặn sự kiện click lan xuống ô phía dưới
             event.stopPropagation();
@@ -1326,10 +1283,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
         }
 
         document.addEventListener('click', function (e) {
-
             // Nếu click không phải ô locked
             if (!e.target.closest('.cell-locked')) {
-
                 document.querySelectorAll('.cell-locked').forEach(c => {
                     c.classList.remove('active-lock');
                 });

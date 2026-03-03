@@ -1,10 +1,11 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 
+// Lấy tham số từ url
 $groundID = intval($_GET['groundID']);
 $week_offset = isset($_GET['week_offset']) ? (int) $_GET['week_offset'] : 0;
 
-// Tính tuần
+// Lấy ngày thứ hai cả tuần hiện tại
 $monday = new DateTime();
 $monday->modify('monday this week');
 if ($week_offset !== 0) {
@@ -18,23 +19,23 @@ $startDate = $monday->format('Y-m-d');
 $endDate = $sunday->format('Y-m-d');
 
 $sql = "
-SELECT 
-    b.id,
-    b.id AS bookingID,
-    b.userID,
-    b.priority,
-    DATE_FORMAT(b.booking_date, '%d/%m') AS booking_date,
-    DATE_FORMAT(b.start_time, '%H:%i') AS start_time,
-    DATE_FORMAT(b.end_time, '%H:%i') AS end_time,
-    u.full_name,
-    u.email
-FROM bookings b
-JOIN users u ON b.userID = u.userID
-WHERE b.groundID = ?
-AND b.booking_date BETWEEN ? AND ?
-AND b.status = 'approved'
-ORDER BY b.booking_date, b.start_time
-";
+        SELECT 
+            b.id,
+            b.id AS bookingID,
+            b.userID,
+            b.priority,
+            DATE_FORMAT(b.booking_date, '%d/%m') AS booking_date,
+            DATE_FORMAT(b.start_time, '%H:%i') AS start_time,
+            DATE_FORMAT(b.end_time, '%H:%i') AS end_time,
+            u.full_name,
+            u.email
+        FROM bookings b
+        JOIN users u ON b.userID = u.userID
+        WHERE b.groundID = ?
+        AND b.booking_date BETWEEN ? AND ?
+        AND b.status = 'approved'
+        ORDER BY b.booking_date, b.start_time
+        ";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("iss", $groundID, $startDate, $endDate);

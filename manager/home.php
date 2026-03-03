@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/database.php';
 require_once '../includes/get_user.php';
+require_once '../includes/auth_manager.php';
 
 // Lấy dữ liệu thành viên theo từng CLB (Sử dụng cho biểu đồ cột và bảng)
 $clubStatsResult = $conn->query("
@@ -61,9 +62,9 @@ while ($row = $chartDataQuery->fetch_assoc()) {
 
 <head>
     <meta charset="UTF-8">
-    <title>TRANG CHỦ - CTUMP Clubs</title>
+    <title>Trang chủ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -121,7 +122,8 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                         </div>
                         <div
                             class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
-                            <i class="bi bi-collection text-xl"></i></div>
+                            <i class="bi bi-collection text-xl"></i>
+                        </div>
                     </div>
                     <div
                         class="bg-white p-5 rounded-[24px] shadow-sm flex items-center justify-between border border-slate-100">
@@ -131,7 +133,8 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                         </div>
                         <div
                             class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
-                            <i class="bi bi-people text-xl"></i></div>
+                            <i class="bi bi-people text-xl"></i>
+                        </div>
                     </div>
                     <div
                         class="bg-white p-5 rounded-[24px] shadow-sm flex items-center justify-between border border-slate-100">
@@ -150,7 +153,8 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                         </div>
                         <div
                             class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
-                            <i class="bi bi-calendar-check text-xl"></i></div>
+                            <i class="bi bi-calendar-check text-xl"></i>
+                        </div>
                     </div>
                 </div>
 

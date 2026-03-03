@@ -7,6 +7,7 @@ use PHPMailer\PHPMailer\Exception;
 
 session_start();
 
+// Nhận dữ liệu từ frontend
 $data = json_decode(file_get_contents("php://input"), true);
 $bookingID = $data['bookingID'] ?? null;
 
@@ -15,10 +16,7 @@ if (!$bookingID) {
     exit;
 }
 
-/* ===============================
-   1. LẤY THÔNG TIN BOOKING
-================================= */
-
+// Lấy thông tin bookig
 $stmt = $conn->prepare("
     SELECT b.*, u.full_name, u.email, g.name AS ground_name
     FROM bookings b
@@ -38,10 +36,7 @@ if ($result->num_rows === 0) {
 
 $booking = $result->fetch_assoc();
 
-/* ===============================
-   2. UPDATE STATUS
-================================= */
-
+// Xoá booking
 $delete = $conn->prepare("
     DELETE FROM bookings 
     WHERE id = ?
@@ -57,48 +52,49 @@ if ($delete->affected_rows === 0) {
     ]);
     exit;
 }
-/* ===============================
-   3. GỬI EMAIL
-================================= */
 
-$mail = new PHPMailer(true);
-$mail->CharSet = 'UTF-8';
-$mail->Encoding = 'base64';
+// /* ===============================
+//    3. GỬI EMAIL
+// ================================= */
 
-try {
-    $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = 'kietb2204944@student.ctu.edu.vn';
-    $mail->Password = 'vpwmbjcwjezwvxyb';
-    $mail->SMTPSecure = 'tls';
-    $mail->Port = 587;
+// $mail = new PHPMailer(true);
+// $mail->CharSet = 'UTF-8';
+// $mail->Encoding = 'base64';
 
-    $mail->setFrom('yourgmail@gmail.com', 'CTUMP Booking');
-    $mail->addAddress($booking['email'], $booking['full_name']);
+// try {
+//     $mail->isSMTP();
+//     $mail->Host = 'smtp.gmail.com';
+//     $mail->SMTPAuth = true;
+//     $mail->Username = 'kietb2204944@student.ctu.edu.vn';
+//     $mail->Password = 'vpwmbjcwjezwvxyb';
+//     $mail->SMTPSecure = 'tls';
+//     $mail->Port = 587;
 
-    $mail->isHTML(true);
-    $mail->Subject = 'Thông báo huỷ lịch đặt sân';
+//     $mail->setFrom('yourgmail@gmail.com', 'CTUMP Booking');
+//     $mail->addAddress($booking['email'], $booking['full_name']);
 
-    $mail->Body = "
-        <h3>Xin chào {$booking['full_name']},</h3>
-        <p>Lịch đặt sân của bạn đã bị huỷ bởi quản lý.</p>
-        <ul>
-            <li><strong>Sân:</strong> {$booking['ground_name']}</li>
-            <li><strong>Ngày:</strong> {$booking['booking_date']}</li>
-            <li><strong>Thời gian:</strong> {$booking['start_time']} - {$booking['end_time']}</li>
-        </ul>
-        <p>Nếu có thắc mắc vui lòng liên hệ quản lý.</p>
-        <br>
-        <small>Hệ thống quản lý sân CTUMP</small>
-    ";
+//     $mail->isHTML(true);
+//     $mail->Subject = 'Thông báo huỷ lịch đặt sân';
 
-    $mail->send();
+//     $mail->Body = "
+//         <h3>Xin chào {$booking['full_name']},</h3>
+//         <p>Lịch đặt sân của bạn đã bị huỷ bởi quản lý.</p>
+//         <ul>
+//             <li><strong>Sân:</strong> {$booking['ground_name']}</li>
+//             <li><strong>Ngày:</strong> {$booking['booking_date']}</li>
+//             <li><strong>Thời gian:</strong> {$booking['start_time']} - {$booking['end_time']}</li>
+//         </ul>
+//         <p>Nếu có thắc mắc vui lòng liên hệ quản lý.</p>
+//         <br>
+//         <small>Hệ thống quản lý sân CTUMP</small>
+//     ";
 
-} catch (Exception $e) {
-    // Không fail nếu mail lỗi
-}
+//     $mail->send();
 
-/* =============================== */
+// } catch (Exception $e) {
+//     // Không fail nếu mail lỗi
+// }
+
+// /* =============================== */
 
 echo json_encode(['status' => 'success']);

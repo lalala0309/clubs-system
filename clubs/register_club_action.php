@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once '../config/database.php';
-
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['userID'])) {
@@ -34,9 +33,9 @@ if ($stmt->num_rows > 0) {
 
 /* Đăng ký */
 $stmt = $conn->prepare("
-INSERT INTO club_members (userID, clubID, request_date, status)
-VALUES (?, ?, CURDATE(), 0)
-");
+    INSERT INTO club_members (userID, clubID, request_date, status)
+    VALUES (?, ?, CURDATE(), 0)
+    ");
 $stmt->bind_param("ii", $userID, $clubID);
 
 if ($stmt->execute()) {

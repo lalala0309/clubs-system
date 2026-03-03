@@ -3,6 +3,8 @@ session_start();
 
 require_once '../manager/get_all_clubs.php';
 require_once '../manager_sport/get_pending_request.php';
+require_once '../includes/auth_manager.php';
+
 $clubs = require '../manager_sport/get_all_clubs_manager.php';
 $sports = require '../manager_sport/get_all_sports.php';
 ?>
@@ -13,9 +15,9 @@ $sports = require '../manager_sport/get_all_sports.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CTUMP Clubs - Admin Management</title>
+    <title>Quản lý thành viên</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
@@ -100,7 +102,7 @@ $sports = require '../manager_sport/get_all_sports.php';
 <body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
 
     <div id="overlay" class="fixed inset-0 z-40" onclick="toggleAddClubForm()"></div>
-
+    <div id="sport-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="toggleSportPanel()"></div>
     <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
 
         <?php include '../includes/sidebar_manager.php'; ?>
@@ -119,9 +121,10 @@ $sports = require '../manager_sport/get_all_sports.php';
             <div
                 class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
                 <div id="main-content">
-                    <div class="mb-5 md:mb-6">
+                    <div class="mb-5 md:mb-4">
                         <div class="flex items-end justify-between">
-                            <h2 id="page-title" class="text-2xl font-bold text-slate-800">Danh sách câu lạc bộ</h2>
+                            <h2 id="page-title" class="text-2xl font-bold text-slate-800 uppercase">Danh sách câu lạc bộ
+                            </h2>
 
                             <div class="flex items-center gap-3">
                                 <button id="back-btn" onclick="showAllClubs()"
@@ -143,7 +146,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                             <div class="absolute left-0 top-0 h-full w-12 md:w-20 bg-indigo-500"></div>
                         </div>
                     </div>
-                    <div id="club-container" class="space-y-4">
+                    <div id="club-container" class="space-y-3">
                         <?php
                         $clubs = getClubs($pdo);
 
@@ -159,12 +162,12 @@ $sports = require '../manager_sport/get_all_sports.php';
                                 id="club-<?= $clubID ?>">
 
                                 <!-- HEADER -->
-                                <div class="club-header p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
+                                <div class="club-header p-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
                                     onclick="openClub('club-<?= $clubID ?>')">
 
                                     <div class="flex items-center gap-4">
                                         <div
-                                            class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center">
+                                            class="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center">
                                             <i class="bi bi-people-fill text-2xl text-slate-700"></i>
                                         </div>
                                         <div>
@@ -251,13 +254,18 @@ $sports = require '../manager_sport/get_all_sports.php';
                                     <h4 class="text-slate-700 font-bold text-xs uppercase mb-3">
                                         Danh sách thành viên
                                     </h4>
+                                    <div class="mb-4">
+                                        <input type="text" placeholder="Tìm theo tên, email, mã sinh viên..."
+                                            class="member-search w-full border rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                                    </div>
 
                                     <div class="bg-white rounded-xl border overflow-hidden">
-                                        <table class="w-full text-sm">
+                                        <table class="w-full text-[12px]">
                                             <thead>
                                                 <tr class="bg-slate-50 border-b text-slate-600">
                                                     <th class="p-3 text-left">Họ tên</th>
                                                     <th class="p-3 text-left">Email</th>
+                                                    <th class="p-3 text-left">Mã SV</th>
                                                     <th class="p-3 text-center">Ngày tham gia</th>
                                                     <th class="p-3 text-center">Ngày đóng phí</th>
                                                     <th class="p-3 text-center">Ngày hết hạn</th>
@@ -282,6 +290,9 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                             <td class="p-3 text-slate-600">
                                                                 <?= htmlspecialchars($m['email']) ?>
                                                             </td>
+                                                            <td class="p-3 text-slate-600">
+                                                                <?= htmlspecialchars($m['student_code'] ?? '—') ?>
+                                                            </td>
                                                             <td class="p-3 text-center">
                                                                 <?= date('d/m/Y', strtotime($m['join_date'])) ?>
                                                             </td>
@@ -292,7 +303,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                             </td>
                                                             <td class="p-3 text-center font-semibold
                                             <?= $m['fee_expire_date'] && strtotime($m['fee_expire_date']) >= time()
-                                                ? 'text-green-600'
+                                                ? 'text-blue-600'
                                                 : 'text-red-500' ?>">
                                                                 <?= $m['fee_expire_date']
                                                                     ? date('d/m/Y', strtotime($m['fee_expire_date']))
@@ -301,12 +312,12 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                             <td class="p-3 text-center">
                                                                 <?php if ($m['fee_expire_date'] && strtotime($m['fee_expire_date']) >= time()): ?>
                                                                     <span
-                                                                        class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-semibold">
+                                                                        class=" text-blue-600 px-2 py-1 rounded-full text-xs font-semibold">
                                                                         Đang hoạt động
                                                                     </span>
                                                                 <?php else: ?>
                                                                     <span
-                                                                        class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+                                                                        class="text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
                                                                         Hết hạn
                                                                     </span>
                                                                 <?php endif; ?>
@@ -376,8 +387,7 @@ $sports = require '../manager_sport/get_all_sports.php';
         </aside>
 
         <aside id="sport-panel" class="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50
-                transform translate-x-full transition-all duration-300">
-
+           transform translate-x-full transition-all duration-300">
             <div class="p-6 border-b flex justify-between items-center bg-indigo-50">
                 <h3 class="font-bold text-indigo-900 uppercase">Quản lý môn thể thao</h3>
                 <button onclick="toggleSportPanel()">
@@ -445,6 +455,8 @@ $sports = require '../manager_sport/get_all_sports.php';
                     alert('Lỗi kết nối server');
                 });
         }
+
+
         function openClub(clubId) {
             const allCards = document.querySelectorAll('.club-card');
             allCards.forEach(card => {
@@ -477,7 +489,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                 .then(data => {
                     alert(data.message);
                     if (data.success) {
-                        location.reload(); // load lại để thấy CLB mới
+                        location.reload();
                     }
                 })
                 .catch(() => {
@@ -509,8 +521,11 @@ $sports = require '../manager_sport/get_all_sports.php';
         }
 
         function toggleSportPanel() {
-            document.getElementById('sport-panel')
-                .classList.toggle('translate-x-full');
+            const panel = document.getElementById('sport-panel');
+            const overlay = document.getElementById('sport-overlay');
+
+            panel.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
         }
 
         function addSport() {
@@ -570,9 +585,6 @@ $sports = require '../manager_sport/get_all_sports.php';
                         input.focus();
                         return;
                     }
-
-
-
                     /* LỖI KHÁC */
                     alert(d.message);
                 })
@@ -629,6 +641,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                     alert('Lỗi kết nối server');
                 });
         }
+
         function approveMember(clubID, userID, btn) {
             if (!confirm('Duyệt yêu cầu này?')) return;
 
@@ -644,11 +657,8 @@ $sports = require '../manager_sport/get_all_sports.php';
                         return;
                     }
 
-                    /* 1️⃣ XÓA REQUEST CHỜ */
                     const pendingItem = btn.closest('.pending-item');
                     if (pendingItem) pendingItem.remove();
-
-                    /* 2️⃣ THÊM THÀNH VIÊN VÀO BẢNG */
                     const member = data.member;
 
                     const tableBody = document.querySelector(
@@ -659,29 +669,29 @@ $sports = require '../manager_sport/get_all_sports.php';
                     row.className = 'border-b hover:bg-slate-50 transition';
 
                     row.innerHTML = `
-    <td class="p-3 font-medium">${member.full_name}</td>
-    <td class="p-3 text-slate-600">${member.email}</td>
-    <td class="p-3 text-center">
-        ${formatDate(member.join_date)}
-    </td>
-    <td class="p-3 text-center text-slate-400">
-        Chưa đóng
-    </td>
-    <td class="p-3 text-center text-red-500 font-semibold">
-        —
-    </td>
-    <td class="p-3 text-center">
-        <span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
-            Hết hạn
-        </span>
-    </td>
-    <td class="p-3 text-center">
-        <button onclick="payFee(${clubID}, ${member.userID}, this)"
-            class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-indigo-700">
-            Đóng phí
-        </button>
-    </td>
-`;
+                        <td class="p-3 font-medium">${member.full_name}</td>
+                        <td class="p-3 text-slate-600">${member.email}</td>
+                        <td class="p-3 text-center">
+                            ${formatDate(member.join_date)}
+                        </td>
+                        <td class="p-3 text-center text-slate-400">
+                            Chưa đóng
+                        </td>
+                        <td class="p-3 text-center text-red-500 font-semibold">
+                            —
+                        </td>
+                        <td class="p-3 text-center">
+                            <span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+                                Hết hạn
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="payFee(${clubID}, ${member.userID}, this)"
+                                class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-indigo-700">
+                                Đóng phí
+                            </button>
+                        </td>
+                    `;
 
                     /* Nếu bảng đang là "Chưa có thành viên" → xóa dòng đó */
                     const emptyRow = tableBody.querySelector('td[colspan]');
@@ -777,6 +787,15 @@ $sports = require '../manager_sport/get_all_sports.php';
                 .catch(() => alert("Lỗi server"));
         }
 
+        document.addEventListener('keydown', function (e) {
+            if (e.key === "Escape") {
+                const panel = document.getElementById('sport-panel');
+                if (!panel.classList.contains('translate-x-full')) {
+                    toggleSportPanel();
+                }
+            }
+        });
+
     </script>
     <script>
         function loadManagerPage(page) {
@@ -790,7 +809,29 @@ $sports = require '../manager_sport/get_all_sports.php';
                         '<div class="text-red-500">Không thể tải dữ liệu</div>';
                 });
         }
+
+        document.addEventListener('input', function (e) {
+
+            if (!e.target.classList.contains('member-search')) return;
+
+            const keyword = e.target.value.toLowerCase();
+            const clubCard = e.target.closest('.club-card');
+            const rows = clubCard.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+
+                const text = row.innerText.toLowerCase();
+
+                if (text.includes(keyword)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+
+            });
+        });
     </script>
+
 
 </body>
 

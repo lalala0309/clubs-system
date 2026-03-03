@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 require_once '../config/pdo.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
-
 $userID = $data['userID'] ?? null;
 $clubID = $data['clubID'] ?? null;
 $months = $data['months'] ?? 1;
@@ -14,16 +13,13 @@ if (!$userID || !$clubID) {
 }
 
 $months = (int) $months;
-
 if ($months <= 0 || $months > 12) {
     echo json_encode(["success" => false, "error" => "Số tháng không hợp lệ"]);
     exit;
 }
 
 try {
-
     $today = date('Y-m-d');
-
     // Nếu còn hạn → cộng thêm vào ngày hết hạn cũ
     $check = $pdo->prepare("
         SELECT fee_expire_date 
@@ -47,7 +43,6 @@ try {
         SET fee_paid_date = ?, fee_expire_date = ?
         WHERE userID = ? AND clubID = ?
     ");
-
     $stmt->execute([$today, $expire, $userID, $clubID]);
 
     echo json_encode([

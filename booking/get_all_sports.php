@@ -11,9 +11,7 @@ $sql = "
 ";
 
 $result = $conn->query($sql);
-
 $sports = [];
-
 while ($row = $result->fetch_assoc()) {
     $sports[] = $row;
 }
