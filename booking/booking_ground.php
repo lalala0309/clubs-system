@@ -67,13 +67,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đặt sân</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 
 
     <style>
@@ -511,7 +509,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                 /* white-space: nowrap !important; */
                 overflow: hidden;
                 /* text-overflow: ellipsis; */
-                line-height: 1.4 !important;
+                /* line-height: 1.4 !important; */
                 overflow: visible !important;
 
                 margin: 0 !important;
@@ -721,11 +719,11 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
     </style>
 </head>
 
-<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
+<body class="bg-[#F8FAFF] min-h-screen p-1 md:p-2">
     <div id="sidebar-overlay" onclick="toggleSidebar()"
         class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
-    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
+    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-2 md:gap-3">
         <?php include '../includes/sidebar_member.php'; ?>
 
         <main class="flex-1 flex flex-col min-h-0 min-w-0">
@@ -791,7 +789,7 @@ $lockedSlots = $result->fetch_all(MYSQLI_ASSOC);
                             </button>
                             <div>
                                 <h2 id="current-club-title"
-                                    class="text-[10px] md:text-xs font-black text-indigo-700 uppercase leading-none">
+                                    class="text-[10px] md:text-sm font-extrabold text-indigo-700 uppercase">
                                     ĐẶT SÂN</h2>
                                 <p id="selected-court-label"
                                     class="text-[px] md:text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">

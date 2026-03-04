@@ -21,7 +21,7 @@ try {
 
     // lấy lại thông tin thành viên
     $stmt = $pdo->prepare("
-        SELECT u.full_name, u.email, cm.join_date
+        SELECT u.userID, u.full_name, u.email, u.student_code, cm.join_date
         FROM club_members cm
         JOIN users u ON u.userID = cm.userID
         WHERE cm.userID = ? AND cm.clubID = ?

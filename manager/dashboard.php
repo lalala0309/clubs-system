@@ -16,13 +16,13 @@ $sports = require '../manager_sport/get_all_sports.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý thành viên</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Trang chủ</title>
+
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.css">
+
 
     <style>
         body {
@@ -99,11 +99,11 @@ $sports = require '../manager_sport/get_all_sports.php';
     </style>
 </head>
 
-<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
+<body class="bg-[#F8FAFF] min-h-screen p-1 md:p-2">
 
     <div id="overlay" class="fixed inset-0 z-40" onclick="toggleAddClubForm()"></div>
     <div id="sport-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="toggleSportPanel()"></div>
-    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
+    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-2 md:gap-3">
 
         <?php include '../includes/sidebar_manager.php'; ?>
 
@@ -119,9 +119,9 @@ $sports = require '../manager_sport/get_all_sports.php';
             </div>
 
             <div
-                class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
+                class="flex-1 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-6 border border-white">
                 <div id="main-content">
-                    <div class="mb-5 md:mb-4">
+                    <div class="mb-2 md:mb-3">
                         <div class="flex items-end justify-between">
                             <h2 id="page-title" class="text-2xl font-bold text-slate-800 uppercase">Danh sách câu lạc bộ
                             </h2>
@@ -158,16 +158,15 @@ $sports = require '../manager_sport/get_all_sports.php';
                             $pendingCount = count($pendingRequests);
 
                             ?>
-                            <div class="club-card bg-white border rounded-2xl overflow-hidden shadow-sm"
-                                id="club-<?= $clubID ?>">
+                            <div class="club-card bg-white  rounded-2xl overflow-hidden shadow-sm" id="club-<?= $clubID ?>">
 
                                 <!-- HEADER -->
-                                <div class="club-header p-3 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
+                                <div class="club-header p-3 md:p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition"
                                     onclick="openClub('club-<?= $clubID ?>')">
 
-                                    <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 md:gap-3">
                                         <div
-                                            class="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center">
+                                            class="w-10 h-10 md:w-13 md:h-13 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center">
                                             <i class="bi bi-people-fill text-2xl text-slate-700"></i>
                                         </div>
                                         <div>
@@ -580,7 +579,18 @@ $sports = require '../manager_sport/get_all_sports.php';
                         `;
 
                         list.prepend(div); // thêm lên đầu danh sách
+                        /* thêm option vào dropdown của thêm câu lạc bộ */
+                        const select = document.querySelector('select[name="sport_id"]');
 
+                        if (select) {
+                            const option = document.createElement('option');
+                            option.value = d.sportID;
+                            option.textContent = name;
+                            select.appendChild(option);
+
+                            // chọn luôn môn vừa tạo (optional)
+                            select.value = d.sportID;
+                        }
                         input.value = '';
                         input.focus();
                         return;
@@ -671,6 +681,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                     row.innerHTML = `
                         <td class="p-3 font-medium">${member.full_name}</td>
                         <td class="p-3 text-slate-600">${member.email}</td>
+                        <td class="p-3 text-slate-600">${member.student_code}</td>
                         <td class="p-3 text-center">
                             ${formatDate(member.join_date)}
                         </td>
@@ -681,7 +692,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                             —
                         </td>
                         <td class="p-3 text-center">
-                            <span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+                            <span class="text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
                                 Hết hạn
                             </span>
                         </td>
@@ -740,6 +751,7 @@ $sports = require '../manager_sport/get_all_sports.php';
                 approvals.classList.add('hidden');
             }
         }
+
         function payFee(clubID, userID, btn) {
 
             const months = prompt("Nhập số tháng muốn đóng (1-12):", "1");
@@ -769,18 +781,18 @@ $sports = require '../manager_sport/get_all_sports.php';
 
                     const row = btn.closest("tr");
 
-                    row.cells[3].innerHTML = formatDate(data.fee_paid_date);
-                    row.cells[4].innerHTML = `
-            <span class="text-green-600 font-semibold">
-                ${formatDate(data.fee_expire_date)}
-            </span>
-        `;
-                    // cập nhật trạng thái
+                    row.cells[4].innerHTML = formatDate(data.fee_paid_date);
                     row.cells[5].innerHTML = `
-    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-semibold">
-        Đang hoạt động
-    </span>
-`;
+                        <span class="text-blue-600 font-semibold">
+                            ${formatDate(data.fee_expire_date)}
+                        </span>
+                    `;
+                    // cập nhật trạng thái
+                    row.cells[6].innerHTML = `
+                        <span class="text-blue-600 px-2 py-1 rounded-full text-xs font-semibold">
+                            Đang hoạt động
+                        </span>
+                    `;
 
 
                 })

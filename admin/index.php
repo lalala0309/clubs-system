@@ -53,13 +53,11 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <title>Phân quyền</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -94,6 +92,10 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             opacity: 1;
         }
 
+        tbody tr {
+            border-bottom: 1px solid #cbd5e1;
+        }
+
         /* Bổ sung để hiển thị sidebar trên mobile */
         #main-sidebar.show {
             transform: translateX(0);
@@ -123,12 +125,13 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </style>
 </head>
 
-<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
+
+<body class="bg-[#F8FAFF] min-h-screen p-1 md:p-2">
 
     <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
 
 
-    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
+    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-2 md:gap-3">
 
         <?php include '../includes/sidebar_manager.php'; ?>
 
@@ -143,9 +146,9 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto bg-white/40 rounded-[30px] p-4 md:p-8">
+            <div class="flex-1 overflow-y-auto bg-white/40 rounded-[30px] p-2 md:p-3">
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 gap-3 mb-2 md:mb-3">
                     <div
                         class="bg-white/80 backdrop-blur p-6 rounded-[28px] shadow-xl flex items-center justify-between">
                         <div>
@@ -191,9 +194,10 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
                 </div>
 
-                <div class="bg-white rounded-[30px] p-6 shadow border">
+                <div class="bg-white rounded-[30px] p-6 shadow">
 
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <div
+                        class="flex flex-col md:flex-row md:items-center md:justify-between mb-2 md:mb-3 gap-2 md:gap-3">
                         <h3 class="text-xl font-black">Danh sách tài khoản</h3>
 
                         <form method="GET">
@@ -212,7 +216,7 @@ $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                     <th class="px-6 py-3 text-right">Đổi quyền</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y">
+                            <tbody class="[&>tr]:border-b [&>tr]:border-slate-100">
                                 <?php foreach ($users as $u): ?>
                                     <tr>
                                         <td class="px-6 py-3 font-semibold">

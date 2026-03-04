@@ -10,10 +10,10 @@ require_once '../includes/get_user.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký Câu lạc bộ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
+    <link rel="stylesheet" href="../assets/css/sidebar_member.css">
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <style>
         body {
@@ -70,11 +70,11 @@ require_once '../includes/get_user.php';
     </style>
 </head>
 
-<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
+<body class="bg-[#F8FAFF] min-h-screen p-1 md:p-2">
     <div id="sidebar-overlay" onclick="toggleSidebar()"
         class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
-    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] gap-4 overflow-hidden">
+    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] gap-2 md:gap-3 overflow-hidden">
 
         <?php include '../includes/sidebar_member.php'; ?>
 

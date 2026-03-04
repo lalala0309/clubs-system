@@ -36,13 +36,14 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý sân</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Trang chủ</title>
+
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <link rel="stylesheet" href="../assets/css/fonts.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.css">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
 
     <style>
         body {
@@ -338,16 +339,16 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
 
 
-<body class="bg-[#F8FAFF] min-h-screen p-2 md:p-4">
+<body class="bg-[#F8FAFF] min-h-screen p-1 md:p-2">
     <div id="sidebar-overlay" onclick="toggleSidebar()"
         class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
-    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
+    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-2 md:gap-3">
         <?php include '../includes/sidebar_manager.php'; ?>
 
         <main class="flex-1 flex flex-col overflow-hidden min-w-0">
 
-            <div class="flex-shrink-0 flex items-center gap-3 mb-2">
+            <div class="flex-shrink-0 flex items-center gap-2 md:gap-3 mb-2">
                 <button onclick="toggleSidebar()"
                     class="lg:hidden p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-indigo-600">
                     <i class="bi bi-list text-2xl"></i>
@@ -359,8 +360,8 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
             <div class="flex-1 relative overflow-hidden">
                 <div id="view-clubs"
-                    class="absolute inset-0 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-8 border border-white">
-                    <div class="mb-5 md:mb-6">
+                    class="absolute inset-0 overflow-y-auto bg-white/40 backdrop-blur-sm rounded-[30px] md:rounded-[45px] p-4 md:p-6 border border-white">
+                    <div class="mb-2 md:mb-3">
                         <div class="flex items-end justify-between">
                             <div>
                                 <h2
@@ -375,11 +376,11 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-2 md:gap-3">
                         <?php foreach ($sports as $sport): ?>
                             <div onclick="openTimetable(<?php echo $sport['sportID']; ?>, '<?php echo $sport['sport_name']; ?>')"
                                 data-sport-id="<?php echo $sport['sportID']; ?>"
-                                class="club-card p-2 md:p-5 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
+                                class="club-card p-2 md:p-4 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer group bg-white rounded-[20px] md:rounded-[25px] transition-all">
                                 <div class="flex items-center gap-3">
                                     <div
                                         class="w-10 h-10 md:w-14 md:h-14 bg-blue-50 rounded-xl md:rounded-2xl flex items-center justify-center text-xl md:text-3xl transition-transform group-hover:scale-110">
@@ -430,23 +431,7 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                         <div class="flex items-center gap-3">
 
-                            <!-- Chuyển tuần -->
-                            <div
-                                class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
-                                <button onclick="changeWeek(<?php echo $week_offset - 1; ?>)"
-                                    class="hover:text-indigo-600 px-1">
-                                    <i class="bi bi-caret-left-fill text-[10px]"></i>
-                                </button>
 
-                                <span class="text-[9px] font-bold text-slate-500 uppercase">
-                                    <?php echo $week_range; ?>
-                                </span>
-
-                                <button onclick="changeWeek(<?php echo $week_offset + 1; ?>)"
-                                    class="hover:text-indigo-600 px-1">
-                                    <i class="bi bi-caret-right-fill text-[10px]"></i>
-                                </button>
-                            </div>
 
                             <div class="flex items-center gap-2">
 
@@ -474,7 +459,23 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
 
                             </div>
 
+                            <!-- Chuyển tuần -->
+                            <div
+                                class="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-slate-100 shadow-sm">
+                                <button onclick="changeWeek(<?php echo $week_offset - 1; ?>)"
+                                    class="hover:text-indigo-600 px-1">
+                                    <i class="bi bi-caret-left-fill text-[10px]"></i>
+                                </button>
 
+                                <span class="text-[9px] font-bold text-slate-500 uppercase">
+                                    <?php echo $week_range; ?>
+                                </span>
+
+                                <button onclick="changeWeek(<?php echo $week_offset + 1; ?>)"
+                                    class="hover:text-indigo-600 px-1">
+                                    <i class="bi bi-caret-right-fill text-[10px]"></i>
+                                </button>
+                            </div>
                         </div>
 
                     </div>
@@ -588,13 +589,13 @@ $week_range = $days[0][1] . ' - ' . $days[6][1];
                 </h3>
 
                 <!-- CHỌN SÂN -->
-                <div>
+                <!-- <div>
                     <label class="text-xs font-semibold text-slate-500">Chọn sân</label>
 
                     <div id="setting-ground-list"
                         class="max-h-40 overflow-auto bg-slate-50 rounded-xl p-2 space-y-1 text-xs">
                     </div>
-                </div>
+                </div> -->
 
                 <!-- LIMIT -->
                 <div>

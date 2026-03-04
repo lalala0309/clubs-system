@@ -67,7 +67,7 @@ while ($row = $chartDataQuery->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../assets/js/chart.js"></script>
 
 
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
@@ -95,9 +95,9 @@ while ($row = $chartDataQuery->fetch_assoc()) {
     </style>
 </head>
 
-<body class="p-2 md:p-4">
+<body class="p-1 md:p-2">
 
-    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-4">
+    <div class="flex h-[calc(100vh-1rem)] md:h-[calc(100vh-2rem)] overflow-hidden gap-3">
         <?php include '../includes/sidebar_manager.php'; ?>
 
         <main class="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -111,9 +111,9 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto bg-white/40 rounded-[30px] p-4 md:p-6">
+            <div class="flex-1 overflow-y-auto bg-white/40 rounded-[30px] p-2 md:p-3">
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 mb-2 md:mb-3">
                     <div
                         class="bg-white p-5 rounded-[24px] shadow-sm flex items-center justify-between border border-slate-100">
                         <div>
@@ -158,7 +158,7 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div class="mb-2 md:mb-3">
                     <div class="bg-white rounded-[28px] p-6 shadow-sm border border-slate-100">
                         <h3 class="text-sm font-bold text-slate-500 uppercase mb-4 tracking-tight">Phân bổ thành viên
                             CLB</h3>
@@ -167,7 +167,7 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-3">
                     <div class="bg-white rounded-[28px] p-6 shadow-sm border border-slate-100 flex flex-col">
                         <h3 class="text-sm font-bold text-slate-500 uppercase mb-4 tracking-tight">Xu hướng đặt sân (7
                             ngày gần nhất)</h3>
@@ -179,8 +179,6 @@ while ($row = $chartDataQuery->fetch_assoc()) {
                     <div class="bg-white rounded-[28px] p-6 shadow-sm border border-slate-100">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-black text-slate-800">Chi tiết thành viên</h3>
-                            <span
-                                class="text-[10px] text-slate-400 italic bg-slate-50 px-2 py-1 rounded">Real-time</span>
                         </div>
                         <div class="overflow-y-auto max-h-[350px] pr-2">
                             <table class="w-full text-sm text-left">

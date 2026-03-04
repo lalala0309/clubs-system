@@ -52,7 +52,8 @@ if (!empty($userInfo->picture)) {
 $allowedDomains = [
     'gmail.com',
     'student.ctu.edu.vn',
-    'ctump.edu.vn'
+    'ctump.edu.vn',
+    'student.ctump.edu.vn'
 ];
 $emailDomain = substr(strrchr($email, "@"), 1);
 if (!in_array($emailDomain, $allowedDomains)) {
