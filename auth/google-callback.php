@@ -38,7 +38,9 @@ $oauth = new Google_Service_Oauth2($client);
 $userInfo = $oauth->userinfo->get();
 $_SESSION['google_json'] = $userInfo->toSimpleObject();
 $email = $userInfo->email;
-$full_name = $userInfo->name;
+$given_name = $userInfo->givenName;   // Tên
+$family_name = $userInfo->familyName; // Họ
+$full_name = trim($family_name . ' ' . $given_name);
 $google_id = $userInfo->id;
 $avatar = null;
 

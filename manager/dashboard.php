@@ -15,11 +15,11 @@ $sports = require '../manager_sport/get_all_sports.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý thành viên</title>
-    <title>Trang chủ</title>
+    <title>Quản lý câu lạc bộ</title>
 
-    <link rel="stylesheet" href="../assets/css/tailwind.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../assets/css/fonts.css">
+    <link rel="stylesheet" href="../assets/css/tailwind.css">
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
     <link rel="stylesheet" href="../assets/css/bootstrap-icons.css">
 
@@ -123,7 +123,8 @@ $sports = require '../manager_sport/get_all_sports.php';
                 <div id="main-content">
                     <div class="mb-2 md:mb-3">
                         <div class="flex items-end justify-between">
-                            <h2 id="page-title" class="text-2xl font-bold text-slate-800 uppercase">Danh sách câu lạc bộ
+                            <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase">Danh sách câu
+                                lạc bộ
                             </h2>
 
                             <div class="flex items-center gap-3">
@@ -209,11 +210,33 @@ $sports = require '../manager_sport/get_all_sports.php';
                                 <div class="club-details hidden p-6 bg-slate-50/50 border-t">
                                     <div id="approvals-<?= $clubID ?>" class="hidden mb-6 space-y-3">
 
-                                        <h4 class="text-orange-700 font-bold text-xs uppercase tracking-widest">
-                                            Yêu cầu chờ (<span class="pending-count"><?= $pendingCount ?></span>)
-                                        </h4>
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h4
+                                                class="text-orange-700 font-bold text-xs uppercase tracking-widest whitespace-nowrap">
+                                                Yêu cầu chờ (<span class="pending-count"><?= $pendingCount ?></span>)
+                                            </h4>
+                                            <div class="flex justify-end w-full">
+                                                <div class="flex gap-2 w-[30%]">
 
+                                                    <button onclick="selectAll(<?= $clubID ?>)"
+                                                        class="flex-1 text-center py-2 bg-gray-400 text-white rounded-xl font-normal text-xs whitespace-nowrap">
+                                                        Chọn tất cả
+                                                    </button>
 
+                                                    <button onclick="approveSelected(<?= $clubID ?>)"
+                                                        class="flex-1 text-center py-2 bg-blue-600 text-white rounded-xl font-normal text-xs whitespace-nowrap">
+                                                        Duyệt đã chọn
+                                                    </button>
+
+                                                    <button onclick="deleteSelected(<?= $clubID ?>)"
+                                                        class="flex-1 text-center py-2 bg-red-600 text-white rounded-xl font-normal text-xs whitespace-nowrap">
+                                                        Xoá đã chọn
+                                                    </button>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
                                         <?php if (empty($pendingRequests)): ?>
                                             <div class="text-slate-400 text-sm italic">
                                                 Không có yêu cầu nào
@@ -221,29 +244,50 @@ $sports = require '../manager_sport/get_all_sports.php';
                                         <?php else: ?>
                                             <?php foreach ($pendingRequests as $req): ?>
                                                 <div
-                                                    class="pending-item bg-white p-4 rounded-xl border flex justify-between items-center hover:bg-slate-50 transition">
+                                                    class="pending-item bg-white py-3 px-4 rounded-2xl border border-slate-100 flex flex-wrap md:flex-nowrap justify-between items-center hover:shadow-md transition-all gap-1">
+                                                    <div class="flex items-center gap-4">
+                                                        <div class="relative flex items-center">
+                                                            <input type="checkbox"
+                                                                class="approve-check w-4 h-4 rounded border-blue-300 text-blue-600"
+                                                                value="<?= $req['userID'] ?>" data-club="<?= $clubID ?>">
+                                                        </div>
 
-                                                    <div>
-                                                        <p class="font-bold text-slate-800">
-                                                            <?= htmlspecialchars($req['full_name']) ?>
-                                                        </p>
-                                                        <p class="text-sm text-slate-500">
-                                                            <?= htmlspecialchars($req['email']) ?>
-                                                            • Gửi ngày:
-                                                            <?= $req['request_date']
-                                                                ? date('d/m/Y', strtotime($req['request_date']))
-                                                                : '—' ?>
-
-                                                        </p>
+                                                        <div class="flex items-center gap-3">
+                                                            <div
+                                                                class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                                                <i class="bi bi-person-plus-fill"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p class="font-bold text-slate-800 leading-tight">
+                                                                    <?= htmlspecialchars($req['full_name']) ?>
+                                                                </p>
+                                                                <div class="flex flex-col md:flex-row md:items-center gap-1">
+                                                                    <span class="text-xs text-blue-500 flex items-center gap-1">
+                                                                        <i class="bi bi-envelope"></i>
+                                                                        <?= htmlspecialchars($req['email']) ?>
+                                                                    </span>
+                                                                    <span class="hidden md:inline text-slate-300">|</span>
+                                                                    <span class="text-[11px] font-medium text-slate-500">
+                                                                        Gửi ngày:
+                                                                        <?= $req['request_date'] ? date('d/m/Y', strtotime($req['request_date'])) : '—' ?>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
 
-                                                    <button onclick="approveMember(<?= $clubID ?>, <?= $req['userID'] ?>, this)"
-                                                        class="px-3 py-1 bg-blue-600 text-white rounded">
-                                                        Duyệt
-                                                    </button>
+                                                    <div class="flex items-center gap-1 w-full md:w-auto">
+                                                        <button onclick="approveMember(<?= $clubID ?>, <?= $req['userID'] ?>, this)"
+                                                            class="flex-1 md:flex-none px-4 py-1 bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                                                            <i class="bi bi-check-lg text-sm"></i>
+                                                        </button>
+                                                        <button
+                                                            onclick="deleteMemberRequest(<?= $clubID ?>, <?= $req['userID'] ?>, this)"
+                                                            class="flex items-center justify-center px-4 py-1 bg-red-500 text-white hover:bg-red-800 hover:text-white text-xs font-bold rounded-xl transition">
+                                                            <i class="bi bi-trash text-sm"></i>
 
-
-
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
@@ -321,11 +365,19 @@ $sports = require '../manager_sport/get_all_sports.php';
                                                                     </span>
                                                                 <?php endif; ?>
                                                             </td>
-                                                            <td class="p-3 text-center">
+                                                            <td class="p-3 text-center flex justify-center gap-2">
+
                                                                 <button onclick="payFee(<?= $clubID ?>, <?= $m['userID'] ?>, this)"
-                                                                    class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-indigo-700">
+                                                                    class="bg-indigo-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-blue-700">
                                                                     Đóng phí
                                                                 </button>
+
+                                                                <button
+                                                                    onclick="removeMember(<?= $clubID ?>, <?= $m['userID'] ?>, this)"
+                                                                    class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-700 hover:text-white">
+                                                                    Xoá
+                                                                </button>
+
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
@@ -696,11 +748,19 @@ $sports = require '../manager_sport/get_all_sports.php';
                                 Hết hạn
                             </span>
                         </td>
-                        <td class="p-3 text-center">
+                        <td class="p-3 text-center flex justify-center gap-2">
+
                             <button onclick="payFee(${clubID}, ${member.userID}, this)"
                                 class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-indigo-700">
                                 Đóng phí
                             </button>
+
+                            <button
+                                    onclick="removeMember(<?= $clubID ?>, <?= $m['userID'] ?>, this)"
+                                    class="bg-red-500 text-black px-3 py-1 rounded-lg text-xs hover:bg-red-700 hover:text-white">
+                                    Xoá
+                                </button>s
+
                         </td>
                     `;
 
@@ -841,7 +901,237 @@ $sports = require '../manager_sport/get_all_sports.php';
                 }
 
             });
+
         });
+
+        function approveSelected(clubID) {
+
+            const checks = document.querySelectorAll(
+                '.approve-check[data-club="' + clubID + '"]:checked'
+            );
+
+            if (checks.length === 0) {
+                alert("Chọn ít nhất 1 người");
+                return;
+            }
+
+            const users = [];
+
+            checks.forEach(c => {
+                users.push(c.value);
+            });
+
+            fetch('../manager_sport/approve_members.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    clubID: clubID,
+                    users: users
+                })
+            })
+                .then(r => r.json())
+                .then(d => {
+
+                    alert(d.message);
+
+                    if (!d.success) return;
+
+                    const tableBody = document.querySelector(`#club-${clubID} table tbody`);
+
+                    /* xóa pending */
+                    checks.forEach(c => {
+                        c.closest('.pending-item').remove();
+                    });
+
+                    /* thêm member mới vào bảng */
+                    d.members.forEach(member => {
+
+                        const row = document.createElement('tr');
+                        row.className = 'border-b hover:bg-slate-50 transition';
+
+                        row.innerHTML = `
+                            <td class="p-3 font-medium">${member.full_name}</td>
+                            <td class="p-3 text-slate-600">${member.email}</td>
+                            <td class="p-3 text-slate-600">${member.student_code ?? '—'}</td>
+                            <td class="p-3 text-center">${formatDate(member.join_date)}</td>
+                            <td class="p-3 text-center text-slate-400">Chưa đóng</td>
+                            <td class="p-3 text-center text-red-500 font-semibold">—</td>
+                            <td class="p-3 text-center">
+                                <span class="text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+                                    Hết hạn
+                                </span>
+                            </td>
+                            <td class="p-3 text-center flex justify-center gap-2">
+                                <button onclick="payFee(<?= $clubID ?>, <?= $m['userID'] ?>, this)"
+                                    class="bg-indigo-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-blue-700">
+                                    Đóng phí
+                                </button>
+
+                                <button
+                                    onclick="removeMember(<?= $clubID ?>, <?= $m['userID'] ?>, this)"
+                                    class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-700 hover:text-white">
+                                    Xoá
+                                </button>
+                            </td>
+                                `;
+
+                        /* nếu bảng đang hiển thị "Chưa có thành viên" */
+                        const emptyRow = tableBody.querySelector('td[colspan]');
+                        if (emptyRow) emptyRow.closest('tr').remove();
+
+                        tableBody.appendChild(row);
+
+                    });
+
+                    updatePendingUI(clubID);
+
+                })
+                .catch(error => {
+                    console.error(error);   // in lỗi trong console
+                    alert("Lỗi: " + error);
+                });
+        }
+        function selectAll(clubID) {
+
+            const checks = document.querySelectorAll(
+                '.approve-check[data-club="' + clubID + '"]'
+            );
+
+            if (checks.length === 0) return;
+
+            // kiểm tra có checkbox nào chưa chọn không
+            let allChecked = true;
+
+            checks.forEach(c => {
+                if (!c.checked) allChecked = false;
+            });
+
+            // nếu tất cả đã chọn → bỏ chọn
+            // nếu chưa → chọn tất cả
+            checks.forEach(c => {
+                c.checked = !allChecked;
+            });
+
+        }
+
+        function removeMember(clubID, userID, btn) {
+
+            if (!confirm("Bạn chắc chắn muốn xoá thành viên này khỏi CLB?")) return;
+
+            fetch('../manager_sport/remove_member.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ clubID, userID })
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (!data.success) {
+                        alert(data.message || "Lỗi xoá");
+                        return;
+                    }
+
+                    alert("Đã xoá thành viên");
+
+                    const row = btn.closest("tr");
+                    row.remove();
+
+                })
+                .catch(() => {
+                    alert("Lỗi server");
+                });
+
+        }
+
+        // Từ chối một người dùng
+        function deleteMemberRequest(clubID, userID, btn) {
+
+            if (!confirm("Từ chối yêu cầu tham gia này?")) return;
+
+            fetch('../manager_sport/reject_member.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ clubID, userID })
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (!data.success) {
+                        alert(data.message || "Lỗi");
+                        return;
+                    }
+
+                    alert("Đã từ chối yêu cầu");
+
+                    const pendingItem = btn.closest('.pending-item');
+                    if (pendingItem) pendingItem.remove();
+
+                    updatePendingUI(clubID);
+
+                })
+                .catch(() => {
+                    alert("Lỗi server");
+                });
+
+        }
+
+
+        // Từ chối thành viên đã chọn
+        function deleteSelected(clubID) {
+            const checks = document.querySelectorAll(
+                '.approve-check[data-club="' + clubID + '"]:checked'
+            );
+
+            if (checks.length === 0) {
+                alert("Chọn ít nhất 1 người");
+                return;
+            }
+
+            if (!confirm("Bạn chắc chắn muốn từ chối các yêu cầu đã chọn?")) return;
+
+            const users = [];
+
+            checks.forEach(c => {
+                users.push(c.value);
+            });
+
+            fetch('../manager_sport/reject_members.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    clubID: clubID,
+                    users: users
+                })
+            })
+                .then(r => r.json())
+                .then(d => {
+
+                    alert(d.message);
+
+                    if (!d.success) return;
+
+                    /* xoá pending khỏi UI */
+                    checks.forEach(c => {
+                        const item = c.closest('.pending-item');
+                        if (item) item.remove();
+                    });
+
+                    updatePendingUI(clubID);
+
+                })
+                .catch(() => {
+                    alert("Lỗi server");
+                });
+
+        }
     </script>
 
 

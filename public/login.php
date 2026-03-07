@@ -82,7 +82,7 @@ if (isset($_SESSION['user'])) {
       text-center
       pr-6
     ">
-          Continue with Google
+          Tiếp tục với Google
         </span>
       </button>
     </a>

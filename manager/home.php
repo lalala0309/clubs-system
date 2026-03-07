@@ -68,10 +68,7 @@ while ($row = $chartDataQuery->fetch_assoc()) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="../assets/js/chart.js"></script>
-
-
     <link rel="stylesheet" href="../assets/css/sidebar_member.css">
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <style>

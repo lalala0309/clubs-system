@@ -180,7 +180,7 @@ require_once '../includes/get_user.php';
 
                     <div class="px-4">
                         <h4 class="text-xs md:text-sm font-bold text-slate-800 mb-2">Lưu ý</h4>
-                        <p class="text-[11px] md:text-xs text-slate-500 leading-relaxed italic">"Việc đăng ký tham gia
+                        <p class="text-[11px] md:text-xs text-slate-500 leading-relaxed">"Việc đăng ký tham gia
                             câu lạc bộ thể hiện sự đồng ý của bạn trong việc đóng góp phí vận hành và tuân thủ quy định
                             sử dụng cơ sở vật chất."</p>
                     </div>

@@ -16,6 +16,7 @@ if (!$sportID) {
 /* ======================
    TẠO KHUNG GIỜ
 ====================== */
+
 $now = new DateTime();
 $minute = (int) $now->format('i');
 
@@ -48,6 +49,7 @@ for ($i = 0; $i < 8; $i++) {
 /* ======================
    LẤY DANH SÁCH SÂN
 ====================== */
+
 $stmt = $pdo->prepare("
     SELECT groundID, name
     FROM grounds
@@ -60,6 +62,7 @@ $grounds = $stmt->fetchAll(PDO::FETCH_ASSOC);
 /* ======================
    LẤY BOOKING HÔM NAY
 ====================== */
+
 $stmt = $pdo->prepare("
     SELECT 
         b.groundID,
